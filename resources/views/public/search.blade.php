@@ -295,7 +295,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                     @foreach($products as $product)
                     @php $img = $product->images->where('is_main', true)->first() ?? $product->images->first(); @endphp
-                    <a href="{{ route('artifact.show', $product->id) }}"
+                    <a href="{{ route('artifact.show', $product->encryptedId()) }}"
                        class="group bg-white rounded-[1.5rem] border border-gray-100 hover:border-brand-500/30 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-brand-500/10 transition-all duration-500 flex flex-col">
 
                         {{-- Image --}}

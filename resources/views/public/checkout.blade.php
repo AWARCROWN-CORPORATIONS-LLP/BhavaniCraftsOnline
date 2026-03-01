@@ -142,7 +142,7 @@
                             :disabled="processing || !selectedAddressId"
                             class="w-full h-16 bg-brand-500 text-white text-[11px] font-black uppercase tracking-[3px] rounded-2xl shadow-xl shadow-brand-500/20 hover:bg-brand-600 transition-all flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed">
                         <template x-if="!processing">
-                            <span x-text="paymentMethod === 'cod' ? 'Confirm COD Order — ₹{{ number_format($total, 2) }}' : 'Pay Online — ₹{{ number_format($total, 2) }}'"></span>
+                            <span x-text="paymentMethod === 'cod' ? 'Confirm COD Order — ₹' + totalAmount.toFixed(2) : 'Pay Online — ₹' + totalAmount.toFixed(2)"></span>
                         </template>
                         <template x-if="processing">
                             <span class="flex items-center space-x-3">
@@ -163,34 +163,69 @@
                 <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 sticky top-28">
                     <h3 class="text-sm font-black uppercase tracking-widest text-onyx-900 mb-8">Sacred Summary</h3>
 
+                    <!-- Coupon Section -->
+                    <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                        <label class="text-[9px] font-black uppercase tracking-[2px] text-gray-400 block mb-3">Divine Discount Code</label>
+                        
+                        <div x-show="!appliedCoupon" class="flex space-x-2">
+                            <input type="text" x-model="couponCode" placeholder="Enter Code" 
+                                   class="flex-1 bg-white border-gray-200 rounded-xl text-xs font-bold px-4 h-11 focus:ring-brand-500 focus:border-brand-500 transition-all uppercase tracking-widest">
+                            <button @click="applyCoupon()" :disabled="!couponCode"
+                                    class="h-11 px-5 bg-onyx-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-brand-500 transition-all disabled:opacity-30">
+                                Apply
+                            </button>
+                        </div>
+
+                        <div x-show="appliedCoupon" x-cloak class="flex items-center justify-between bg-brand-500/10 border border-brand-500/20 p-3 rounded-xl">
+                            <div class="flex items-center space-x-3">
+                                <span class="h-8 w-8 bg-brand-500 text-white rounded-lg flex items-center justify-center">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                                </span>
+                                <div>
+                                    <p class="text-[10px] font-black text-onyx-900 uppercase tracking-widest" x-text="appliedCoupon ? appliedCoupon.code : ''"></p>
+                                    <p class="text-[8px] font-bold text-brand-600 uppercase tracking-widest">Active Blessing Applied</p>
+                                </div>
+                            </div>
+                            <button @click="removeCoupon()" class="text-gray-400 hover:text-red-500 transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="space-y-4 mb-8">
                         <div class="flex justify-between">
                             <span class="text-[11px] font-medium text-gray-400">Subtotal ({{ $cartItems->sum('quantity') }} items)</span>
                             <span class="text-sm font-bold text-onyx-900">₹{{ number_format($subtotal, 2) }}</span>
                         </div>
+                        
+                        <div x-show="discountAmount > 0" x-cloak class="flex justify-between text-green-600">
+                            <span class="text-[11px] font-medium">Sacred Discount</span>
+                            <span class="text-sm font-bold">- ₹<span x-text="discountAmount.toFixed(2)"></span></span>
+                        </div>
+
                         <div class="flex justify-between">
                             <span class="text-[11px] font-medium text-gray-400">GST (18%)</span>
-                            <span class="text-sm font-bold text-onyx-900">₹{{ number_format($gst, 2) }}</span>
+                            <span class="text-sm font-bold text-onyx-900">₹<span x-text="gstAmount.toFixed(2)"></span></span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-[11px] font-medium text-gray-400">Sacred Shipping</span>
-                            @if($shipping == 0)
+                            <template x-if="shippingAmount == 0">
                                 <span class="text-sm font-bold text-green-500">FREE</span>
-                            @else
-                                <span class="text-sm font-bold text-onyx-900">₹{{ number_format($shipping, 2) }}</span>
-                            @endif
+                            </template>
+                            <template x-if="shippingAmount > 0">
+                                <span class="text-sm font-bold text-onyx-900">₹<span x-text="shippingAmount.toFixed(2)"></span></span>
+                            </template>
                         </div>
-                        @if($shipping > 0)
-                            <div class="text-[10px] font-medium text-brand-500 bg-brand-50 px-3 py-2 rounded-xl">
-                                Add ₹{{ number_format(999 - $subtotal, 2) }} more for Free Shipping!
-                            </div>
-                        @endif
+                        
+                        <div x-show="shippingAmount > 0" class="text-[10px] font-medium text-brand-500 bg-brand-50 px-3 py-2 rounded-xl">
+                            Add ₹{{ number_format(max(0, 999 - ($subtotal - $discountAmount)), 2) }} more for Free Shipping!
+                        </div>
                     </div>
 
                     <div class="border-t border-gray-100 pt-6 mb-8">
                         <div class="flex justify-between items-center">
                             <span class="text-sm font-black uppercase tracking-widest text-onyx-900">Total</span>
-                            <span class="text-2xl font-black text-onyx-900">₹{{ number_format($total, 2) }}</span>
+                            <span class="text-2xl font-black text-onyx-900">₹<span x-text="totalAmount.toFixed(2)"></span></span>
                         </div>
                     </div>
 
@@ -226,6 +261,64 @@ function checkoutApp() {
         paymentMethod: 'razorpay',
         processing: false,
         errorMessage: '',
+        
+        // Coupon Data
+        couponCode: '',
+        appliedCoupon: @json($appliedCoupon),
+        discountAmount: {{ $discountAmount }},
+        subtotal: {{ $subtotal }},
+        
+        // Computed-like getters for totals
+        get discountedSubtotal() { return Math.max(0, this.subtotal - this.discountAmount); },
+        get gstAmount() { return Math.round(this.discountedSubtotal * 0.18 * 100) / 100; },
+        get shippingAmount() { return this.discountedSubtotal >= 999 ? 0 : 80; },
+        get totalAmount() { return this.discountedSubtotal + this.gstAmount + this.shippingAmount; },
+
+        applyCoupon() {
+            if (!this.couponCode) return;
+            BcLoader.show('Validating blessing...');
+            
+            fetch('{{ route("checkout.coupon.apply") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ coupon_code: this.couponCode })
+            })
+            .then(r => r.json())
+            .then(data => {
+                BcLoader.hide();
+                if (data.error) {
+                    window.dispatchEvent(new CustomEvent('notify', { detail: { message: data.error, type: 'error' } }));
+                    return;
+                }
+                this.appliedCoupon = { code: this.couponCode };
+                this.discountAmount = parseFloat(data.discount_amount);
+                this.couponCode = '';
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: data.success, type: 'success' } }));
+            })
+            .catch(() => {
+                BcLoader.hide();
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Unexpected error. Try again.', type: 'error' } }));
+            });
+        },
+
+        removeCoupon() {
+            BcLoader.show('Removing blessing...');
+            fetch('{{ route("checkout.coupon.remove") }}', {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                BcLoader.hide();
+                this.appliedCoupon = null;
+                this.discountAmount = 0;
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: data.success } }));
+            });
+        },
 
         initiatePayment() {
             if (!this.selectedAddressId) {
@@ -266,17 +359,7 @@ function checkoutApp() {
                     return;
                 }
                 if (data.success) {
-                    document.body.innerHTML = `
-                        <div class="min-h-screen bg-white flex items-center justify-center flex-col text-center p-8">
-                            <div class="h-24 w-24 bg-green-50 rounded-full flex items-center justify-center mb-8 mx-auto">
-                                <svg class="h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                            </div>
-                            <h2 class="text-3xl font-bold text-gray-900 mb-4">Order Confirmed! 🙏</h2>
-                            <p class="text-gray-500 mb-2">Order ID: <strong>${data.order_id}</strong></p>
-                            <p class="text-gray-400 text-sm mb-2">Payment: <strong>Cash on Delivery</strong></p>
-                            <p class="text-gray-400 text-sm mb-8">Your sacred artifacts will arrive shortly. Jai Bhavani!</p>
-                            <a href="${data.redirect}" class="px-8 py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition">View My Orders</a>
-                        </div>`;
+                    window.location.href = data.redirect;
                 }
             })
             .catch(() => {
@@ -370,16 +453,7 @@ function checkoutApp() {
                 this.processing = false;
                 BcLoader.hide();
                 if (data.success) {
-                    document.body.innerHTML = `
-                        <div class="min-h-screen bg-white flex items-center justify-center flex-col text-center p-8">
-                            <div class="h-24 w-24 bg-green-50 rounded-full flex items-center justify-center mb-8 mx-auto">
-                                <svg class="h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                            </div>
-                            <h2 class="text-3xl font-bold text-gray-900 mb-4">Order Confirmed! 🙏</h2>
-                            <p class="text-gray-500 mb-2">Order ID: <strong>${data.order_id}</strong></p>
-                            <p class="text-gray-400 text-sm mb-8">Your sacred artifacts will arrive shortly. Jai Bhavani!</p>
-                            <a href="${data.redirect}" class="px-8 py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition">View My Orders</a>
-                        </div>`;
+                    window.location.href = data.redirect;
                 } else {
                     this.errorMessage = data.message || 'Payment verification failed. Please contact support.';
                 }

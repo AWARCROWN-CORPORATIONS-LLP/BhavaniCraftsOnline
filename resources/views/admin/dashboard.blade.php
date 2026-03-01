@@ -58,7 +58,7 @@
         <div class="card-premium p-8 relative overflow-hidden flex flex-col justify-between h-[220px]">
             <div class="z-10">
                 <p class="text-[9px] font-black text-[#ff9933] uppercase tracking-[4px] mb-2 leading-none">Revenue Registry</p>
-                <h3 class="text-4xl lg:text-5xl font-black text-gray-900 leading-none tracking-tighter">₹{{ number_format($stats['revenue_total'], 2) }}</h3>
+                <h3 class="text-4xl lg:text-5xl font-black revenue-badge leading-none tracking-tighter">@format_currency_abbr($stats['revenue_total'])</h3>
             </div>
             <div class="z-10 flex items-center justify-between">
                 <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">Total Profit Volume</p>
@@ -134,6 +134,14 @@
                 </div>
                 <h4 class="text-[12px] font-black uppercase tracking-[4px] text-gray-900 group-hover:text-white mb-2 leading-none">Product Registry</h4>
                 <p class="text-[10px] text-gray-400 group-hover:text-white/70 font-bold uppercase tracking-wider">Manage Master Catalog</p>
+            </a>
+
+            <a href="{{ route('admin.page-content.index') }}" class="card-premium p-10 flex flex-col items-center text-center group hover:bg-[#ff9933] transition-colors duration-500">
+                <div class="h-20 w-20 bg-[#ff9933]/10 text-[#ff9933] rounded-3xl flex items-center justify-center mb-6 group-hover:bg-white group-hover:scale-110 transition-all">
+                    <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
+                </div>
+                <h4 class="text-[12px] font-black uppercase tracking-[4px] text-gray-900 group-hover:text-white mb-2 leading-none">Page Content</h4>
+                <p class="text-[10px] text-gray-400 group-hover:text-white/70 font-bold uppercase tracking-wider">Manage Dynamic Sections</p>
             </a>
         </div>
     </div>

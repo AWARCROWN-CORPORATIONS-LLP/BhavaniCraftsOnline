@@ -147,7 +147,25 @@
         .text-\[9px\]  { font-size: 10px !important; }
         .text-\[10px\] { font-size: 11px !important; }
         .text-\[11px\] { font-size: 12px !important; }
-        /* Slightly heavier base weight for body copy */
+        /* ── Marquee Animations ────────────────────────────── */
+        @keyframes marquee-fast {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+        @keyframes marquee-fast2 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(0); }
+        }
+        .animate-marquee-fast {
+            animation: marquee-fast 40s linear infinite;
+        }
+        .animate-marquee-fast2 {
+            animation: marquee-fast2 40s linear infinite;
+        }
+        .pause-on-hover:hover {
+            animation-play-state: paused;
+        }
+    
         body { font-weight: 450; }
     </style>
 </head>
@@ -166,7 +184,7 @@
 
     {{-- ── Global Loading JS (must be early) ───────────────────────────── --}}
     <script>
-        // Public API: window.BcLoader
+        
         window.BcLoader = {
             overlay: null,
             bar: null,

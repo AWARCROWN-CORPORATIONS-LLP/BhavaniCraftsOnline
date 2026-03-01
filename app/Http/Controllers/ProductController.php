@@ -10,9 +10,12 @@ class ProductController extends Controller
     /**
      * Display the specified artifact details.
      */
-    public function show($id)
+    public function show($token)
     {
-        $product = Product::with(['images', 'category', 'user'])
+        $id = Product::decryptId($token);
+        if (!$id) abort(404);
+
+        $product = Product::with(['images', 'category', 'user', 'reviews.user'])
             ->where('listed_status', 'Listed')
             ->findOrFail($id);
 

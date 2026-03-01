@@ -30,4 +30,22 @@ class Product extends Model
     {
         return $this->hasMany(ProductImage::class);
     }
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class)->latest();
+    }
+
+    public function encryptedId()
+    {
+        return base64_encode(\Illuminate\Support\Facades\Crypt::encryptString($this->id));
+    }
+
+    public static function decryptId($token)
+    {
+        try {
+            return \Illuminate\Support\Facades\Crypt::decryptString(base64_decode($token));
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
 }

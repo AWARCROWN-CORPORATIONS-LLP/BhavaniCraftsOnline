@@ -14,10 +14,18 @@ class HomeController extends Controller
                 $query->where('is_main', true);
             }, 'category'])
             ->where('listed_status', 'Listed')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->take(8)
             ->get();
 
-        return view('welcome', compact('products'));
+        $pageContent = \App\Models\PageContent::all()->pluck('value', 'key');
+
+        $suggestionService = new \App\Services\SuggestionService();
+        $recommendationMode = $pageContent['recommendation_mode'] ?? 'Festive';
+        $recommendationCount = (int)($pageContent['recommendation_count'] ?? 8);
+        
+        $recommendedProducts = $suggestionService->getRecommendations($recommendationMode, $recommendationCount);
+
+        return view('welcome', compact('products', 'pageContent', 'recommendedProducts'));
     }
 }

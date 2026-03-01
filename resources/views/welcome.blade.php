@@ -1,50 +1,167 @@
 @extends('layouts.public')
 
 @section('content')
-    <!-- Hero Section -->
+ 
     <div class="relative bg-onyx-900 overflow-hidden min-h-[85vh] flex items-center">
-        <!-- Background Imagery / Texture -->
-        <div class="absolute inset-0 z-0">
-            <!-- For now using a dark gradient, but we can replace this with an actual image URL later -->
+       
+        <div class="absolute inset-0 z-0 text-white">
             <div class="absolute inset-0 bg-gradient-to-r from-onyx-900 via-onyx-900/80 to-transparent z-10"></div>
-            <!-- Decorative circle blur -->
             <div class="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-brand-500/20 blur-[120px] rounded-full mix-blend-screen pointer-events-none"></div>
-            <!-- Optional image placeholder -->
-            <div class="h-full w-full bg-[url('https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center opacity-40 mix-blend-overlay"></div>
+            <div class="h-full w-full bg-cover bg-center opacity-40 mix-blend-overlay" style="background-image: url('{{ !empty($pageContent['hero_bg_image']) ? $pageContent['hero_bg_image'] : 'https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?q=80&w=2670&auto=format&fit=crop' }}')"></div>
         </div>
 
         <div class="container mx-auto px-4 lg:px-8 relative z-20">
             <div class="max-w-3xl">
                 <span class="inline-block py-1.5 px-3 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-[10px] font-black uppercase tracking-[4px] mb-6">
-                    Handcrafted Heritage
+                    {{ $pageContent['hero_badge'] ?? 'Handcrafted Heritage' }}
                 </span>
                 
                 <h1 class="text-5xl md:text-7xl lg:text-8xl font-serif font-bold text-white leading-[1.1] tracking-tight mb-8">
-                    Divine Artifacts, <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500">Masterfully</span> Forged.
+                    {!! $pageContent['hero_title'] ?? 'Divine Artifacts, <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500">Masterfully</span> Forged.' !!}
                 </h1>
                 
                 <p class="text-lg md:text-xl text-gray-300 font-light max-w-2xl leading-relaxed mb-10">
-                    Discover exclusive brass idols, exquisite pooja mandirs, and premium corporate gifts. Each piece is meticulously crafted by generational artisans, bringing eternal grace into your modern sanctuary.
+                    {{ $pageContent['hero_description'] ?? 'Discover exclusive brass idols, exquisite pooja mandirs, and premium corporate gifts. Each piece is meticulously crafted by generational artisans, bringing eternal grace into your modern sanctuary.' }}
                 </p>
                 
-                <div class="flex flex-col sm:flex-row items-center gap-4">
-                    <a href="#" class="w-full sm:w-auto px-8 py-4 bg-brand-500 hover:bg-brand-400 text-white text-xs font-black uppercase tracking-[3px] rounded-full transition-all shadow-[0_0_30px_rgba(245,130,28,0.3)] hover:shadow-[0_0_40px_rgba(245,130,28,0.5)] transform hover:-translate-y-1 text-center">
-                        Explore Collection
+                <div class="flex flex-col sm:flex-row items-center gap-4 mb-12">
+                    <a href="{{ $pageContent['hero_button_1_link'] ?? '#' }}" class="w-full sm:w-auto px-8 py-4 bg-brand-500 hover:bg-brand-400 text-white text-xs font-black uppercase tracking-[3px] rounded-full transition-all shadow-[0_0_30px_rgba(245,130,28,0.3)] hover:shadow-[0_0_40px_rgba(245,130,28,0.5)] transform hover:-translate-y-1 text-center">
+                        {{ $pageContent['hero_button_1_text'] ?? 'Explore Collection' }}
                     </a>
-                    <a href="#" class="w-full sm:w-auto px-8 py-4 bg-transparent border border-white/20 text-white hover:bg-white/5 text-xs font-black uppercase tracking-[3px] rounded-full transition-all text-center">
-                        B2B Wholesale
+                    <a href="{{ $pageContent['hero_button_2_link'] ?? '#' }}" class="w-full sm:w-auto px-8 py-4 bg-transparent border border-white/20 text-white hover:bg-white/5 text-xs font-black uppercase tracking-[3px] rounded-full transition-all text-center">
+                        {{ $pageContent['hero_button_2_text'] ?? 'B2B Wholesale' }}
                     </a>
+                </div>
+
+                <!-- USP Sticky Bar (Feature 2) -->
+                <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-10 border-t border-white/10 opacity-60">
+                    <div class="flex items-center space-x-2">
+                        <svg class="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-white">{{ $pageContent['usp_1_text'] ?? 'Artisan Direct' }}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <svg class="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-white">{{ $pageContent['usp_2_text'] ?? 'Global Export' }}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <svg class="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-white">{{ $pageContent['usp_3_text'] ?? 'Sacred Quality' }}</span>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- Scroll indicator -->
+    <!-- Scroll indicator -->
         <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 animate-bounce flex flex-col items-center">
             <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Scroll</span>
             <svg class="h-5 w-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
         </div>
     </div>
+
+    @if(isset($pageContent['offer_enabled']) && $pageContent['offer_enabled'] == '1')
+    <!-- Festival / Promo Section -->
+    <section class="relative py-16 lg:py-24 overflow-hidden bg-onyx-900">
+        <!-- Background Decor -->
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-gradient-to-r from-onyx-900 via-onyx-900/60 to-transparent z-10"></div>
+            <img src="{{ !empty($pageContent['offer_bg_image']) ? $pageContent['offer_bg_image'] : 'https://images.unsplash.com/photo-1619962314121-e4415ccc7f20?q=80&w=2670&auto=format&fit=crop' }}" 
+                 class="h-full w-full object-cover opacity-30 mix-blend-overlay">
+        </div>
+
+        <div class="container mx-auto px-4 lg:px-8 relative z-10">
+            <div class="max-w-4xl mx-auto text-center">
+                <span class="inline-block py-2 px-5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-[10px] font-black uppercase tracking-[5px] mb-8 animate-pulse shadow-[0_0_20px_rgba(245,130,28,0.2)]">
+                    {{ $pageContent['offer_badge'] ?? 'Festive Exclusive' }}
+                </span>
+                
+                <h2 class="text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-white mb-6 leading-tight">
+                    {{ $pageContent['offer_title'] ?? 'Divine Celebrations' }}
+                </h2>
+                
+                <p class="text-lg md:text-xl text-gray-300 font-light mb-12 max-w-2xl mx-auto italic">
+                    {{ $pageContent['offer_description'] ?? 'Celebrate the season with handcrafted excellence.' }}
+                </p>
+
+                @if(isset($pageContent['offer_timer_enabled']) && $pageContent['offer_timer_enabled'] == '1')
+                <!-- Feature 1: Countdown Timer -->
+                <div class="mb-12 flex justify-center space-x-4 md:space-x-8" 
+                     x-data="{ 
+                        expiry: new Date('{{ $pageContent['offer_ends_at'] ?? now()->addDays(7) }}').getTime(),
+                        now: new Date().getTime(),
+                        d: 0, h: 0, m: 0, s: 0,
+                        update() {
+                            this.now = new Date().getTime();
+                            let diff = this.expiry - this.now;
+                            if(diff < 0) return;
+                            this.d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                            this.h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            this.m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                            this.s = Math.floor((diff % (1000 * 60)) / 1000);
+                        }
+                     }" 
+                     x-init="update(); setInterval(() => update(), 1000)">
+                    <div class="text-center">
+                        <div class="text-4xl md:text-5xl font-black text-white" x-text="d.toString().padStart(2, '0')">00</div>
+                        <div class="text-[9px] font-black uppercase tracking-widest text-brand-500 mt-2">Days</div>
+                    </div>
+                    <div class="text-4xl md:text-5xl font-black text-white/20">:</div>
+                    <div class="text-center">
+                        <div class="text-4xl md:text-5xl font-black text-white" x-text="h.toString().padStart(2, '0')">00</div>
+                        <div class="text-[9px] font-black uppercase tracking-widest text-brand-500 mt-2">Hours</div>
+                    </div>
+                    <div class="text-4xl md:text-5xl font-black text-white/20">:</div>
+                    <div class="text-center">
+                        <div class="text-4xl md:text-5xl font-black text-white" x-text="m.toString().padStart(2, '0')">00</div>
+                        <div class="text-[9px] font-black uppercase tracking-widest text-brand-500 mt-2">Mins</div>
+                    </div>
+                    <div class="text-4xl md:text-5xl font-black text-white/20">:</div>
+                    <div class="text-center">
+                        <div class="text-4xl md:text-5xl font-black text-white" x-text="s.toString().padStart(2, '0')">00</div>
+                        <div class="text-[9px] font-black uppercase tracking-widest text-brand-500 mt-2">Secs</div>
+                    </div>
+                </div>
+                @endif
+                
+                <a href="{{ $pageContent['offer_btn_link'] ?? '#' }}" 
+                   class="inline-block px-12 py-5 bg-white text-onyx-900 text-xs font-black uppercase tracking-[4px] rounded-full hover:bg-brand-500 hover:text-white transition-all transform hover:-translate-y-1 shadow-2xl">
+                    {{ $pageContent['offer_btn_text'] ?? 'Explore Offer' }}
+                </a>
+            </div>
+        </div>
+
+        <!-- Decorative elements -->
+        <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-brand-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+    </section>
+    @endif
+
+    @if(isset($pageContent['social_proof_enabled']) && $pageContent['social_proof_enabled'] == '1')
+    <!-- Feature 5: Social Proof Marquee -->
+    <div class="bg-white py-12 border-b border-gray-100 overflow-hidden group">
+        <div class="container mx-auto px-4 mb-10 text-center">
+            <span class="text-[9px] font-black uppercase tracking-[3px] text-gray-400">Trusted for Corporate Gifting & Sacred Spaces By</span>
+        </div>
+        <div class="relative flex overflow-x-hidden">
+            <div class="flex animate-marquee-fast pause-on-hover items-center">
+                @for($i=1; $i<=5; $i++)
+                    @php $logoKey = 'trust_logo_' . $i; @endphp
+                    @if(isset($pageContent[$logoKey]))
+                        <img src="{{ $pageContent[$logoKey] }}" class="h-12 md:h-16 mx-12 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
+                    @endif
+                @endfor
+            </div>
+            <!-- Duplicate for infinite effect -->
+            <div class="absolute top-0 flex animate-marquee-fast2 pause-on-hover items-center">
+                @for($i=1; $i<=5; $i++)
+                    @php $logoKey = 'trust_logo_' . $i; @endphp
+                    @if(isset($pageContent[$logoKey]))
+                        <img src="{{ $pageContent[$logoKey] }}" class="h-12 md:h-16 mx-12 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
+                    @endif
+                @endfor
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Features / Value Prop -->
     <section class="py-20 bg-white">
@@ -56,8 +173,8 @@
                     <div class="h-16 w-16 mx-auto bg-brand-50 rounded-2xl flex items-center justify-center mb-6 text-brand-500 group-hover:bg-brand-500 group-hover:text-white transition-all transform group-hover:-translate-y-2 duration-300 shadow-sm">
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                     </div>
-                    <h3 class="font-serif font-bold text-xl text-onyx-900 mb-3">Authentic Craftsmanship</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed px-4">Every artifact is completely hand-forged by generational artisans using traditional techniques.</p>
+                    <h3 class="font-serif font-bold text-xl text-onyx-900 mb-3">{{ $pageContent['feature_1_title'] ?? 'Authentic Craftsmanship' }}</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed px-4">{{ $pageContent['feature_1_description'] ?? 'Every artifact is completely hand-forged by generational artisans using traditional techniques.' }}</p>
                 </div>
                 
                 <!-- Prop 2 -->
@@ -65,8 +182,8 @@
                     <div class="h-16 w-16 mx-auto bg-brand-50 rounded-2xl flex items-center justify-center mb-6 text-brand-500 group-hover:bg-brand-500 group-hover:text-white transition-all transform group-hover:-translate-y-2 duration-300 shadow-sm">
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
-                    <h3 class="font-serif font-bold text-xl text-onyx-900 mb-3">Global Shipping</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed px-4">Securely packaged and exported worldwide. We ensure divine artifacts reach your door safely.</p>
+                    <h3 class="font-serif font-bold text-xl text-onyx-900 mb-3">{{ $pageContent['feature_2_title'] ?? 'Global Shipping' }}</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed px-4">{{ $pageContent['feature_2_description'] ?? 'Securely packaged and exported worldwide. We ensure divine artifacts reach your door safely.' }}</p>
                 </div>
 
                 <!-- Prop 3 -->
@@ -74,10 +191,130 @@
                     <div class="h-16 w-16 mx-auto bg-brand-50 rounded-2xl flex items-center justify-center mb-6 text-brand-500 group-hover:bg-brand-500 group-hover:text-white transition-all transform group-hover:-translate-y-2 duration-300 shadow-sm">
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
-                    <h3 class="font-serif font-bold text-xl text-onyx-900 mb-3">B2B & Wholesale Dropshipping</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed px-4">Exclusive partner portals featuring automated restocks and zero-inventory fulfillment systems.</p>
+                    <h3 class="font-serif font-bold text-xl text-onyx-900 mb-3">{{ $pageContent['feature_3_title'] ?? 'B2B & Wholesale Dropshipping' }}</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed px-4">{{ $pageContent['feature_3_description'] ?? 'Exclusive partner portals featuring automated restocks and zero-inventory fulfillment systems.' }}</p>
                 </div>
                 
+            </div>
+        </div>
+    </section>
+
+    @if(isset($recommendedProducts) && $recommendedProducts->count() > 0)
+    <!-- Feature: Sacred Picks Suggestion Engine -->
+    <section class="py-24 bg-onyx-950 relative overflow-hidden">
+        <!-- Background light bleeds -->
+        <div class="absolute top-0 right-0 w-1/3 h-1/2 bg-brand-500/5 blur-[120px] rounded-full"></div>
+        <div class="absolute bottom-0 left-0 w-1/3 h-1/2 bg-brand-500/5 blur-[120px] rounded-full"></div>
+
+        <div class="container mx-auto px-4 lg:px-8 relative z-10">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <span class="h-[1px] w-8 bg-brand-500"></span>
+                        <span class="text-[10px] font-black uppercase tracking-[5px] text-brand-500">
+                            {{ $pageContent['recommendation_mode'] === 'Festive' ? 'Season\'s High Velocity' : 'Hand-Picked Heritage' }}
+                        </span>
+                    </div>
+                    <h2 class="font-serif text-4xl md:text-5xl font-bold text-white leading-tight">
+                        {{ $pageContent['recommendation_title'] ?? 'Sacred Picks for You' }}
+                    </h2>
+                </div>
+                <p class="text-sm text-gray-400 font-light max-w-sm mt-6 md:mt-0 italic">
+                    {{ $pageContent['recommendation_mode'] === 'Festive' ? 'Trending masterpieces currently gracing the most sacred spaces across Bharat.' : 'Unique artisanal treasures selected to bring eternal grace into your modern sanctuary.' }}
+                </p>
+            </div>
+
+            <!-- Horizontal Scrollable Grid -->
+            <div class="flex pb-12 overflow-x-auto gap-8 no-scrollbar snap-x snap-mandatory scroll-smooth">
+                @foreach($recommendedProducts as $product)
+                    <div class="flex-none w-[280px] md:w-[320px] snap-start">
+                        <div class="bg-white/5 border border-white/10 rounded-3xl p-5 group hover:bg-white/10 hover:border-brand-500/30 transition-all duration-500 transform hover:-translate-y-2">
+                            <!-- Image -->
+                            <div class="relative aspect-square rounded-2xl overflow-hidden mb-6 bg-onyx-900 flex items-center justify-center">
+                                @if($product->images->count() > 0)
+                                    <a href="{{ route('artifact.show', $product->encryptedId()) }}" class="block w-full h-full">
+                                        <img src="{{ Storage::url($product->images->first()->image_url) }}" alt="{{ $product->product_name }}" class="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100">
+                                    </a>
+                                @endif
+                                
+                                @if($product->discount_percent > 0)
+                                    <div class="absolute top-4 right-4 bg-brand-500 text-onyx-900 text-[9px] font-black px-2 py-1 rounded-md shadow-lg">
+                                        {{ $product->discount_percent }}% OFF
+                                    </div>
+                                @endif
+
+                                <!-- Quick Actions (Glass UI) -->
+                                <div class="absolute bottom-4 inset-x-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                                    <button onclick="buyNow({{ $product->id }}, this)" class="w-full py-3 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-brand-500 hover:border-brand-500 transition-all">
+                                        Quick Checkout
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Info -->
+                            <div class="text-center">
+                                <p class="text-[9px] font-bold text-brand-500 uppercase tracking-widest mb-2">{{ $product->category->name }}</p>
+                                <h3 class="text-sm font-bold text-white mb-4 line-clamp-1 group-hover:text-brand-400 transition-colors">{{ $product->product_name }}</h3>
+                                <div class="flex items-center justify-center space-x-3">
+                                    <span class="text-lg font-black text-white">₹{{ number_format($product->price, 0) }}</span>
+                                    @if($product->mrp > $product->price)
+                                        <span class="text-[11px] text-gray-500 line-through">₹{{ number_format($product->mrp, 0) }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
+    <!-- Side-Scrolling Gallery Section -->
+    <section class="py-24 bg-onyx-900 overflow-hidden">
+        <div class="container mx-auto px-4 lg:px-8 mb-16 text-center">
+             <span class="text-[10px] font-black uppercase tracking-[4px] text-brand-500 block mb-2">Heritage in Motion</span>
+             <h2 class="font-serif text-3xl md:text-5xl font-bold text-white">{{ $pageContent['gallery_title'] ?? 'Artisanal Highlights' }}</h2>
+        </div>
+
+        <div class="relative flex overflow-x-hidden group">
+            <div class="py-4 animate-marquee-fast flex whitespace-nowrap pause-on-hover">
+                @for($i=1; $i<=6; $i++)
+                    @php 
+                        $imgKey = 'gallery_image_' . $i; 
+                        $fallbacks = [
+                            1 => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=2670&auto=format&fit=crop',
+                            2 => 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop',
+                            3 => 'https://images.unsplash.com/photo-1603412470732-bc66033866b1?q=80&w=2670&auto=format&fit=crop',
+                            4 => 'https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?q=80&w=2670&auto=format&fit=crop',
+                            5 => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=2670&auto=format&fit=crop',
+                            6 => 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop',
+                        ];
+                    @endphp
+                    <div class="mx-4 w-[300px] md:w-[450px] h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 hover:scale-105 border border-white/5">
+                        <img src="{{ !empty($pageContent[$imgKey]) ? $pageContent[$imgKey] : $fallbacks[$i] }}" class="w-full h-full object-cover">
+                    </div>
+                @endfor
+            </div>
+
+            <!-- Duplicate for infinite effect -->
+            <div class="absolute top-0 py-4 animate-marquee-fast2 flex whitespace-nowrap pause-on-hover">
+                @for($i=1; $i<=6; $i++)
+                    @php 
+                        $imgKey = 'gallery_image_' . $i; 
+                        $fallbacks = [
+                            1 => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=2670&auto=format&fit=crop',
+                            2 => 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop',
+                            3 => 'https://images.unsplash.com/photo-1603412470732-bc66033866b1?q=80&w=2670&auto=format&fit=crop',
+                            4 => 'https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?q=80&w=2670&auto=format&fit=crop',
+                            5 => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=2670&auto=format&fit=crop',
+                            6 => 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop',
+                        ];
+                    @endphp
+                    <div class="mx-4 w-[300px] md:w-[450px] h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 hover:scale-105 border border-white/5">
+                        <img src="{{ !empty($pageContent[$imgKey]) ? $pageContent[$imgKey] : $fallbacks[$i] }}" class="w-full h-full object-cover">
+                    </div>
+                @endfor
             </div>
         </div>
     </section>
@@ -87,8 +324,8 @@
         <div class="container mx-auto px-4 lg:px-8">
             <div class="flex items-end justify-between mb-12">
                 <div>
-                    <span class="text-[10px] font-black uppercase tracking-[4px] text-brand-500 block mb-2">Featured Artifacts</span>
-                    <h2 class="font-serif text-3xl md:text-5xl font-bold text-onyx-900">Curated Masterpieces</h2>
+                    <span class="text-[10px] font-black uppercase tracking-[4px] text-brand-500 block mb-2">{{ $pageContent['products_badge'] ?? 'Featured Artifacts' }}</span>
+                    <h2 class="font-serif text-3xl md:text-5xl font-bold text-onyx-900">{{ $pageContent['products_title'] ?? 'Curated Masterpieces' }}</h2>
                 </div>
                 <a href="#" class="hidden md:flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-brand-500 transition-colors">
                     <span>View All</span>
@@ -102,7 +339,7 @@
                         <!-- Image Container -->
                         <div class="relative w-full h-64 rounded-xl mb-4 overflow-hidden bg-gray-50 flex items-center justify-center">
                             @if($product->images->count() > 0)
-                                <a href="{{ route('artifact.show', $product->id) }}" class="block w-full h-full">
+                                <a href="{{ route('artifact.show', $product->encryptedId()) }}" class="block w-full h-full">
                                     <img src="{{ Storage::url($product->images->first()->image_url) }}" alt="{{ $product->product_name }}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500">
                                 </a>
                             @else
@@ -184,7 +421,7 @@
                             </div>
                             
                             <h3 class="text-sm font-bold text-onyx-900 leading-tight mb-3 truncate">
-                                <a href="{{ route('artifact.show', $product->id) }}" class="hover:text-brand-500 transition-colors">
+                                <a href="{{ route('artifact.show', $product->encryptedId()) }}" class="hover:text-brand-500 transition-colors">
                                     {{ $product->product_name }}
                                 </a>
                             </h3>
@@ -231,18 +468,16 @@
 @push('scripts')
 <script>
 async function buyNow(productId, btn) {
-    // Guard: prevent double clicks
+    
     if (btn.disabled) return;
 
-    // Show button spinner
     btn.disabled = true;
     const textEl    = btn.querySelector('.btn-text');
     const spinnerEl = btn.querySelector('.btn-spinner');
     if (textEl)    textEl.textContent = 'Adding...';
     if (spinnerEl) spinnerEl.classList.remove('hidden');
 
-    // Show global overlay — but we need to bypass bc-busy for the redirect,
-    // so we do NOT set bc-busy here — just the progress bar
+    
     if (window.BcLoader) {
         BcLoader.bar.style.opacity = '1';
         BcLoader.bar.style.width   = '40%';

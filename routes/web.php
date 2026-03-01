@@ -22,9 +22,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout');
     Route::post('/checkout/create-order', [App\Http\Controllers\CheckoutController::class, 'createOrder'])->name('checkout.create_order');
     Route::post('/checkout/verify-payment', [App\Http\Controllers\CheckoutController::class, 'verifyPayment'])->name('checkout.verify_payment');
+    Route::get('/checkout/success/{token}', [App\Http\Controllers\CheckoutController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/receipt/{token}', [App\Http\Controllers\ReceiptController::class, 'download'])->name('checkout.receipt');
+    
+    // Coupon Mastery
+    Route::post('/checkout/coupon/apply', [App\Http\Controllers\CouponController::class, 'apply'])->name('checkout.coupon.apply');
+    Route::delete('/checkout/coupon/remove', [App\Http\Controllers\CouponController::class, 'remove'])->name('checkout.coupon.remove');
 });
 Route::get('/collection/{token}', [App\Http\Controllers\CollectionController::class, 'show'])->name('collection.show');
-Route::get('/artifact/{id}', [App\Http\Controllers\ProductController::class, 'show'])->name('artifact.show');
+Route::get('/artifact/{token}', [App\Http\Controllers\ProductController::class, 'show'])->name('artifact.show');
+Route::post('/artifact/{token}/reviews', [App\Http\Controllers\ProductReviewController::class, 'store'])->name('artifact.reviews.store')->middleware('auth');
 
 // Customer Dashboard Mastery
 Route::middleware('auth')->prefix('my-account')->name('customer.')->group(function() {
@@ -85,9 +92,16 @@ Route::prefix('admin')->name('admin.')->middleware('role:super_admin,admin,emplo
     Route::resource('broadcasts', App\Http\Controllers\Admin\GlobalBroadcastController::class)->except(['show']);
     Route::patch('/broadcasts/{broadcast}/toggle', [App\Http\Controllers\Admin\GlobalBroadcastController::class, 'toggle'])->name('broadcasts.toggle');
     
+    // Page Content Management
+    Route::get('/page-content', [App\Http\Controllers\Admin\AdminPageContentController::class, 'index'])->name('page-content.index');
+    Route::post('/page-content/update', [App\Http\Controllers\Admin\AdminPageContentController::class, 'update'])->name('page-content.update');
+
     // HQ Restock Management
     Route::get('/restocks', [App\Http\Controllers\Admin\AdminRestockController::class, 'index'])->name('restocks.index');
     Route::patch('/restocks/{restock}', [App\Http\Controllers\Admin\AdminRestockController::class, 'update'])->name('restocks.update');
+    
+    // Divine Coupon Mastery
+    Route::resource('coupons', App\Http\Controllers\Admin\AdminCouponController::class);
     
     // Future Content Modules can be added here
     Route::get('/settings', function() { return "Elite Settings Registry - Coming Soon"; })->name('settings');

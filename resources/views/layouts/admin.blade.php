@@ -9,14 +9,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Tailwind Config Customizations -->
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; font-size: 14px; -webkit-font-smoothing: antialiased; }
-        h1, h2, h3, .heading-silk { font-family: 'Playfair Display', serif; }
-        p, span, td, th, li, label, input, select, textarea { color: inherit; }
+        body { font-family: 'Outfit', sans-serif; background: #fbfbfc; color: #1e293b; font-size: 14px; -webkit-font-smoothing: antialiased; }
+        h1, h2, h3, .heading-silk { font-family: 'Bodoni Moda', serif; }
+        p, span, td, th, li, label, input, select, textarea { font-family: 'Outfit', sans-serif; color: inherit; }
         /* Boost base text legibility across all table cells and content areas */
         td { color: #1e293b; }
         th { color: #475569; font-weight: 700; }
@@ -68,8 +68,15 @@
         /* Beautiful Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+        .revenue-badge {
+            background: linear-gradient(135deg, #ff9933 0%, #ff5e00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+        }
     </style>
 </head>
 <body x-data="{ sidebarOpen: true }" class="min-h-screen flex bg-gray-50 overflow-hidden">
@@ -121,6 +128,11 @@
                 <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Global Broadcast</span>
             </a>
 
+            <a href="{{ route('admin.page-content.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.page-content.index') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
+                <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Page Content</span>
+            </a>
+
             <p x-show="sidebarOpen" class="text-white/40 text-[10px] font-black uppercase tracking-[4px] px-6 mt-10 mb-4">Catalog Silk</p>
 
             <a href="{{ route('admin.categories.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.categories.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
@@ -146,6 +158,11 @@
             <a href="{{ route('admin.orders.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.orders.index') || request()->routeIs('admin.orders.show') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
                 <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Order Registry</span>
+            </a>
+
+            <a href="{{ route('admin.coupons.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.coupons.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Divine Coupons</span>
             </a>
         </nav>
 

@@ -10,8 +10,9 @@ class Order extends Model
     protected $fillable = [
         'user_id', 'order_id_string', 'address_id', 'status',
         'total_amount', 'currency', 'subtotal', 'discount_total',
-        'tax_total', 'shipping_total', 'payment_status',
+        'tax_total', 'shipping_total', 'payment_status', 'payment_method',
         'razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature',
+        'coupon_id', 'discount_amount',
     ];
 
     protected $casts = [
