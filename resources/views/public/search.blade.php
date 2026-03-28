@@ -10,19 +10,20 @@
 
     {{-- Hero Search Header --}}
     <div class="bg-onyx-900 py-14 relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#f5821c 1px, transparent 1px); background-size: 24px 24px;"></div>
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#c5a021 1px, transparent 1px); background-size: 24px 24px;"></div>
         <div class="absolute top-0 left-1/3 w-96 h-96 bg-brand-500/20 rounded-full blur-3xl -translate-y-1/2"></div>
         <div class="container mx-auto px-4 lg:px-8 relative z-10">
             <div class="max-w-3xl mx-auto text-center mb-10">
-                <span class="text-[10px] font-black uppercase tracking-[4px] text-brand-400 block mb-3">Sacred Discovery</span>
+                <span class="text-[10px] font-black uppercase tracking-[4px] text-brand-400 block mb-3">Product Search</span>
                 <h1 class="text-4xl lg:text-5xl font-serif font-bold text-white italic mb-4">
-                    Find Your <span class="text-brand-400">Divine Artifact</span>
+                    Find Your <span class="text-brand-400">Product</span>
                 </h1>
-                <p class="text-gray-400 text-sm font-medium">Search through our curated collection of handcrafted brass idols, pooja items & sacred gifts</p>
+                <p class="text-gray-400 text-sm font-medium">Search through our collection of handcrafted brass idols, pooja items & gifts</p>
             </div>
 
             {{-- Main Search Bar --}}
-            <form method="GET" action="{{ route('search') }}" class="max-w-2xl mx-auto">
+            <form method="GET" action="{{ route('search') }}" class="max-w-2xl mx-auto" 
+                  onsubmit="if(!this.q.value.trim()){ event.preventDefault(); return false; }">
                 <div class="flex rounded-2xl overflow-hidden border-2 border-brand-500/30 bg-white/10 backdrop-blur-sm focus-within:border-brand-500 transition-all duration-300 shadow-2xl shadow-onyx-900/50">
                     <input type="text"
                            name="q"
@@ -48,7 +49,7 @@
                 <a href="{{ route('search') }}"
                    class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all
                           {{ !request('category') && !request('q') ? 'bg-brand-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white' }}">
-                    All Artifacts
+                    All Products
                 </a>
                 @foreach($categories as $cat)
                 <a href="{{ route('search', ['category' => $cat->id, 'q' => request('q')]) }}"
@@ -92,7 +93,7 @@
                         {{-- Results count + Clear --}}
                         <div class="flex items-center justify-between mb-6">
                             <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                {{ $products->total() }} Sacred Results
+                                {{ $products->total() }} Results Found
                             </p>
                             @if(request()->hasAny(['category','material','min_price','max_price','in_stock']))
                             <a href="{{ route('search', request()->only('q', 'sort')) }}"
@@ -235,9 +236,9 @@
                                 {{ $categories->find(request('category'))?->name ?? 'Category' }}
                             </h2>
                         @else
-                            <h2 class="text-xl font-black text-onyx-900">All Sacred Artifacts</h2>
+                            <h2 class="text-xl font-black text-onyx-900">All Products</h2>
                         @endif
-                        <p class="text-xs text-gray-400 font-medium mt-1">{{ $products->total() }} artifacts found</p>
+                        <p class="text-xs text-gray-400 font-medium mt-1">{{ $products->total() }} products found</p>
                     </div>
 
                     {{-- Sort --}}
@@ -290,102 +291,63 @@
                 </div>
                 @endif
 
-                {{-- ── Product Grid ────────────────────────── --}}
-                @if($products->count() > 0)
-                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                    @foreach($products as $product)
-                    @php $img = $product->images->where('is_main', true)->first() ?? $product->images->first(); @endphp
-                    <a href="{{ route('artifact.show', $product->encryptedId()) }}"
-                       class="group bg-white rounded-[1.5rem] border border-gray-100 hover:border-brand-500/30 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-brand-500/10 transition-all duration-500 flex flex-col">
-
-                        {{-- Image --}}
-                        <div class="relative aspect-square overflow-hidden bg-gray-50">
-                            @if($img)
-                                <img src="{{ \Illuminate\Support\Facades\Storage::url($img->image_url) }}"
-                                     alt="{{ $product->product_name }}"
-                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center">
-                                    <svg class="h-16 w-16 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-                                </div>
-                            @endif
-
-                            {{-- Badges --}}
-                            <div class="absolute top-3 left-3 flex flex-col gap-1">
-                                @if($product->discount_percent > 0)
-                                    <span class="bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full">{{ $product->discount_percent }}% OFF</span>
-                                @endif
-                                @if($product->stock == 0)
-                                    <span class="bg-gray-800/80 text-white text-[9px] font-black px-2 py-0.5 rounded-full">Out of Stock</span>
-                                @elseif($product->stock <= 5)
-                                    <span class="bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full">Only {{ $product->stock }} left</span>
-                                @endif
-                            </div>
-
-                            {{-- Wishlist quick --}}
-                            <button onclick="event.preventDefault(); toggleWishlist({{ $product->id }}, this)"
-                                    class="absolute top-3 right-3 h-8 w-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-400 hover:text-brand-500 hover:bg-white transition-all shadow-sm">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                            </button>
+                @if(count($products) > 0)
+                    {{-- ── Product Grid ────────────────────────── --}}
+                    <div x-data="infiniteScroll()" class="space-y-12">
+                        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                            @foreach($products as $product)
+                                @include('public.partials.product_card', ['product' => $product])
+                            @endforeach
+                            
+                            {{-- JS Dynamic Artifacts will be appended here --}}
+                            <template x-for="pItem in dynamicProducts" :key="pItem.id">
+                                <div x-html="renderProductCard(pItem)"></div>
+                            </template>
                         </div>
 
-                        {{-- Product Info --}}
-                        <div class="p-5 flex flex-col flex-1">
-                            @if($product->category)
-                                <span class="text-[9px] font-black uppercase tracking-[2px] text-brand-500 mb-1">{{ $product->category->name }}</span>
-                            @endif
-                            <h3 class="text-sm font-bold text-onyx-900 leading-snug mb-1 group-hover:text-brand-500 transition-colors line-clamp-2">
-                                {{ $product->product_name }}
-                            </h3>
-                            @if($product->material_type)
-                            <p class="text-[10px] text-gray-400 font-medium capitalize mb-3">{{ $product->material_type }}</p>
-                            @endif
-
-                            <div class="mt-auto flex items-center justify-between">
-                                <div>
-                                    <p class="text-lg font-black text-onyx-900">₹{{ number_format($product->price, 0) }}</p>
-                                    @if($product->mrp && $product->mrp > $product->price)
-                                        <p class="text-[10px] text-gray-400 line-through font-medium">₹{{ number_format($product->mrp, 0) }}</p>
-                                    @endif
+                        {{-- Loading / Infinite Scroll Trigger --}}
+                        <div x-show="hasMore" x-intersect="loadMore()" class="py-12 flex flex-col items-center justify-center min-h-[100px]">
+                            <template x-if="loading">
+                                <div class="flex flex-col items-center animate-fadeIn">
+                                    <div class="flex space-x-2 mb-4">
+                                        <div class="h-2 w-2 bg-brand-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                        <div class="h-2 w-2 bg-brand-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                        <div class="h-2 w-2 bg-brand-500 rounded-full animate-bounce"></div>
+                                    </div>
+                                    <span class="text-[10px] font-black uppercase tracking-[3px] text-gray-400">Revealing more items...</span>
                                 </div>
-                                <button onclick="event.preventDefault(); addToCart({{ $product->id }})"
-                                        class="h-9 w-9 bg-brand-500 text-white rounded-xl flex items-center justify-center hover:bg-brand-600 transition-all shadow-md shadow-brand-500/20 hover:scale-110">
-                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                                </button>
-                            </div>
+                            </template>
                         </div>
-                    </a>
-                    @endforeach
-                </div>
 
-                {{-- Pagination --}}
-                <div class="mt-12">
-                    {{ $products->links() }}
-                </div>
-
+                        <div x-show="!hasMore && dynamicProducts.length > 0" class="py-12 text-center">
+                            <span class="h-px w-12 bg-gray-200 inline-block align-middle mr-4"></span>
+                            <span class="text-[10px] font-black uppercase tracking-[3px] text-gray-300 italic">No more products to show</span>
+                            <span class="h-px w-12 bg-gray-200 inline-block align-middle ml-4"></span>
+                        </div>
+                    </div>
                 @else
-                {{-- No Results --}}
-                <div class="py-24 text-center flex flex-col items-center justify-center">
-                    <div class="h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-8 mx-auto">
-                        <svg class="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    {{-- No Results --}}
+                    <div class="py-24 text-center flex flex-col items-center justify-center">
+                        <div class="h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-8 mx-auto">
+                            <svg class="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </div>
+                        <h3 class="text-2xl font-black text-onyx-900 italic mb-3">No Products Found</h3>
+                        <p class="text-gray-400 text-sm font-medium mb-8 max-w-sm">
+                            @if(request('q'))
+                                No results for <strong>"{{ request('q') }}"</strong>. Try different keywords or browse our full collection.
+                            @else
+                                No artifacts match your current filters. Try adjusting your search criteria.
+                            @endif
+                        </p>
+                        <div class="flex items-center space-x-4">
+                            <a href="{{ route('search') }}" class="px-8 py-3 bg-brand-500 text-white font-black uppercase tracking-[3px] text-[10px] rounded-xl hover:bg-brand-600 transition-all shadow-lg shadow-brand-500/20">
+                                View All Products
+                            </a>
+                            <a href="{{ route('home') }}" class="px-8 py-3 border border-gray-200 text-onyx-900 font-black uppercase tracking-[3px] text-[10px] rounded-xl hover:border-brand-500 hover:text-brand-500 transition-all">
+                                Back to Home
+                            </a>
+                        </div>
                     </div>
-                    <h3 class="text-2xl font-black text-onyx-900 italic mb-3">No Sacred Artifacts Found</h3>
-                    <p class="text-gray-400 text-sm font-medium mb-8 max-w-sm">
-                        @if(request('q'))
-                            No results for <strong>"{{ request('q') }}"</strong>. Try different keywords or browse our full collection.
-                        @else
-                            No artifacts match your current filters. Try adjusting your search criteria.
-                        @endif
-                    </p>
-                    <div class="flex items-center space-x-4">
-                        <a href="{{ route('search') }}" class="px-8 py-3 bg-brand-500 text-white font-black uppercase tracking-[3px] text-[10px] rounded-xl hover:bg-brand-600 transition-all shadow-lg shadow-brand-500/20">
-                            View All Artifacts
-                        </a>
-                        <a href="{{ url('/') }}" class="px-8 py-3 border border-gray-200 text-onyx-900 font-black uppercase tracking-[3px] text-[10px] rounded-xl hover:border-brand-500 hover:text-brand-500 transition-all">
-                            Back to Home
-                        </a>
-                    </div>
-                </div>
                 @endif
             </div>
         </div>
@@ -393,8 +355,8 @@
 </div>
 
 <style>
-.thumb-range::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #f5821c; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 8px rgba(245,130,28,0.4); }
-.thumb-range::-moz-range-thumb { width: 20px; height: 20px; background: #f5821c; border-radius: 50%; cursor: pointer; border: none; }
+.thumb-range::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #c5a021; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 8px rgba(197,160,33,0.4); }
+.thumb-range::-moz-range-thumb { width: 20px; height: 20px; background: #c5a021; border-radius: 50%; cursor: pointer; border: none; }
 </style>
 
 <script>
@@ -425,7 +387,7 @@ async function addToCart(productId, btn) {
         });
         const data = await r.json();
         window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.count } }));
-        window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Added to Sacred Cart! 🙏', type: 'success' } }));
+        window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Added to Cart!', type: 'success' } }));
     } finally {
         BcLoader.hide();
         if (btn) { btn.disabled = false; btn.innerHTML = btn._orig; }
@@ -433,7 +395,7 @@ async function addToCart(productId, btn) {
 }
 
 async function toggleWishlist(productId, btn) {
-    BcLoader.show('Saving to collection...');
+    BcLoader.show('Saving to wishlist...');
     try {
         const r = await fetch('{{ route("wishlist.toggle") }}', {
             method: 'POST',
@@ -443,18 +405,110 @@ async function toggleWishlist(productId, btn) {
         const data = await r.json();
         const svg = btn.querySelector('svg');
         if (data.status === 'added') {
-            svg.setAttribute('fill', '#f5821c');
-            svg.setAttribute('stroke', '#f5821c');
-            window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Saved to Collection ✨', type: 'success' } }));
+            svg.setAttribute('fill', '#c5a021');
+            svg.setAttribute('stroke', '#c5a021');
+            window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Saved to Wishlist', type: 'success' } }));
         } else {
             svg.setAttribute('fill', 'none');
             svg.setAttribute('stroke', 'currentColor');
-            window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Removed from Collection', type: 'info' } }));
+            window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Removed from Wishlist', type: 'info' } }));
         }
         window.dispatchEvent(new CustomEvent('wishlist-updated', { detail: { count: data.count ?? 0 } }));
     } finally {
         BcLoader.hide();
     }
+}
+
+function infiniteScroll() {
+    return {
+        dynamicProducts: [],
+        page: 1,
+        hasMore: {{ (is_object($products) && method_exists($products, 'hasMorePages')) ? ($products->hasMorePages() ? 'true' : 'false') : 'false' }},
+        loading: false,
+        async loadMore() {
+            if (this.loading || !this.hasMore) return;
+            this.loading = true;
+            this.page++;
+            
+            const gqlQuery = `
+                query Search($q: String, $cat: ID, $page: Int) {
+                    searchProducts(q: $q, category: $cat, page: $page) {
+                        data {
+                            id
+                            product_name
+                            slug
+                            price
+                            mrp
+                            discount_percent
+                            stock
+                            material_type
+                            category { name }
+                            images { image_url is_main }
+                        }
+                        paginatorInfo {
+                            hasMorePages
+                        }
+                    }
+                }
+            `;
+            
+            try {
+                const r = await fetch('/graphql', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: gqlQuery,
+                        variables: { 
+                            q: "{{ request('q') }}", 
+                            cat: "{{ request('category') }}",
+                            page: this.page 
+                        }
+                    })
+                });
+                const res = await r.json();
+                if (res.data && res.data.searchProducts) {
+                    this.dynamicProducts.push(...res.data.searchProducts.data);
+                    this.hasMore = res.data.searchProducts.paginatorInfo.hasMorePages;
+                }
+            } catch (err) {
+                console.error('Infinite Scroll Error:', err);
+                this.hasMore = false;
+            } finally {
+                this.loading = false;
+            }
+        },
+        renderProductCard(p) {
+            const img = p.images.find(i => i.is_main) || p.images[0];
+            const imgUrl = img ? `/storage/${img.image_url}` : '';
+            const discountBadge = p.discount_percent > 0 ? `<span class="bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full">${p.discount_percent}% OFF</span>` : '';
+            const stockBadge = (p.stock > 0 && p.stock <= 5) ? `<span class="bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full animate-pulse">Only ${p.stock} left</span>` : (p.stock == 0 ? `<span class="bg-gray-800/80 text-white text-[9px] font-black px-2 py-0.5 rounded-full">Out of Stock</span>` : '');
+
+            return `
+                <a href="/${window.AppLocale}/artifact/${p.slug}" class="group bg-white rounded-[1.5rem] border border-gray-100 hover:border-brand-500/30 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-brand-500/10 transition-all duration-500 flex flex-col h-full">
+                    <div class="relative aspect-square overflow-hidden bg-gray-50">
+                        <img src="${imgUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute top-3 left-3 flex flex-col gap-1">${discountBadge}${stockBadge}</div>
+                    </div>
+                    <div class="p-5 flex flex-col flex-1">
+                        <span class="text-[9px] font-black uppercase tracking-[2px] text-brand-500 mb-1">${p.category ? p.category.name : 'Artifact'}</span>
+                        <h3 class="text-sm font-bold text-onyx-900 leading-snug mb-1 group-hover:text-brand-600 transition-colors line-clamp-2">${p.product_name}</h3>
+                        <div class="mt-auto flex items-center justify-between">
+                            <div>
+                                <p class="text-lg font-black text-onyx-900">${window.AppCurrency.symbol}${(p.price * window.AppCurrency.rate).toLocaleString()}</p>
+                            </div>
+                            <button onclick="event.preventDefault(); addToCart(${p.id})" class="h-9 w-9 bg-brand-500 text-white rounded-xl flex items-center justify-center hover:bg-brand-600 transition-all shadow-md shadow-brand-500/20 hover:scale-110">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                </a>
+            `;
+        }
+    };
 }
 </script>
 @endsection

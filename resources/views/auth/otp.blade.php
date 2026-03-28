@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Identity | Bhavani Crafts</title>
+    <title>Verify OTP | Bhavani Crafts</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -33,7 +33,7 @@
             <div class="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center shadow-xl mx-auto mb-6">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
             </div>
-            <h2 class="text-3xl font-black text-gray-900 mb-2">Verify Identity</h2>
+            <h2 class="text-3xl font-black text-gray-900 mb-2">Verify OTP</h2>
             <p class="text-gray-500 text-sm font-medium">We've sent a 6-digit code to your mobile</p>
             <p class="text-orange-600 font-bold text-xs mt-1 tracking-widest">+91 ******2291</p>
         </div>
@@ -75,7 +75,7 @@
         <!-- Trust Footer -->
         <div class="mt-10 pt-6 border-t border-gray-50 flex items-center justify-center space-x-4 opacity-40 grayscale">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
-            <span class="text-[9px] font-black uppercase tracking-widest">End-to-End Encrypted</span>
+            <span class="text-[9px] font-black uppercase tracking-widest">Secure Connection</span>
         </div>
     </div>
 

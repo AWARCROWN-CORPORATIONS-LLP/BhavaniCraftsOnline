@@ -3,7 +3,7 @@
 @section('header_extra')
     <div class="flex items-center space-x-4">
         <h2 class="text-xl lg:text-3xl font-black text-gray-900 uppercase tracking-tighter">My Inventory</h2>
-        <a href="/franchise/inventory/create" class="btn-luxury-saffron px-6 py-2 text-[10px] shadow-xl">Register New Artifact</a>
+        <a href="{{ route('franchise.inventory.create') }}" class="btn-luxury-saffron px-6 py-2 text-[10px] shadow-xl">Register New Artifact</a>
     </div>
 @endsection
 

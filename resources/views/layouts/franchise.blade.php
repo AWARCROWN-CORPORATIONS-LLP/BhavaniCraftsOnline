@@ -10,13 +10,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Tailwind Config Customizations -->
     <style>
         body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; font-size: 14px; -webkit-font-smoothing: antialiased; }
-        h1, h2, h3, .heading-silk { font-family: 'Playfair Display', serif; }
+        h1, h2, h3, .heading-silk { font-family: 'Inter', sans-serif; font-weight: 800; }
         p, span, td, th, li, label, input, select, textarea { color: inherit; }
         td { color: #1e293b; }
         th { color: #475569; font-weight: 700; }
@@ -28,9 +28,9 @@
         }
 
         .nav-item-active {
-            background: rgba(255, 153, 51, 0.1);
-            color: #ff9933;
-            border-right: 3px solid #ff9933;
+            background: rgba(30, 64, 175, 0.1);
+            color: #1e40af;
+            border-right: 3px solid #1e40af;
         }
 
         .card-premium {
@@ -50,7 +50,7 @@
         }
 
         .btn-luxury-saffron {
-            background: #ff9933;
+            background: #1e40af;
             color: white;
             border-radius: 12px;
             font-weight: 800;
@@ -60,8 +60,8 @@
         }
 
         .btn-luxury-saffron:hover {
-            background: #fb8c00;
-            box-shadow: 0 10px 20px rgba(255, 153, 51, 0.2);
+            background: #1e3a8a;
+            box-shadow: 0 10px 20px rgba(30, 64, 175, 0.2);
             transform: scale(1.02);
         }
 
@@ -81,13 +81,15 @@
         
         <!-- Logo Section -->
         <div class="p-6 flex items-center mb-10 overflow-hidden min-h-[100px]">
-            <div class="h-10 w-10 flex-shrink-0 bg-[#ff9933] flex items-center justify-center rounded-xl shadow-2xl">
-                <span class="text-white text-xl font-black italic">B</span>
-            </div>
-            <div x-show="sidebarOpen" class="ml-4 flex flex-col items-start whitespace-nowrap">
-                <h2 class="text-white text-xs font-black uppercase tracking-[4px] leading-none">Bhavani</h2>
-                <span class="text-[#ff9933] text-[10px] uppercase tracking-[3px] font-bold mt-1">Partner Hub</span>
-            </div>
+            <a href="{{ route('home') }}" class="flex items-center group">
+                <div class="h-10 w-auto group-hover:scale-105 transition-all duration-300">
+                    <img src="{{ $siteLogo }}" alt="Bhavani Crafts" class="h-full w-auto object-contain brightness-0 invert shadow-2xl">
+                </div>
+                <div x-show="sidebarOpen" class="ml-4 flex flex-col items-start whitespace-nowrap">
+                    <h2 class="text-white text-xs font-black uppercase tracking-[4px] leading-none">Bhavani</h2>
+                    <span class="text-[#1e40af] text-[10px] uppercase tracking-[3px] font-bold mt-1">Partner Hub</span>
+                </div>
+            </a>
         </div>
 
         <!-- Navigation -->
@@ -112,6 +114,11 @@
             <a href="{{ route('franchise.restock.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('franchise.restock.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                 <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">HQ Restock</span>
+            </a>
+
+            <a href="{{ route('franchise.payment.verify.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('franchise.payment.verify.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Verify Payments</span>
             </a>
 
             <p x-show="sidebarOpen" class="text-white/40 text-[10px] font-black uppercase tracking-[4px] px-6 mt-10 mb-4">Orders &amp; Supply</p>
@@ -148,15 +155,79 @@
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                 </button>
                 <div class="h-6 w-[1.5px] bg-gray-100"></div>
+
+                <!-- UNIVERSAL SEARCH ENGINE (GraphQL Powered) -->
+                <div x-data="{ 
+                    search: '', 
+                    results: [], 
+                    loading: false,
+                    async performSearch() {
+                        if (this.search.length < 2) { this.results = []; return; }
+                        this.loading = true;
+                        const query = `query UniversalSearch($q: String!) {
+                            universalSearch(q: $q) {
+                                title subtitle type url image
+                            }
+                        }`;
+                        try {
+                            const response = await fetch('/graphql', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                                body: JSON.stringify({ query, variables: { q: this.search } })
+                            });
+                            const data = await response.json();
+                            this.results = data.data.universalSearch;
+                        } catch (e) { console.error(e); }
+                        finally { this.loading = false; }
+                    }
+                }" class="relative flex-grow max-w-md ml-4">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg :class="loading ? 'animate-spin text-[#1e40af]' : 'text-gray-400 group-focus-within:text-[#1e40af]'" class="h-4 w-4 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path v-if="!loading" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </div>
+                        <input 
+                            type="text" 
+                            x-model="search" 
+                            @input.debounce.300ms="performSearch()"
+                            @click.away="results = []"
+                            placeholder="Universal Registry Search..." 
+                            class="w-full bg-gray-50 border-none pl-12 pr-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-[#1e40af]/20 transition-all placeholder:text-gray-300">
+                    </div>
+
+                    <!-- Search Results Dropdown -->
+                    <div x-show="results.length > 0" x-transition class="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 py-2">
+                        <template x-for="result in results" :key="result.url">
+                            <a :href="result.url" class="flex items-center px-6 py-4 hover:bg-gray-50 transition-colors group">
+                                <div class="h-8 w-8 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-100">
+                                    <template x-if="result.image">
+                                        <img :src="result.image" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!result.image">
+                                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-tighter" x-text="result.type.substring(0,1)"></span>
+                                    </template>
+                                </div>
+                                <div class="ml-4 flex-grow">
+                                    <p class="text-[10px] font-black text-gray-900 uppercase tracking-widest leading-none" x-text="result.title"></p>
+                                    <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1" x-text="result.subtitle || result.type"></p>
+                                </div>
+                                <svg class="h-4 w-4 text-gray-300 group-hover:text-[#1e40af] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                            </a>
+                        </template>
+                    </div>
+                </div>
+
                 @yield('header_extra')
             </div>
 
             <div class="flex items-center space-x-6">
                 <div class="text-right hidden sm:block">
                     <p class="text-[11px] font-black text-gray-900 uppercase tracking-[2px]">{{ Auth::user()->name }}</p>
-                    <p class="text-[10px] font-bold text-[#ff9933] uppercase tracking-[3px]">Partner Member</p>
+                    <p class="text-[10px] font-bold text-[#1e40af] uppercase tracking-[3px]">Partner Member</p>
                 </div>
-                <div class="h-10 w-10 rounded-xl border-2 border-[#ff9933] p-0.5 shadow-xl">
+                <div class="h-10 w-10 rounded-xl border-2 border-[#1e40af] p-0.5 shadow-xl">
                     <div class="h-full w-full rounded-lg bg-gray-100 flex items-center justify-center font-bold text-gray-500 uppercase">{{ substr(Auth::user()->name, 0, 1) }}</div>
                 </div>
             </div>

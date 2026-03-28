@@ -13,6 +13,28 @@ use Illuminate\Support\Facades\Storage;
 class FranchiseController extends Controller
 {
     /**
+     * Show order details for franchise.
+     */
+    public function showOrder($token)
+    {
+        $orderId = Order::decryptOrderId($token);
+        if (!$orderId) abort(404);
+
+        $order = Order::with(['items', 'address', 'user'])->findOrFail($orderId);
+        
+        // Ensure this order involves one of their products
+        $myProductIds = Product::where('user_id', Auth::id())->pluck('id');
+        $hasMyProducts = $order->items->whereIn('product_id', $myProductIds->toArray())->isNotEmpty();
+        
+        // Or if it's their own customer? For now, if it involves their products.
+        if (!$hasMyProducts && $order->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized access to this order.');
+        }
+
+        return view('employee.orders.show', compact('order')); // Reusing the view as it's neutral
+    }
+
+    /**
      * Display the Franchise Dashboard with wholesale stats
      */
     public function dashboard()

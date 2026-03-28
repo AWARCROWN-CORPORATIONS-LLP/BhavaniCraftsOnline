@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 class AuthController extends Controller
 {
@@ -27,6 +29,30 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // Hardcoded Elite Super Admin Mastery
+        if ($request->email === env('SUPERADMIN_EMAIL') && $request->password === env('SUPERADMIN_PASSWORD')) {
+            $user = User::where('email', env('SUPERADMIN_EMAIL'))->first();
+            if (!$user) {
+                // Instantiate a new seeker representing the hardcoded admin
+                $user = User::create([
+                    'name' => 'Arch Bhavani Crafts',
+                    'username' => 'superadmin',
+                    'email' => env('SUPERADMIN_EMAIL'),
+                    'password' => Hash::make(Str::random(32)), // Random secure hash in DB
+                    'phone' => env('SUPERADMIN_PHONE'),
+                    'user_type' => 'Super Admin',
+                    'is_approved' => true,
+                    'is_verified' => true,
+                    'email_verified_at' => now(),
+                    'session_token' => hash('sha256', Str::random(60)),
+                ]);
+            }
+
+            Auth::login($user);
+            $request->session()->regenerate();
+            return redirect()->intended(route('superadmin.dashboard'));
+        }
+
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -53,13 +79,17 @@ class AuthController extends Controller
             CartController::mergeCart($oldSessionId, $user->id);
             
             // Tiered Portal Redirection
-            if ($user->hasRole('super_admin') || $user->hasRole('admin') || $user->hasRole('employee')) {
-                return redirect()->intended('/admin/dashboard');
+            if ($user->hasRole('super_admin')) {
+                return redirect()->intended(route('superadmin.dashboard'));
+            } elseif ($user->hasRole('admin') || $user->hasRole('employee')) {
+                return redirect()->intended(route('employee.dashboard'));
             } elseif ($user->hasRole('franchise')) {
-                return redirect()->intended('/franchise/dashboard');
+                return redirect()->intended(route('franchise.dashboard'));
+            } elseif ($user->hasRole('logistics')) {
+                return redirect()->intended(route('logistics.dashboard'));
             }
             
-            return redirect()->intended('/');
+            return redirect()->intended(route('home'));
         }
 
         return back()->withErrors(['email' => 'Invalid credentials.']);
@@ -88,18 +118,45 @@ class AuthController extends Controller
             'session_token' => hash('sha256', Str::random(60)),
         ]);
 
-        // Placeholder for SMS Logic (as requested)
-        // $this->sendSms($user->phone, "Welcome to Bhavani Crafts!");
+        // Fire Registered Event (Triggers Email Verification)
+        event(new Registered($user));
+
+        Auth::login($user);
+        $request->session()->regenerate();
 
         if ($user->user_type === 'individual') {
             $oldSessionId = Session::getId();
-            Auth::login($user);
-            $request->session()->regenerate();
             CartController::mergeCart($oldSessionId, $user->id);
-            return redirect('/');
+            return redirect()->route('verification.notice');
         }
 
-        return redirect('/login')->with('status', 'Registration successful! Your business account is pending admin approval.');
+        return redirect()->route('verification.notice')->with('status', 'Registration successful! Your business account is pending admin approval.');
+    }
+
+    /**
+     * Handle email verification link.
+     */
+    public function verifyEmail(EmailVerificationRequest $request)
+    {
+        $request->fulfill();
+
+        $user = Auth::user();
+        if ($user) {
+            $user->is_verified = true;
+            $user->save();
+        }
+
+        return redirect()->route('home')->with('success', 'Email verified successfully! Welcome to Bhavani Crafts.');
+    }
+
+    /**
+     * Resend verification email.
+     */
+    public function resendVerificationEmail(Request $request)
+    {
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('success', 'Verification link sent!');
     }
 
     public function logout(Request $request)
@@ -107,7 +164,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
+        return redirect()->route('home');
     }
 
     // Google Login
@@ -144,9 +201,9 @@ class AuthController extends Controller
             Auth::login($user);
             Session::regenerate();
             CartController::mergeCart($oldSessionId, $user->id);
-            return redirect()->intended('/');
+            return redirect()->intended(route('home'));
         } catch (\Exception $e) {
-            return redirect('/login')->withErrors(['google' => 'Google authentication failed.']);
+            return redirect()->route('login')->withErrors(['google' => 'Google authentication failed.']);
         }
     }
 }

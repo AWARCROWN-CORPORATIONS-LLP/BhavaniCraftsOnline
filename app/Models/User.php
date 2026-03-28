@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Traits\Auditable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Auditable;
 
     /**
      * The attributes that are mass assignable.
@@ -22,15 +23,10 @@ class User extends Authenticatable
         'email',
         'password',
         'name',
-        'first_name',
-        'last_name',
         'phone',
         'user_type',
         'is_approved',
-        'policy',
         'is_verified',
-        'verification_token',
-        'token_expiry',
         'session_token',
         'is_blocked',
         'google_id',
@@ -61,13 +57,22 @@ class User extends Authenticatable
      */
     public function hasRole($roleName)
     {
-        return $this->roles->contains('name', $roleName);
+        // Special case for hardcoded superadmin - ONLY return true for super_admin role
+        if (strtolower($this->email) === 'archbhavanicrafts@gmail.com') {
+            return str_replace(['_', ' '], '', strtolower($roleName)) === 'superadmin';
+        }
+        
+        // Normalize role name (handle both 'super_admin' and 'super admin')
+        $normalizedSearch = str_replace(['_', ' '], '', strtolower($roleName));
+        
+        return $this->roles->contains(function($role) use ($normalizedSearch) {
+            $normalizedRole = str_replace(['_', ' '], '', strtolower($role->name));
+            return $normalizedRole === $normalizedSearch;
+        });
     }
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Get the cart items for the user.
      */
     public function cartItems()
     {
@@ -84,11 +89,35 @@ class User extends Authenticatable
         return $this->hasMany(Address::class);
     }
 
+    /**
+     * Poojari Profile if user is a poojari.
+     */
+    public function poojariProfile()
+    {
+        return $this->hasOne(PoojariProfile::class);
+    }
+
+    /**
+     * Bookings made BY this user.
+     */
+    public function bookings()
+    {
+        return $this->hasMany(PoojariBooking::class, 'user_id');
+    }
+
+    /**
+     * Bookings assigned TO this user (if they are a poojari).
+     */
+    public function poojariBookings()
+    {
+        return $this->hasMany(PoojariBooking::class, 'poojari_id');
+    }
+
     protected function casts(): array
     {
         return [
             'is_verified' => 'boolean',
-            'token_expiry' => 'datetime',
+            'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'wishlist_public' => 'boolean',
         ];

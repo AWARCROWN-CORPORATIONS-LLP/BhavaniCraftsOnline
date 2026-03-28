@@ -16,7 +16,12 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
         $recentOrders = Order::where('user_id', $user->id)->orderBy('ordered_date', 'desc')->take(5)->get();
-        return view('customer.dashboard', compact('user', 'recentOrders'));
+        
+        $registryGifts = \App\Models\RegistryContribution::whereHas('wishlist', function($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->with('wishlist.product')->orderBy('created_at', 'desc')->get();
+
+        return view('customer.dashboard', compact('user', 'recentOrders', 'registryGifts'));
     }
 
     public function profile()
@@ -75,7 +80,14 @@ class CustomerController extends Controller
             Auth::user()->addresses()->update(['is_default' => false]);
         }
 
-        Auth::user()->addresses()->create($data);
+        $address = Auth::user()->addresses()->create($data);
+        
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => 'Ritual address saved.',
+                'address' => $address
+            ]);
+        }
 
         return back()->with('success', 'Ritual address saved.');
     }
@@ -143,5 +155,114 @@ class CustomerController extends Controller
         ]);
 
         return back()->with('success', 'Order #' . $order->order_id_string . ' has been cancelled. If paid, a refund will be processed within 5–7 business days.');
+    }
+
+    /**
+     * Generate a unique 6-digit PIN for order collection verification.
+     */
+    public function generateDeliveryPin(string $token)
+    {
+        $id = \App\Models\Order::decryptOrderId($token);
+        if (!$id) abort(404);
+        $order = Order::findOrFail($id);
+        
+        // Security check
+        if ($order->user_id !== Auth::id()) abort(403);
+
+        // State check: Only for orders in transit or processing
+        if ($order->delivery_status === 'Delivered') {
+            return back()->with('error', 'Registry finalization captured. This order is already marked as Delivered.');
+        }
+
+        // Limit check: Max 3 generations
+        if ($order->pin_generations_count >= 3) {
+            return back()->with('error', 'Authentication Guard: Pin generation limit (3) exceeded for security. Please contact support if you forgot your PIN.');
+        }
+
+        // Generate 6-digit numeric PIN
+        $pin = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        $order->update([
+            'delivery_pin' => $pin,
+            'pin_generations_count' => $order->pin_generations_count + 1,
+            'delivery_status' => $order->delivery_status === 'Pending' ? 'In Transit' : $order->delivery_status
+        ]);
+
+        return back()->with('success', 'Secure Delivery PIN generated successfully. Please share this with the delivery agent upon arrival.');
+    }
+
+    /**
+     * Rate the delivery experience from the customer side.
+     */
+    public function rateOrder(Request $request, string $token)
+    {
+        $request->validate(['rating' => 'required|integer|min:1|max:5']);
+        
+        $id = \App\Models\Order::decryptOrderId($token);
+        $order = Order::findOrFail($id);
+        
+        if ($order->user_id !== Auth::id()) abort(403);
+        if ($order->delivery_status !== 'Delivered') {
+            return back()->with('error', 'Rating is only permitted for finalized deliveries.');
+        }
+
+        $order->update(['delivery_rating' => $request->rating]);
+
+        return back()->with('success', 'Thank you for your feedback! Your rating is archived in the logistics registry.');
+    }
+
+    /**
+     * Initiate a Return Management System (RMS) request.
+     */
+    public function requestReturn(Request $request, string $token)
+    {
+        $request->validate(['reason' => 'required|string|max:500']);
+        
+        $id = \App\Models\Order::decryptOrderId($token);
+        $order = Order::findOrFail($id);
+        
+        if ($order->user_id !== Auth::id()) abort(403);
+        
+        if ($order->delivery_status !== 'Delivered') {
+            return back()->with('error', 'Return requests are only available for delivered artifacts.');
+        }
+
+        $order->update([
+            'delivery_status' => 'Return Requested',
+            'status' => 'Return Requested',
+            'return_requested_at' => now(),
+            'return_reason' => $request->reason
+        ]);
+
+        return back()->with('success', 'Return Request Captured. Our logistics team will scan your registry for pick-up soon.');
+    }
+
+    /**
+     * Store a new safety complaint related to an order.
+     */
+    public function storeSafetyComplaint(Request $request, string $token)
+    {
+        $id = \App\Models\Order::decryptOrderId($token);
+        if (!$id) abort(404);
+        $order = \App\Models\Order::findOrFail($id);
+        
+        if ($order->user_id !== \Illuminate\Support\Facades\Auth::id()) abort(403);
+
+        $request->validate([
+            'complaint_type' => 'required|string|max:100',
+            'description'    => 'required|string|max:1000',
+            'assigned_logistics_id' => 'nullable|exists:users,id'
+        ]);
+
+        \App\Models\SafetyComplaint::create([
+            'user_id' => \Illuminate\Support\Facades\Auth::id(),
+            'order_id' => $order->id,
+            'assigned_logistics_id' => $request->assigned_logistics_id,
+            'complaint_type' => $request->complaint_type,
+            'description' => $request->description,
+            'status' => 'Pending'
+        ]);
+
+        return back()->with('success', 'Safety protocol initiated. Our security council will investigate this report immediately.');
     }
 }

@@ -3,14 +3,32 @@
 @section('content')
 <div class="bg-white min-h-screen pt-12 pb-24" x-data="{ 
     mainImage: '{{ $product->images->where('is_main', true)->first() ? \Illuminate\Support\Facades\Storage::url($product->images->where('is_main', true)->first()->image_url) : ($product->images->first() ? \Illuminate\Support\Facades\Storage::url($product->images->first()->image_url) : '') }}',
-    quantity: 1
+    quantity: 1,
+    is360Active: false,
+    currentFrame: 0,
+    frames: [
+        @foreach($product->images as $img)
+            '{{ \Illuminate\Support\Facades\Storage::url($img->image_url) }}',
+        @endforeach
+    ],
+    rotate360(e) {
+        if(!this.is360Active) return;
+        const rect = e.target.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const width = rect.width;
+        const frameIndex = Math.floor((x / width) * this.frames.length);
+        if(this.frames[frameIndex]) {
+            this.mainImage = this.frames[frameIndex];
+            this.currentFrame = frameIndex;
+        }
+    }
 }">
     <div class="container mx-auto px-4 lg:px-8">
         <!-- Breadcrumbs -->
         <nav class="flex mb-12 text-[10px] font-black uppercase tracking-[3px] text-gray-400">
-            <a href="{{ route('home') }}" class="hover:text-brand-500 transition-colors">Temple</a>
+            <a href="{{ route('home') }}" class="hover:text-brand-500 transition-colors">Home</a>
             <span class="mx-3 opacity-30">/</span>
-            <span class="hover:text-brand-500 transition-colors capitalize">{{ $product->category->name ?? 'Artifacts' }}</span>
+            <span class="hover:text-brand-500 transition-colors capitalize">{{ $product->category->name ?? 'Products' }}</span>
             <span class="mx-3 opacity-30">/</span>
             <span class="text-onyx-900">{{ $product->product_name }}</span>
         </nav>
@@ -30,10 +48,13 @@
                 </div>
 
                 <!-- Main Image -->
-                <div class="relative w-full aspect-[4/5] md:aspect-auto md:h-[calc(100vh-120px)] rounded-[2rem] overflow-hidden bg-gray-50 border border-gray-100 group shadow-2xl shadow-brand-900/5">
+                <div class="relative w-full aspect-[4/5] md:aspect-auto md:h-[calc(100vh-120px)] rounded-[2rem] overflow-hidden bg-gray-50 border border-gray-100 group shadow-2xl shadow-brand-900/5 cursor-crosshair"
+                     @mousemove="rotate360($event)">
+                    
                     <img :src="mainImage" 
                          alt="{{ $product->product_name }}" 
-                         class="w-full h-full object-contain md:object-cover transition-all duration-700 bg-white">
+                         class="w-full h-full object-contain md:object-cover transition-all duration-300 bg-white"
+                         :class="is360Active ? 'scale-110' : ''">
                     
                     @if($product->discount_percent > 0)
                     <div class="absolute top-6 left-6 bg-brand-500 text-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl">
@@ -41,9 +62,48 @@
                     </div>
                     @endif
 
-                    <!-- Zoom Hint -->
-                    <div class="absolute bottom-6 right-6 bg-white/90 backdrop-blur px-4 py-2 rounded-xl text-[10px] font-bold text-gray-500 shadow-lg pointer-events-none hidden md:block">
-                        Hover to inspect artifact
+                    <!-- 360/3D / AR Overlay Controls -->
+                    <div class="absolute bottom-6 left-6 right-6 flex items-center justify-between z-20">
+                        @if($product->model_3d)
+                            <button @click="is360Active = !is360Active" 
+                                    class="px-6 py-3 bg-brand-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-[3px] shadow-2xl flex items-center space-x-3 transition-all transform hover:scale-105 active:scale-95 group overflow-hidden relative">
+                                <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                                <svg class="h-5 w-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>
+                                <span x-text="is360Active ? 'Exit 3D View' : 'Explore in 3D'"></span>
+                            </button>
+
+                            <button onclick="document.getElementById('ar-viewer').activateAR()"
+                                    class="h-12 w-12 bg-onyx-950 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-brand-500 transition-all border border-white/10 group">
+                                <svg class="h-6 w-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            </button>
+                        @endif
+                    </div>
+
+                    <!-- 3D Model Viewer Overlay -->
+                    @if($product->model_3d)
+                        <div x-show="is360Active" 
+                             x-transition:enter="transition ease-out duration-500"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             class="absolute inset-0 z-10 bg-white" style="display: none;">
+                            <model-viewer id="ar-viewer"
+                                          src="{{ \Illuminate\Support\Facades\Storage::url($product->model_3d) }}"
+                                          ios-src="{{ $product->model_usdz ? \Illuminate\Support\Facades\Storage::url($product->model_usdz) : '' }}"
+                                          alt="3D model of {{ $product->product_name }}"
+                                          ar
+                                          ar-modes="webxr scene-viewer quick-look"
+                                          camera-controls
+                                          auto-rotate
+                                          shadow-intensity="1"
+                                          style="width: 100%; height: 100%; background: radial-gradient(circle, #ffffff 0%, #f3f4f6 100%);">
+                                <button slot="ar-button" class="hidden">View in AR</button>
+                            </model-viewer>
+                        </div>
+                    @endif
+
+                    <!-- Zoom Hint (only if 3D not active) -->
+                    <div x-show="!is360Active" class="absolute bottom-6 right-6 bg-white/90 backdrop-blur px-4 py-2 rounded-xl text-[10px] font-bold text-gray-400 shadow-lg pointer-events-none hidden md:block">
+                        Hover to zoom
                     </div>
                 </div>
             </div>
@@ -53,7 +113,7 @@
                 <div class="mb-10">
                     <div class="flex items-center space-x-3 mb-6">
                         <span class="h-1px w-10 bg-brand-500/30"></span>
-                        <span class="text-[10px] font-black text-brand-500 uppercase tracking-[4px]">{{ $product->material_type ?? 'Handcrafted' }} Artifact</span>
+                        <span class="text-[10px] font-black text-brand-500 uppercase tracking-[4px]">{{ $product->material_type ?? 'Handmade' }} Product</span>
                     </div>
                     
                     <h1 class="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-onyx-900 mb-2 leading-tight">
@@ -79,20 +139,28 @@
                                 @endfor
                             </div>
                             <span class="text-sm font-bold text-onyx-900">{{ $avgRating }}</span>
-                            <span class="text-xs font-bold text-gray-400">({{ $totalReviews }} Testimonies)</span>
+                            <span class="text-xs font-bold text-gray-400">({{ $totalReviews }} Reviews)</span>
                         </div>
                     @endif
 
-                    <div class="flex items-end space-x-3 mb-6">
-                        <span class="text-4xl font-black text-onyx-900 tracking-tight">₹{{ number_format($product->price, 2) }}</span>
+                    <div class="flex items-end space-x-4 mb-2">
+                        <span class="text-4xl font-black text-onyx-900 tracking-tight">{{ App\Helpers\PriceHelper::format($product->price) }}</span>
                         @if($product->mrp > $product->price)
                             <div class="flex flex-col pb-1">
-                                <span class="text-sm text-gray-400 font-bold">M.R.P: <span class="line-through italic">₹{{ number_format($product->mrp, 2) }}</span></span>
+                                <span class="text-sm text-gray-400 font-bold">M.R.P: <span class="line-through italic">{{ App\Helpers\PriceHelper::format($product->mrp) }}</span></span>
                             </div>
                         @endif
                     </div>
                     
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-8">Inclusive of all taxes</p>
+                    <div class="flex items-center justify-between mb-8">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Inclusive of all taxes</p>
+                        @if($product->stock > 0 && $product->stock <= 5)
+                            <div class="flex items-center space-x-2 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 animate-pulse shrink-0">
+                                <span class="h-1.5 w-1.5 bg-red-500 rounded-full"></span>
+                                <span class="text-[9px] font-black text-red-600 uppercase tracking-widest">Only {{ $product->stock }} Items Left</span>
+                            </div>
+                        @endif
+                    </div>
 
                     <div class="w-full h-px bg-gray-100 mb-8"></div>
 
@@ -100,19 +168,24 @@
                         {{ $product->short_description }}
                     </p>
 
-                    <!-- Features/Badges -->
-                    <div class="grid grid-cols-2 gap-4 mb-10">
-                        <div class="flex items-center space-x-3 p-4 bg-gray-50 rounded-2xl border border-gray-100/50">
-                            <div class="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-brand-500">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                    <div class="flex flex-col space-y-4 mb-10">
+                        <div class="flex items-center space-x-3 p-4 bg-amber-50/50 rounded-2xl border border-amber-100/50">
+                            <div class="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-premium text-amber-500">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                             </div>
-                            <span class="text-[10px] font-bold text-onyx-900 uppercase tracking-widest">Ritual Verified</span>
+                            <div>
+                                <h4 class="text-[10px] font-black text-onyx-900 uppercase tracking-widest">Purity Guaranteed</h4>
+                                <p class="text-[9px] text-gray-500 font-medium">100% Authentic Hand-Forged Brass</p>
+                            </div>
                         </div>
-                        <div class="flex items-center space-x-3 p-4 bg-gray-50 rounded-2xl border border-gray-100/50">
-                            <div class="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-brand-500">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+                        <div class="flex items-center space-x-3 p-4 bg-amber-50/50 rounded-2xl border border-amber-100/50">
+                            <div class="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-premium text-amber-500">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                             </div>
-                            <span class="text-[10px] font-bold text-onyx-900 uppercase tracking-widest">Heritage Piece</span>
+                            <div>
+                                <h4 class="text-[10px] font-black text-onyx-900 uppercase tracking-widest">Worldwide Delivery</h4>
+                                <p class="text-[9px] text-gray-500 font-medium">Safe international shipping available</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -122,7 +195,7 @@
                     
                     <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-6">
                         <span class="text-sm font-bold text-onyx-900">Total Selection</span>
-                        <span class="text-2xl font-black text-onyx-900" x-text="'₹' + ({{ $product->price }} * quantity).toLocaleString()"></span>
+                        <span class="text-2xl font-black text-onyx-900" x-text="'{{ config('app.currency_symbol') }}' + ({{ $product->price * config('app.currency_rate') }} * quantity).toLocaleString()"></span>
                     </div>
 
                     <div class="space-y-4">
@@ -187,16 +260,16 @@
                         <!-- Trust Signals -->
                         <div class="pt-6 mt-6 border-t border-gray-100 flex items-center justify-between px-2 opacity-70">
                             <div class="flex flex-col items-center justify-center space-y-2">
-                                <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                <svg class="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                 <span class="text-[9px] font-bold uppercase text-gray-500 text-center">Secure<br>Transaction</span>
                             </div>
                             <div class="flex flex-col items-center justify-center space-y-2">
-                                <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <svg class="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span class="text-[9px] font-bold uppercase text-gray-500 text-center">Dispatched<br>in 48h</span>
                             </div>
                             @if($product->replacement_available)
                             <div class="flex flex-col items-center justify-center space-y-2">
-                                <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <svg class="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                 <span class="text-[9px] font-bold uppercase text-gray-500 text-center">Easy<br>Returns</span>
                             </div>
                             @endif
@@ -206,19 +279,62 @@
             </div>
         </div>
 
-        <!-- Long Description -->
-        @if($product->full_description)
-        <div class="mt-32 pt-24 border-t border-gray-100 max-w-4xl mx-auto">
-            <h2 class="text-3xl font-serif font-bold text-onyx-900 mb-12 italic text-center">Artifact <span class="text-brand-500">Chronicle</span></h2>
-            <div class="prose prose-lg max-w-none text-gray-500 font-medium leading-[2]">
-                {!! $product->full_description !!}
+        <!-- Long Description / Heritage Chronicle -->
+        <div class="mt-32 pt-24 border-t border-gray-100 max-w-5xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-16">
+                <div class="lg:col-span-2">
+                    <div class="flex items-center justify-center lg:justify-start space-x-4 mb-10">
+                        <span class="h-[1px] w-12 bg-amber-500/50"></span>
+                        <h2 class="text-3xl font-serif font-bold text-onyx-900 italic">Product <span class="text-amber-500">Details</span></h2>
+                    </div>
+                    <div class="prose prose-onyx max-w-none text-gray-600 font-medium leading-[2] text-justify first-letter:text-5xl first-letter:font-serif first-letter:text-amber-600 first-letter:float-left first-letter:mr-3">
+                        {!! $product->full_description !!}
+                    </div>
+                </div>
+                
+                <div class="bg-amber-50/50 rounded-[3rem] p-10 border border-amber-100 h-fit sticky top-32">
+                    <div class="text-center mb-8">
+                         <span class="text-[10px] font-black text-amber-500 uppercase tracking-[4px] mb-2 block">Our Craft</span>
+                         <h3 class="text-2xl font-serif font-bold text-onyx-900">Handmade with heart</h3>
+                    </div>
+                    
+                    <div class="space-y-8">
+                        <div class="flex items-start space-x-4">
+                            <div class="h-10 w-10 shrink-0 bg-white rounded-2xl flex items-center justify-center shadow-lg text-amber-500 font-black text-xs">01</div>
+                            <div>
+                                <h4 class="text-xs font-black uppercase tracking-wider text-onyx-900 mb-1">Generational Mastery</h4>
+                                <p class="text-[11px] text-gray-500 leading-relaxed">Hand-forged by 5th generation artisans using secret alloys handed down through centuries.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="h-10 w-10 shrink-0 bg-white rounded-2xl flex items-center justify-center shadow-lg text-brand-500 font-black text-xs">02</div>
+                            <div>
+                                <h4 class="text-xs font-black uppercase tracking-wider text-onyx-900 mb-1">Pure Quality</h4>
+                                <p class="text-[11px] text-gray-500 leading-relaxed">Every piece is crafted in a clean environment, ensuring high quality and finish.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <div class="h-10 w-10 shrink-0 bg-white rounded-2xl flex items-center justify-center shadow-lg text-brand-500 font-black text-xs">03</div>
+                            <div>
+                                <h4 class="text-xs font-black uppercase tracking-wider text-onyx-900 mb-1">Lost Wax Process</h4>
+                                <p class="text-[11px] text-gray-500 leading-relaxed">Using the ancient Cire Perdue method, ensuring no two artifacts are exactly identical.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-12 pt-8 border-t border-brand-200/50 text-center">
+                        <img src="https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop" class="h-16 w-16 rounded-full mx-auto object-cover mb-4 grayscale">
+                        <p class="text-[9px] font-black uppercase tracking-[3px] text-brand-600">Certified Authentic</p>
+                    </div>
+                </div>
             </div>
         </div>
-        @endif
 
         <!-- Specifications Tab/Table -->
         <div class="mt-24 max-w-4xl mx-auto">
-            <h3 class="text-xl font-bold text-onyx-900 mb-8 uppercase tracking-widest italic">Divine Specifications</h3>
+            <h3 class="text-xl font-bold text-onyx-900 mb-8 uppercase tracking-widest italic">Product Specifications</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 border-t border-gray-100 pt-8">
                 <div class="flex justify-between py-4 border-b border-gray-50">
                     <span class="text-[10px] font-black uppercase text-gray-400">Material Composition</span>
@@ -233,8 +349,8 @@
                     <span class="text-sm font-bold text-onyx-900">{{ $product->customizable ? 'Available' : 'Standard' }}</span>
                 </div>
                 <div class="flex justify-between py-4 border-b border-gray-50">
-                    <span class="text-[10px] font-black uppercase text-gray-400">Sanctuary Shipping</span>
-                    <span class="text-sm font-bold text-onyx-900">{{ $product->requires_shipping ? 'Global Logistics' : 'In-store Only' }}</span>
+                    <span class="text-[10px] font-black uppercase text-gray-400">Shipping</span>
+                    <span class="text-sm font-bold text-onyx-900">{{ $product->requires_shipping ? 'Worldwide' : 'In-store Only' }}</span>
                 </div>
                 <div class="flex justify-between py-4 border-b border-gray-50">
                     <span class="text-[10px] font-black uppercase text-gray-400">Festival Alignment</span>
@@ -249,41 +365,41 @@
 
         <!-- Reviews Section -->
         <div class="mt-24 pt-24 border-t border-gray-100 max-w-4xl mx-auto">
-            <h3 class="text-3xl font-serif font-bold text-onyx-900 mb-12 italic text-center">Sacred <span class="text-brand-500">Testimonies</span></h3>
+            <h3 class="text-3xl font-serif font-bold text-onyx-900 mb-12 italic text-center">Customer <span class="text-brand-500">Reviews</span></h3>
 
             <!-- Review Form -->
             @auth
                 <div class="bg-gray-50 rounded-[2rem] p-8 mb-16 border border-gray-100">
-                    <h4 class="text-lg font-bold text-onyx-900 mb-6 font-serif italic">Share your Divine Experience</h4>
+                    <h4 class="text-lg font-bold text-onyx-900 mb-6 font-serif italic">Share your experience</h4>
                     <form action="{{ route('artifact.reviews.store', $product->encryptedId()) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                         @csrf
                         <div>
-                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Sacred Rating (1-5)</label>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Rating (1-5)</label>
                             <input type="number" name="rating" min="1" max="5" value="5" class="w-full h-12 bg-white border border-gray-200 rounded-xl px-4 text-sm font-bold focus:ring-brand-500 focus:border-brand-500" required>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Your Testimony</label>
-                            <textarea name="comment" rows="4" class="w-full bg-white border border-gray-200 rounded-xl p-4 text-sm focus:ring-brand-500 focus:border-brand-500" placeholder="Chronicle your experience with this artifact..."></textarea>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Your Review</label>
+                            <textarea name="comment" rows="4" class="w-full bg-white border border-gray-200 rounded-xl p-4 text-sm focus:ring-brand-500 focus:border-brand-500" placeholder="Write what you think about this product..."></textarea>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Artifact Evidence (Optional Image)</label>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Product Image (Optional)</label>
                             <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 transition-colors">
                         </div>
                         <button type="submit" class="px-8 py-3 bg-brand-500 text-white text-[11px] font-black uppercase tracking-[2px] rounded-xl hover:bg-brand-600 transition-colors shadow-lg shadow-brand-500/20">
-                            Offer Testimony
+                            Post Review
                         </button>
                     </form>
                 </div>
             @else
                 <div class="text-center p-8 bg-gray-50 rounded-[2rem] border border-gray-100 mb-16">
-                    <p class="text-sm font-bold text-gray-500 mb-4">You must enter the sanctuary to leave a testimony.</p>
+                    <p class="text-sm font-bold text-gray-500 mb-4">You must login to leave a review.</p>
                     <a href="{{ route('login') }}" class="inline-block px-8 py-3 bg-onyx-900 text-white text-[11px] font-black uppercase tracking-[2px] rounded-xl hover:bg-black transition-colors">
-                        Authenticate Symbol
+                        Login Now
                     </a>
                 </div>
             @endauth
 
-            <!-- Display Reviews -->
+            
             <div class="space-y-8">
                 @forelse($product->reviews as $review)
                 <div class="flex space-x-6 p-8 bg-white rounded-[2rem] border border-gray-50 shadow-sm">
@@ -312,7 +428,7 @@
                 </div>
                 @empty
                 <div class="text-center py-12">
-                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest italic">No testimonies registered yet.</p>
+                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest italic">No reviews yet.</p>
                 </div>
                 @endforelse
             </div>
@@ -323,22 +439,22 @@
         <div class="mt-32 pt-24 border-t border-gray-100">
             <div class="flex items-center justify-between mb-12">
                 <div>
-                    <span class="text-[10px] font-black text-brand-500 uppercase tracking-[4px] mb-2 block">Heritage Collection</span>
-                    <h2 class="text-3xl font-serif font-bold text-onyx-900 italic">Divine <span class="text-brand-500">Pairings</span></h2>
+                    <span class="text-[10px] font-black text-brand-500 uppercase tracking-[4px] mb-2 block">Collection</span>
+                    <h2 class="text-3xl font-serif font-bold text-onyx-900 italic">Similar <span class="text-brand-500">Products</span></h2>
                 </div>
-                <a href="{{ route('home') }}" class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-brand-500 transition-colors">Explore Gallery</a>
+                <a href="{{ route('home') }}" class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-brand-500 transition-colors">Explore All</a>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
                 @foreach($relatedProducts as $rel)
                 <div class="group">
-                    <a href="{{ route('artifact.show', $rel->encryptedId()) }}" class="block aspect-[3/4] rounded-3xl overflow-hidden bg-gray-50 mb-6 border border-gray-100 group-hover:shadow-2xl group-hover:shadow-brand-900/10 transition-all duration-500">
+                    <a href="{{ route('artifact.show', $rel->slug) }}" class="block aspect-[3/4] rounded-3xl overflow-hidden bg-gray-50 mb-6 border border-gray-100 group-hover:shadow-2xl group-hover:shadow-brand-900/10 transition-all duration-500">
                         <img src="{{ $rel->images->first() ? \Illuminate\Support\Facades\Storage::url($rel->images->first()->image_url) : '' }}" 
                              alt="{{ $rel->product_name }}" 
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                     </a>
                     <h4 class="text-sm font-bold text-onyx-900 mb-1 truncate">{{ $rel->product_name }}</h4>
-                    <p class="text-[11px] font-black text-brand-500">₹{{ number_format($rel->price, 2) }}</p>
+                    <p class="text-[11px] font-black text-brand-500">{{ \App\Helpers\PriceHelper::format($rel->price) }}</p>
                 </div>
                 @endforeach
             </div>

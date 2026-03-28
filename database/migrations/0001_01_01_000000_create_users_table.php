@@ -11,12 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('users')) return;
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('username')->nullable()->unique();
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('name')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('user_type')->default('customer');
+            $table->boolean('is_approved')->default(false);
+            $table->boolean('is_verified')->default(false);
+            $table->string('session_token')->nullable();
+            $table->boolean('is_blocked')->default(false);
+            $table->string('google_id')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

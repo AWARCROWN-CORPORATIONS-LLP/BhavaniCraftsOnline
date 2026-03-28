@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('restock_requests')) return;
         Schema::create('restock_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('franchise_id')->constrained('users')->onDelete('cascade');

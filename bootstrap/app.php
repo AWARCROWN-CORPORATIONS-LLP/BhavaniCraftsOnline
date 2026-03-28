@@ -11,9 +11,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(\App\Http\Middleware\SetLocale::class);
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            'set_locale' => \App\Http\Middleware\SetLocale::class,
+            'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         ]);
+
+        $middleware->redirectTo(function (\Illuminate\Http\Request $request) {
+            return route('login', ['locale' => $request->segment(1) ?: config('app.locale')]);
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

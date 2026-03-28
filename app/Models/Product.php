@@ -4,17 +4,31 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\Auditable;
+
 class Product extends Model
 {
+    use Auditable;
     public $timestamps = false;
 
     protected $fillable = [
-        'product_name', 'telugu_name', 'price', 'mrp', 'discount_percent', 'gst_rate',
+        'product_name', 'telugu_name', 'slug', 'price', 'mrp', 'discount_percent', 'gst_rate',
         'short_description', 'full_description', 'video_url',
         'category_id', 'material_type', 'festival_use', 'made_type',
         'customizable', 'requires_shipping', 'replacement_available',
-        'replacement_conditions', 'product_code', 'listed_status', 'stock', 'user_id'
+        'replacement_conditions', 'product_code', 'listed_status', 'stock', 'user_id',
+        'model_3d', 'model_usdz'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($product) {
+            if (!$product->slug) {
+                $product->slug = \Illuminate\Support\Str::slug($product->product_name) . '-' . uniqid();
+            }
+        });
+    }
 
     public function user()
     {
@@ -47,5 +61,9 @@ class Product extends Model
         } catch (\Exception $e) {
             return null;
         }
+    }
+    public function ritualKits()
+    {
+        return $this->belongsToMany(RitualKit::class, 'ritual_kit_product');
     }
 }

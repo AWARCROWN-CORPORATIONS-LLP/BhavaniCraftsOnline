@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join the Tradition | Bhavani Crafts</title>
+    <title>Register | Bhavani Crafts</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -92,7 +92,7 @@
     <!-- Normal Circular Loader -->
     <div id="masterLoader" class="loader-overlay">
         <span class="spinner"></span>
-        <p id="loaderText" class="text-[#ff9933] mt-4 text-[10px] font-black tracking-[4px] uppercase animate-pulse">Syncing</p>
+        <p id="loaderText" class="text-[#ff9933] mt-4 text-[10px] font-black tracking-[4px] uppercase animate-pulse">Please wait...</p>
     </div>
 
     <!-- Left: Artistic Section -->
@@ -106,9 +106,9 @@
                 <h1 class="text-xl lg:text-3xl text-white tracking-[6px] font-bold uppercase">Bhavani Crafts</h1>
             </div>
             <div class="space-y-4 lg:space-y-6">
-                <h2 class="text-3xl sm:text-5xl lg:text-6xl text-white font-light leading-tight tracking-tight">Join the <br><span class="text-[#ff9933] italic">Tradition.</span></h2>
+                <h2 class="text-3xl sm:text-5xl lg:text-6xl text-white font-light leading-tight tracking-tight">Join <br><span class="text-[#ff9933] italic">Us.</span></h2>
                 <div class="w-16 lg:w-24 h-1 bg-[#ff9933]"></div>
-                <p class="text-white/70 text-sm sm:text-lg max-w-sm font-light leading-relaxed hidden sm:block">Become a part of India's most exclusive sacred artifacts community.</p>
+                <p class="text-white/70 text-sm sm:text-lg max-w-sm font-light leading-relaxed hidden sm:block">Become a part of India's most exclusive handcrafted artifacts community.</p>
             </div>
         </div>
         
@@ -124,7 +124,7 @@
         <div class="max-w-2xl mx-auto w-full">
             <div class="mb-10 text-center lg:text-left">
                 <h2 class="text-4xl lg:text-5xl font-black text-gray-900 mb-2">Registration</h2>
-                <p class="text-gray-400 font-bold uppercase tracking-[4px] text-[10px]">Create your sacred portal</p>
+                <p class="text-gray-400 font-bold uppercase tracking-[4px] text-[10px]">Create your account</p>
             </div>
 
             <form id="regForm" action="{{ route('register') }}" method="POST" class="space-y-6">
@@ -181,7 +181,7 @@
 
                 <div x-show="userType === 'business'" x-transition class="bg-gray-50 p-4 rounded-2xl border-l-4 border-[#ff9933]">
                     <p class="text-gray-900 text-[10px] font-black tracking-widest uppercase">Franchise Policy</p>
-                    <p class="text-gray-500 text-[11px] leading-relaxed mt-1">Audit verification required for all business/franchise memberships.</p>
+                    <p class="text-gray-500 text-[11px] leading-relaxed mt-1">Verification required for all business/franchise memberships.</p>
                 </div>
 
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pt-6">
@@ -192,68 +192,62 @@
                     </a>
                 </div>
             </form>
+
+            <p class="text-center text-sm text-gray-400 font-bold mt-12 bg-white">
+                Already have an account? <a href="{{ route('login') }}" class="text-[#ff9933] hover:underline uppercase ml-2 tracking-tighter">Login here</a>
+            </p>
         </div>
 
         <p class="mt-12 lg:absolute lg:bottom-10 lg:right-10 text-[9px] text-gray-300 font-black tracking-[8px] uppercase opacity-30 text-center lg:text-right">© 2026 BHAVANI CRAFTS</p>
     </div>
 
+    </div>
+
     <script>
-        document.getElementById('regForm').onsubmit = async function(e) {
+        const regForm = document.getElementById('regForm');
+        const masterLoader = document.getElementById('masterLoader');
+        const loaderText = document.getElementById('loaderText');
+
+        regForm.onsubmit = async function(e) {
             e.preventDefault();
-            const loader = document.getElementById('masterLoader');
-            const loaderText = document.getElementById('loaderText');
-            loader.style.display = 'flex';
-
-            const messages = [
-                'Establishing Safe Connection...',
-                'Verifying Credentials...',
-                'Routing Application...',
-                'Checking Encryption Keys...',
-                'Optimizing Profile...'
-            ];
-
-            let msgIndex = 0;
-            const messageInterval = setInterval(() => {
-                msgIndex = (msgIndex + 1) % messages.length;
-                loaderText.textContent = messages[msgIndex];
-            }, 800);
+            
+            loaderText.textContent = 'Registering...';
+            masterLoader.style.display = 'flex';
 
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
 
             try {
-                const response = await fetch('/api/auth/register', {
+                const response = await fetch('api/auth/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify(data)
                 });
 
                 const result = await response.json();
-                clearInterval(messageInterval);
+                masterLoader.style.display = 'none';
 
                 if (result.success) {
-                    loaderText.textContent = 'Account Verified. Redirecting...';
+                    loaderText.textContent = result.message;
+                    masterLoader.style.display = 'flex';
                     setTimeout(() => {
                         window.location.href = result.redirect;
-                    }, 500);
+                    }, 1000);
                 } else {
-                    loader.style.display = 'none';
-                    if(result.errors) {
-                        const errorMsg = Object.values(result.errors).flat().join('\n');
-                        alert('Registration error:\n' + errorMsg);
+                    if (result.errors) {
+                        const firstError = Object.values(result.errors)[0][0];
+                        alert(firstError);
                     } else {
-                        alert(result.message || 'Registration failed. Please check your data.');
+                        alert(result.message || 'Registration failed.');
                     }
                 }
             } catch (error) {
-                clearInterval(messageInterval);
-                loader.style.display = 'none';
-                console.error('API Error:', error);
-                alert('A technical connection error occurred. Our team has been notified.');
+                masterLoader.style.display = 'none';
+                alert('Connection error.');
             }
         };
     </script>

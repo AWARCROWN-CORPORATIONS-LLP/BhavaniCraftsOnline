@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Portal | Bhavani Crafts</title>
+    <title>Sign In | Bhavani Crafts</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -84,7 +84,7 @@
     <!-- Normal Circular Loader -->
     <div id="masterLoader" class="loader-overlay">
         <span class="spinner"></span>
-        <p id="loaderText" class="text-[#ff9933] mt-4 text-[10px] font-black tracking-[4px] uppercase animate-pulse">Processing</p>
+        <p id="loaderText" class="text-[#ff9933] mt-4 text-[10px] font-black tracking-[4px] uppercase animate-pulse">Please wait...</p>
     </div>
 
     <!-- Left: Immersive Artwork -->
@@ -98,9 +98,9 @@
                 <h1 class="text-xl lg:text-2xl text-white tracking-[8px] font-bold uppercase">Bhavani Crafts</h1>
             </div>
             <div class="space-y-4 lg:space-y-8 max-w-2xl">
-                <h2 class="text-4xl sm:text-6xl lg:text-7xl text-white font-light leading-tight tracking-tight">Master <br><span class="text-[#ff9933] italic">Portal.</span></h2>
+                <h2 class="text-4xl sm:text-6xl lg:text-7xl text-white font-light leading-tight tracking-tight">Welcome <br><span class="text-[#ff9933] italic">Back.</span></h2>
                 <div class="w-16 lg:w-24 h-1 bg-[#ff9933]"></div>
-                <p class="text-white/80 text-sm lg:text-lg font-light leading-relaxed max-w-md hidden sm:block">Access India's finest collection of sacred artifacts and luxury pooja essentials.</p>
+                <p class="text-white/80 text-sm lg:text-lg font-light leading-relaxed max-w-md hidden sm:block">Access India's finest collection of handcrafted artifacts and pooja essentials.</p>
             </div>
         </div>
         
@@ -117,13 +117,14 @@
         <div class="max-w-md mx-auto w-full">
             <div class="mb-10 lg:mb-16 text-center lg:text-left">
                 <h2 class="text-4xl sm:text-5xl font-black text-gray-900 mb-2 leading-none">Sign In</h2>
-                <p class="text-gray-400 font-bold uppercase tracking-[4px] text-[10px]">Access your divine dashboard</p>
+                <p class="text-gray-400 font-bold uppercase tracking-[4px] text-[10px]">Access your account</p>
             </div>
 
+            <!-- Password Form -->
             <form id="loginForm" action="{{ route('login') }}" method="POST" class="space-y-6 lg:space-y-8">
                 @csrf
                 <div>
-                    <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-3 block ml-1 leading-none">Security ID</label>
+                    <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-3 block ml-1 leading-none">Email or Username</label>
                     <input type="text" name="email" required 
                            class="input-luxury w-full py-5 px-7 rounded-2xl text-gray-800 font-medium"
                            value="{{ old('email') }}" placeholder="Email or Username">
@@ -131,8 +132,7 @@
 
                 <div>
                     <div class="flex justify-between items-center mb-3 px-1">
-                        <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase block leading-none">Master Key</label>
-                        <a href="#" class="text-[10px] text-[#ff9933] font-black uppercase tracking-widest hover:underline">Forgot?</a>
+                        <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase block leading-none">Password</label>
                     </div>
                     <input type="password" name="password" required 
                            class="input-luxury w-full py-5 px-7 rounded-2xl text-gray-800 font-medium"
@@ -140,84 +140,65 @@
                 </div>
 
                 <div class="pt-4">
-                    <button type="submit" class="btn-luxury w-full py-6 rounded-2xl font-black text-sm uppercase shadow-2xl">Connect Account</button>
-                    
-                    <div class="text-center my-10 relative flex items-center">
-                         <div class="flex-grow border-t border-gray-100"></div>
-                         <span class="px-6 text-[9px] text-gray-300 font-black tracking-[8px] uppercase">OR</span>
-                         <div class="flex-grow border-t border-gray-100"></div>
-                    </div>
-
-                    <a href="{{ route('google.login') }}" class="flex items-center justify-center space-x-3 px-8 py-5 border border-gray-100 rounded-2xl hover:border-orange-100 transition-all font-bold text-[10px] text-gray-500 uppercase tracking-[4px]">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5 grayscale opacity-70" alt="Google">
-                        <span>Sign-in with Google</span>
-                    </a>
+                    <button type="submit" class="btn-luxury w-full py-6 rounded-2xl font-black text-sm uppercase shadow-2xl">Sign In</button>
                 </div>
-
-                <p class="text-center text-sm text-gray-400 font-bold mt-12">
-                    New Seeker? <a href="{{ route('register') }}" class="text-[#ff9933] hover:underline uppercase ml-2 tracking-tighter">Start Journey</a>
-                </p>
             </form>
+
+            <div class="text-center my-10 relative flex items-center">
+                 <div class="flex-grow border-t border-gray-100"></div>
+                 <span class="px-6 text-[9px] text-gray-300 font-black tracking-[8px] uppercase">OR</span>
+                 <div class="flex-grow border-t border-gray-100"></div>
+            </div>
+
+            <a href="{{ route('google.login') }}" class="flex items-center justify-center space-x-3 px-8 py-5 border border-gray-100 rounded-2xl hover:border-orange-100 transition-all font-bold text-[10px] text-gray-500 uppercase tracking-[4px]">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5 grayscale opacity-70" alt="Google">
+                <span>Sign-in with Google</span>
+            </a>
+
+            <p class="text-center text-sm text-gray-400 font-bold mt-12">
+                New user? <a href="{{ route('register') }}" class="text-[#ff9933] hover:underline uppercase ml-2 tracking-tighter">Register here</a>
+            </p>
         </div>
 
         <p class="mt-12 lg:absolute lg:bottom-10 lg:right-10 text-[9px] text-gray-300 font-black tracking-[8px] uppercase opacity-30 text-center lg:text-right">© 2026 BHAVANI CRAFTS</p>
     </div>
 
     <script>
+        const masterLoader = document.getElementById('masterLoader');
+        const loaderText = document.getElementById('loaderText');
+
+        // Password Login
         document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
-            const loader = document.getElementById('masterLoader');
-            const loaderText = document.getElementById('loaderText');
-            loader.style.display = 'flex';
-
-            const messages = [
-                'Initializing Request...',
-                'Checking API Connection...',
-                'Routing to Secure Server...',
-                'Verifying Master Key...',
-                'Encrypting Session...'
-            ];
-
-            let msgIndex = 0;
-            const messageInterval = setInterval(() => {
-                msgIndex = (msgIndex + 1) % messages.length;
-                loaderText.textContent = messages[msgIndex];
-            }, 800);
+            loaderText.textContent = 'Verifying credentials...';
+            masterLoader.style.display = 'flex';
 
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
 
             try {
-                const response = await fetch('/api/auth/login', {
+                const response = await fetch('api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify(data)
                 });
 
                 const result = await response.json();
-                clearInterval(messageInterval);
-
                 if (result.success) {
-                    loaderText.textContent = 'Access Granted. Redirecting...';
-                    setTimeout(() => {
-                        window.location.href = result.redirect;
-                    }, 500);
+                    window.location.href = result.redirect;
                 } else {
-                    loader.style.display = 'none';
-                    alert(result.message || 'Authentication failed. Please check your credentials.');
+                    masterLoader.style.display = 'none';
+                    alert(result.message || 'Authentication failed.');
                 }
             } catch (error) {
-                clearInterval(messageInterval);
-                loader.style.display = 'none';
-                console.error('API Error:', error);
-                alert('A technical connection error occurred. Our team has been notified.');
+                masterLoader.style.display = 'none';
+                alert('Connection error.');
             }
         };
     </script>
-
 </body>
 </html>

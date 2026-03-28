@@ -16,20 +16,27 @@
             @csrf
 
             @foreach($contents as $section => $items)
+                {{-- No sections skipped (Hero and Offers now manageable) --}}
                 <div class="card-premium p-8 relative overflow-hidden">
                     <div class="flex items-center space-x-4 mb-8">
                         <span class="h-8 w-8 bg-brand-500/10 text-brand-600 rounded-lg flex items-center justify-center">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                            @if($section == 'identity')
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            @else
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                            @endif
                         </span>
                         <div>
                             <h3 class="text-sm font-black uppercase tracking-[3px] text-gray-900">{{ ucfirst($section) }} Section</h3>
                             <p class="text-[9px] text-gray-400 font-bold uppercase tracking-[1px] mt-1">Manage visuals and messaging for the {{ $section }} area.</p>
                         </div>
                         <div class="flex-grow h-[1px] bg-gray-100"></div>
+                        @if($section != 'identity')
                         <button type="button" @click="openPreview('{{ $section }}')" class="flex items-center space-x-2 px-4 py-2 bg-[#111111] text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-[#ff9933] transition-colors">
                             <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                             <span>Live Preview</span>
                         </button>
+                        @endif
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -131,12 +138,12 @@
                                      class="absolute inset-0 h-full w-full object-cover opacity-60">
                                 <div class="absolute inset-0 bg-gradient-to-t from-onyx-950 via-onyx-950/40 to-transparent"></div>
                                 <div class="relative h-full flex flex-col items-center justify-center text-center px-12">
-                                    <span class="inline-block py-2 px-6 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-[10px] font-black uppercase tracking-[5px] mb-8" x-text="formValues['hero_badge']"></span>
-                                    <h1 class="text-4xl md:text-5xl font-serif font-bold text-white mb-6 leading-tight" x-html="formValues['hero_title']"></h1>
-                                    <p class="text-lg text-gray-300 font-light max-w-xl mx-auto mb-10" x-text="formValues['hero_description']"></p>
+                                    <span class="inline-block py-2 px-6 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-[10px] font-black uppercase tracking-[5px] mb-8" x-text="'Established 1993 • Sacred Artisans'"></span>
+                                    <h1 class="text-4xl md:text-5xl font-serif font-bold text-white mb-6 leading-tight" x-html="formValues['hero_title'] || 'Sacred Ritual Marketplace'"></h1>
+                                    <p class="text-lg text-gray-300 font-light max-w-xl mx-auto mb-10" x-text="formValues['hero_subtitle'] || 'Serving your spiritual needs with wholesale & retail authentic brass idols and essentials.'"></p>
                                     <div class="flex items-center space-x-6">
-                                        <span class="px-8 py-4 bg-brand-500 text-white text-[11px] font-black uppercase tracking-[3px] rounded-full" x-text="formValues['hero_btn_1_text']"></span>
-                                        <span class="px-8 py-4 border border-white/20 text-white text-[11px] font-black uppercase tracking-[3px] rounded-full" x-text="formValues['hero_btn_2_text']"></span>
+                                        <span class="px-8 py-4 bg-white text-onyx-900 text-[11px] font-black uppercase tracking-[3px] rounded-full" x-text="formValues['hero_cta_retail'] || 'Retail Collection'"></span>
+                                        <span class="px-8 py-4 bg-brand-600 border border-brand-500 text-white text-[11px] font-black uppercase tracking-[3px] rounded-full" x-text="formValues['hero_cta_wholesale'] || 'Wholesale Hub'"></span>
                                     </div>
                                 </div>
                             </section>

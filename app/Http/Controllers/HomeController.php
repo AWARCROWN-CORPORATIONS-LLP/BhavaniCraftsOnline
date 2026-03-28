@@ -8,15 +8,12 @@ use App\Models\Product;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index($locale)
     {
-        $products = Product::with(['images' => function($query) {
-                $query->where('is_main', true);
-            }, 'category'])
+        $products = Product::with(['images', 'category'])
             ->where('listed_status', 'Listed')
             ->orderBy('id', 'desc')
-            ->take(8)
-            ->get();
+            ->paginate(12);
 
         $pageContent = \App\Models\PageContent::all()->pluck('value', 'key');
 
@@ -26,6 +23,9 @@ class HomeController extends Controller
         
         $recommendedProducts = $suggestionService->getRecommendations($recommendationMode, $recommendationCount);
 
-        return view('welcome', compact('products', 'pageContent', 'recommendedProducts'));
+        $categories = \App\Models\Category::all();
+        $ritualKits = \App\Models\RitualKit::with('products')->where('is_active', true)->get();
+
+        return view('welcome', compact('products', 'pageContent', 'recommendedProducts', 'categories', 'ritualKits'));
     }
 }

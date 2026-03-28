@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('page_contents')) return;
         Schema::create('page_contents', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();

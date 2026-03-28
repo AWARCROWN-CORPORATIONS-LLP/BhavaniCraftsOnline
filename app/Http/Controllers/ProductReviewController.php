@@ -13,10 +13,10 @@ class ProductReviewController extends Controller
     /**
      * Store a newly created review in storage.
      */
-    public function store(Request $request, $token)
+    public function store(Request $request, $slug)
     {
-        $productId = Product::decryptId($token);
-        if (!$productId) abort(404);
+        $product = Product::where('slug', $slug)->firstOrFail();
+        $productId = $product->id;
 
         $request->validate([
             'rating'  => 'required|integer|min:1|max:5',
@@ -24,7 +24,6 @@ class ProductReviewController extends Controller
             'image'   => 'nullable|image|max:2048', // 2MB limit
         ]);
 
-        $product = Product::findOrFail($productId);
 
         // Check if user already reviewed this product (optional but good practice)
         $existing = ProductReview::where('product_id', $productId)

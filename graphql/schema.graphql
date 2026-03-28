@@ -1,0 +1,66 @@
+type Query {
+    "Search for products with a query string"
+    searchProducts(q: String, category: ID, first: Int = 12, page: Int): ProductPaginator @paginate(resolver: "App\\GraphQL\\Queries\\SearchProducts")
+
+    "Get a single product by slug"
+    product(slug: String @eq): Product @find
+    
+    "Get all categories"
+    categories: [Category!]! @all
+
+    "Universal search across products, categories, and orders"
+    universalSearch(q: String!): [SearchResult!]! @field(resolver: "App\\GraphQL\\Queries\\UniversalSearch")
+}
+
+type SearchResult {
+    title: String!
+    subtitle: String
+    type: String!
+    url: String!
+    image: String
+}
+
+type Product {
+    id: ID!
+    product_name: String!
+    slug: String!
+    price: Float!
+    mrp: Float!
+    discount_percent: Int
+    product_code: String
+    short_description: String
+    full_description: String
+    stock: Int
+    category: Category! @belongsTo
+    images: [ProductImage!]! @hasMany
+    
+    "Get products in the same category"
+    relatedProducts(take: Int = 4): [Product!]! @field(resolver: "App\\GraphQL\\Queries\\RelatedProducts")
+}
+
+type Category {
+    id: ID!
+    name: String!
+    slug: String!
+    icon_url: String
+    products: [Product!]! @hasMany
+}
+
+type ProductImage {
+    id: ID!
+    image_url: String!
+    is_main: Boolean!
+}
+
+type ProductPaginator {
+    data: [Product!]!
+    paginatorInfo: PaginatorInfo!
+}
+
+type PaginatorInfo {
+    total: Int!
+    count: Int!
+    currentPage: Int!
+    lastPage: Int!
+    hasMorePages: Boolean!
+}

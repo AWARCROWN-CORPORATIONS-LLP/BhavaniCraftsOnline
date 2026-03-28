@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('addresses')) return;
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('full_name');
             $table->string('phone_number');
             $table->string('address_line1');
@@ -26,7 +27,7 @@ return new class extends Migration
             $table->boolean('is_default')->default(false);
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            
         });
     }
 

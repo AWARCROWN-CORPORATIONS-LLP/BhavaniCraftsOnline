@@ -5,18 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use Illuminate\Support\Facades\Storage;
 
 class SearchController extends Controller
 {
     public function index(Request $request)
     {
         $query = Product::with(['images', 'category'])
-            ->where('listed_status', 1);
+            ->where('listed_status', 'Listed');
 
-        // ── Text Search ─────────────────────────────────────────────────────
+        // ── Text Search ──────────────────────────────────────────────────────
         if ($request->filled('q')) {
             $q = $request->q;
-            $query->where(function ($sq) use ($q) {
+            $query->whereNested(function ($sq) use ($q) {
                 $sq->where('product_name', 'LIKE', "%{$q}%")
                    ->orWhere('short_description', 'LIKE', "%{$q}%")
                    ->orWhere('telugu_name', 'LIKE', "%{$q}%")
@@ -24,6 +25,14 @@ class SearchController extends Controller
                    ->orWhere('festival_use', 'LIKE', "%{$q}%")
                    ->orWhereHas('category', fn ($cq) => $cq->where('name', 'LIKE', "%{$q}%"));
             });
+        }
+
+        // ── Redirect if search empty (requested by user) ─────────────────────
+        if (!$request->filled('q') && !$request->filled('category') && !$request->filled('material') && !$request->filled('min_price') && !$request->filled('max_price') && !$request->ajax()) {
+            // If we are coming from another page and the search is empty, don't proceed to search
+            if ($request->header('referer') && !str_contains($request->header('referer'), route('search'))) {
+                return redirect()->back()->with('error', 'Please enter a search term or select a category.');
+            }
         }
 
         // ── Category Filter ──────────────────────────────────────────────────
@@ -54,23 +63,44 @@ class SearchController extends Controller
         match ($sort) {
             'price_asc'  => $query->orderBy('price', 'asc'),
             'price_desc' => $query->orderBy('price', 'desc'),
-            'popular'    => $query->orderBy('stock', 'desc'),   // proxy metric
-            default      => $query->orderBy('id', 'desc'),      // newest
+            'popular'    => $query->orderBy('stock', 'desc'),
+            default      => $query->orderBy('id', 'desc'),
         };
 
+        // ── Live Search: return JSON for AJAX / ?format=json ─────────────────
+        if ($request->ajax() || $request->get('format') === 'json') {
+            $results = $query->limit(8)->get()->map(function ($product) {
+                $mainImage = $product->images->firstWhere('is_main', true)
+                    ?? $product->images->first();
+
+                return [
+                    'id'           => $product->id,
+                    'product_name' => $product->product_name,
+                    'slug'         => $product->slug,
+                    'price'        => (float) $product->price,
+                    'mrp'          => (float) $product->mrp,
+                    'image_url'    => $mainImage ? Storage::url($mainImage->image_url) : null,
+                    'category'     => ['name' => $product->category?->name ?? ''],
+                    'stock'        => $product->stock,
+                ];
+            });
+
+            return response()->json($results);
+        }
+
+        // ── Full Page Response ────────────────────────────────────────────────
         $products = $query->paginate(16)->withQueryString();
 
-        // ── Filter Options (for dropdowns) ───────────────────────────────────
-        $categories = Category::whereHas('products', fn ($pq) => $pq->where('listed_status', 1))->get();
-        $materials  = Product::where('listed_status', 1)
+        $categories = Category::whereHas('products', fn ($pq) => $pq->where('listed_status', 'Listed'))->get();
+        $materials  = Product::where('listed_status', 'Listed')
                         ->whereNotNull('material_type')
                         ->where('material_type', '!=', '')
                         ->distinct()
                         ->pluck('material_type');
 
         $priceRange = [
-            'min' => Product::where('listed_status', 1)->min('price') ?? 0,
-            'max' => Product::where('listed_status', 1)->max('price') ?? 10000,
+            'min' => Product::where('listed_status', 'Listed')->min('price') ?? 0,
+            'max' => Product::where('listed_status', 'Listed')->max('price') ?? 10000,
         ];
 
         return view('public.search', compact(

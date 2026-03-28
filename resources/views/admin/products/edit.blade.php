@@ -1,5 +1,9 @@
 @extends('layouts.admin')
 
+@section('scripts')
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+@endsection
+
 @section('header_extra')
     <div class="flex items-center space-x-4">
         <h2 class="text-xl lg:text-3xl font-black text-gray-900 uppercase tracking-tighter">Refine Artifact</h2>
@@ -79,6 +83,81 @@
 
                     <div id="imagePreview" class="grid grid-cols-3 gap-6 mt-10 w-full hidden"></div>
                 </div>
+
+                <!-- 3D AR PRODUCT VAULT -->
+                <div class="space-y-8 mt-12 p-10 bg-gray-50/50 rounded-[40px] border border-gray-100">
+                    <div class="flex items-center space-x-6">
+                        <h3 class="text-xs font-black text-[#ff9933] uppercase tracking-[6px] leading-none italic">3D AR Vault Update</h3>
+                        <div class="flex-grow h-[1px] bg-[#ff9933]/10"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- GLB Upload -->
+                        <div class="p-8 bg-white border-2 border-dashed border-gray-100 rounded-[30px] flex flex-col items-center text-center shadow-sm">
+                            <label class="text-[9px] font-black text-gray-400 tracking-[3px] uppercase mb-4 block leading-none">Web/Android (.GLB)</label>
+                            <input type="file" name="model_3d" id="glb_input" accept=".glb" class="hidden">
+                            <button type="button" onclick="document.getElementById('glb_input').click()" class="px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-[10px] font-black text-gray-600 uppercase tracking-widest hover:border-[#ff9933] transition-all">Replace GLB</button>
+                            
+                            @if($product->model_3d)
+                                <div class="mt-4 flex items-center space-x-2">
+                                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                    <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest text-ellipsis overflow-hidden max-w-[150px]">Current: GLB Active</span>
+                                </div>
+                            @endif
+                            <div id="glb_status" class="mt-4 text-[9px] font-bold text-[#ff9933] hidden uppercase tracking-widest">New GLB Selected</div>
+                        </div>
+
+                        <!-- USDZ Upload -->
+                        <div class="p-8 bg-white border-2 border-dashed border-gray-100 rounded-[30px] flex flex-col items-center text-center shadow-sm">
+                            <label class="text-[9px] font-black text-gray-400 tracking-[3px] uppercase mb-4 block leading-none">iOS AR Support (.USDZ)</label>
+                            <input type="file" name="model_usdz" id="usdz_input" accept=".usdz" class="hidden">
+                            <button type="button" onclick="document.getElementById('usdz_input').click()" class="px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-[10px] font-black text-gray-600 uppercase tracking-widest hover:border-[#ff9933] transition-all">Replace USDZ</button>
+                            @if($product->model_usdz)
+                                <div class="mt-4 flex items-center space-x-2">
+                                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                    <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest">iOS AR Matrix Ready</span>
+                                </div>
+                            @endif
+                            <div id="usdz_status" class="mt-4 text-[9px] font-bold text-[#ff9933] hidden uppercase tracking-widest">New Matrix Selected</div>
+                        </div>
+                    </div>
+
+                    <!-- PREVIEW ZONE -->
+                    <div id="viewer_container" class="{{ $product->model_3d ? '' : 'hidden' }} p-10 bg-black/5 rounded-[40px] border-4 border-white shadow-2xl relative overflow-hidden group">
+                        <div class="absolute top-6 left-6 z-10">
+                            <span class="px-4 py-2 bg-black/80 text-white text-[8px] font-black uppercase tracking-[4px] rounded-full backdrop-blur-md">Admin Visualization</span>
+                        </div>
+                        <model-viewer id="admin_preview" 
+                                      src="{{ $product->model_3d ? asset('storage/' . $product->model_3d) : '' }}"
+                                      style="width: 100%; height: 400px; --poster-color: transparent;"
+                                      camera-controls 
+                                      auto-rotate 
+                                      shadow-intensity="1">
+                        </model-viewer>
+                        <div class="mt-6 flex justify-center">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[4px]">Drag to orbit • Scroll to zoom</p>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    document.getElementById('glb_input').addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            document.getElementById('glb_status').classList.remove('hidden');
+                            document.getElementById('viewer_container').classList.remove('hidden');
+                            const url = URL.createObjectURL(file);
+                            document.getElementById('admin_preview').src = url;
+                        }
+                    });
+
+                    document.getElementById('usdz_input').addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            document.getElementById('usdz_status').classList.remove('hidden');
+                        }
+                    });
+                </script>
             </div>
 
             <script>

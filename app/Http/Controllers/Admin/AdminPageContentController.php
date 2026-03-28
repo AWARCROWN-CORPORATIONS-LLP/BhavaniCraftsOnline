@@ -8,13 +8,13 @@ use Illuminate\Http\Request;
 
 class AdminPageContentController extends Controller
 {
-    public function index()
+    public function index($locale)
     {
         $contents = PageContent::all()->groupBy('section');
         return view('admin.page-content.index', compact('contents'));
     }
 
-    public function update(Request $request)
+    public function update(Request $request, $locale)
     {
         $data = $request->except('_token');
 

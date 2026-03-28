@@ -14,7 +14,7 @@ class AdminEmployeeController extends Controller
     /**
      * Display a listing of the employees.
      */
-    public function index()
+    public function index($locale)
     {
         // Get users with role 'employee'
         $employees = User::whereHas('roles', function($q) {
@@ -27,7 +27,7 @@ class AdminEmployeeController extends Controller
     /**
      * Show the form for creating a new employee.
      */
-    public function create()
+    public function create($locale)
     {
         return view('admin.employees.create');
     }
@@ -35,7 +35,7 @@ class AdminEmployeeController extends Controller
     /**
      * Store a newly created employee in storage.
      */
-    public function store(Request $request)
+    public function store($locale, Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -65,7 +65,7 @@ class AdminEmployeeController extends Controller
     /**
      * Toggle the block status of the given employee.
      */
-    public function toggleBlock(User $employee)
+    public function toggleBlock($locale, User $employee)
     {
         // Prevent blocking super admins or admins through this route just in case
         if ($employee->hasRole('super_admin') || $employee->hasRole('admin')) {

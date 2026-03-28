@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('product_images')) return;
         Schema::create('product_images', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('product_id');
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->string('image_path');
             $table->boolean('is_primary')->default(false);
             $table->timestamps();
 
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            
         });
     }
 

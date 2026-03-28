@@ -24,9 +24,14 @@ class CheckoutController extends Controller
             return redirect()->route('login')->with('info', 'Please sign in to proceed to checkout.');
         }
 
-        $cartItems = CartItem::with(['product.images'])
-            ->where('user_id', Auth::id())
-            ->get();
+        $cartQuery = CartItem::with(['product.images'])
+            ->where('user_id', Auth::id());
+
+        if (request()->has('single_cart_item')) {
+            $cartQuery->where('id', request('single_cart_item'));
+        }
+
+        $cartItems = $cartQuery->get();
 
         if ($cartItems->isEmpty()) {
             return redirect()->route('home')->with('info', 'Your cart is empty.');
@@ -79,7 +84,13 @@ class CheckoutController extends Controller
             return response()->json(['error' => 'Unauthorized address.'], 403);
         }
 
-        $cartItems = CartItem::with('product')->where('user_id', Auth::id())->get();
+        $cartQuery = CartItem::with('product')->where('user_id', Auth::id());
+
+        if ($request->has('single_cart_item')) {
+            $cartQuery->where('id', $request->single_cart_item);
+        }
+
+        $cartItems = $cartQuery->get();
 
         if ($cartItems->isEmpty()) {
             return response()->json(['error' => 'Cart is empty.'], 400);
@@ -141,9 +152,9 @@ class CheckoutController extends Controller
                         'price'        => $item->product->price,
                         'tax_amount'   => round($item->product->price * $item->quantity * 0.18, 2),
                     ]);
+                    $item->delete(); // Delete only the items processed in this order
                 }
 
-                CartItem::where('user_id', Auth::id())->delete();
                 session()->forget('applied_coupon');
                 DB::commit();
 
@@ -182,6 +193,7 @@ class CheckoutController extends Controller
             'checkout_gst'            => $gst,
             'checkout_shipping'       => $shipping,
             'checkout_razorpay_order' => $razorpayOrder->id,
+            'checkout_single_item_id' => $request->single_cart_item,
         ]);
 
         return response()->json([
@@ -236,8 +248,13 @@ class CheckoutController extends Controller
         $couponId       = session('checkout_coupon_id');
         $gst            = session('checkout_gst');
         $shipping       = session('checkout_shipping');
+        $singleItemId   = session('checkout_single_item_id');
 
-        $cartItems = CartItem::with('product')->where('user_id', Auth::id())->get();
+        $cartQuery = CartItem::with('product')->where('user_id', Auth::id());
+        if ($singleItemId) {
+            $cartQuery->where('id', $singleItemId);
+        }
+        $cartItems = $cartQuery->get();
 
         // Place order in DB
         DB::beginTransaction();
@@ -275,10 +292,8 @@ class CheckoutController extends Controller
                     'price'        => $item->product->price,
                     'tax_amount'   => round($item->product->price * $item->quantity * 0.18, 2),
                 ]);
+                $item->delete(); // Only delete what was bought
             }
-
-            // Clear cart
-            CartItem::where('user_id', Auth::id())->delete();
 
             // Clear session checkout data
             session()->forget([

@@ -28,6 +28,19 @@ class CheckRole
             }
         }
 
+        // Tiered Redirection Logic: If unauthorized for this specific tier, send to primary portal
+        if ($user->hasRole('super_admin')) {
+            return redirect()->route('superadmin.dashboard');
+        } elseif ($user->hasRole('admin') || $user->hasRole('employee')) {
+            return redirect()->route('employee.dashboard');
+        } elseif ($user->hasRole('logistics')) {
+            return redirect()->route('logistics.dashboard');
+        } elseif ($user->hasRole('franchise')) {
+            return redirect()->route('franchise.dashboard');
+        } elseif ($user->hasRole('poojari')) {
+            return redirect()->route('poojari.dashboard');
+        }
+
         abort(403, 'Unauthorized access for your tier.');
     }
 }

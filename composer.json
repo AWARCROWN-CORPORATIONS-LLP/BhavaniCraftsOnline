@@ -15,6 +15,9 @@
         "laravel/framework": "^12.0",
         "laravel/socialite": "^5.24",
         "laravel/tinker": "^2.10.1",
+        "livewire/livewire": "^4.2",
+        "mll-lab/laravel-graphql-playground": "^1.1",
+        "nuwave/lighthouse": "^6.65",
         "razorpay/razorpay": "^2.9"
     },
     "require-dev": {

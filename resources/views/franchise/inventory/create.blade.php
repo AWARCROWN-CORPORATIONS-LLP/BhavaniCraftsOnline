@@ -139,7 +139,7 @@
             </div>
 
             <div class="pt-10 flex items-center justify-between">
-                <a href="/franchise/inventory" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-500 transition-colors">Abort Registry</a>
+                <a href="{{ route('franchise.inventory.index') }}" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-500 transition-colors">Abort Registry</a>
                 <button type="submit" class="btn-luxury-saffron px-12 py-5 text-[11px] shadow-2xl">Confirm & Register Artifact</button>
             </div>
         </form>
