@@ -1,0 +1,28 @@
+﻿php : PHP Warning:  
+Module "openssl" is 
+already loaded in Unknown 
+on line 0
+At line:1 char:1
++ php artisan test tests/F
+eature/Admin/BillingTest.p
+hp --verbose 2>&1 | ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (P  
+  HP Warning:  M...know   
+ n on line 0:String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+
+Warning: Module "openssl" is already loaded in Unknown on line 0
+
+Warning: Module "openssl" is already loaded in Unknown on line 0
+PHP Warning:  Module "openssl" is already loaded in Unknown on line 0
+PHPUnit 11.5.55 by Sebastian Bergmann and contributors.
+
+Unknown option "--verbose"

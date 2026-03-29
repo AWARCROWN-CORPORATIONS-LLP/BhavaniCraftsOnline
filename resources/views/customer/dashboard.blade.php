@@ -94,7 +94,7 @@
                             Personal invitations? Use this QR code on your cards or invites. Guests can scan it to view and shop your wishlist.
                         </p>
                         <a href="https://api.qrserver.com/v1/create-qr-code/?size=500x500&color=2E2E2E&bgcolor=FFFFFF&data={{ urlencode(route('collection.show', Auth::user()->wishlist_token)) }}" 
-                           download="sacred_registry_qr.png"
+                           download="wishlist_qr.png"
                            target="_blank"
                            class="inline-flex items-center space-x-2 text-[9px] font-black uppercase tracking-widest text-brand-500 hover:text-brand-600 transition-colors">
                             <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
@@ -119,7 +119,7 @@
     @if(isset($registryGifts) && $registryGifts->count() > 0)
     <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden mb-12">
         <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="text-sm font-black uppercase tracking-widest text-onyx-900">Gift Contributions</h3>
+            <h3 class="text-sm font-black uppercase tracking-widest text-onyx-900">Gifts from Friends</h3>
             <span class="text-[10px] font-black uppercase tracking-widest text-brand-500">Total: ₹{{ number_format($registryGifts->sum('amount'), 2) }}</span>
         </div>
         <div class="overflow-x-auto">
@@ -127,7 +127,7 @@
                 <thead>
                     <tr class="bg-gray-50/50">
                         <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Guest Name</th>
-                        <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Item Supported</th>
+                        <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">For Item</th>
                         <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Date</th>
                         <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Amount</th>
                         <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Action</th>
@@ -140,7 +140,7 @@
                             <span class="text-sm font-bold text-onyx-900">{{ $gift->guest_name }}</span>
                         </td>
                         <td class="px-8 py-6 text-sm font-medium text-gray-500">
-                            {{ $gift->wishlist->product->product_name ?? 'Sacred Item' }}
+                            {{ $gift->wishlist->product->product_name ?? 'Products' }}
                         </td>
                         <td class="px-8 py-6 text-sm font-medium text-gray-400">
                             {{ $gift->created_at->format('M d, Y') }}
@@ -149,7 +149,7 @@
                             ₹{{ number_format($gift->amount, 2) }}
                         </td>
                         <td class="px-8 py-6 text-right">
-                            <a href="https://wa.me/?text={{ urlencode('Dear ' . $gift->guest_name . ', thank you so much for your generous support towards our ' . ($gift->wishlist->product->product_name ?? 'collection') . '! We are deeply grateful.') }}" 
+                            <a href="https://wa.me/?text={{ urlencode('Dear ' . $gift->guest_name . ', thank you so much for your support towards our ' . ($gift->wishlist->product->product_name ?? 'collection') . '! We are very grateful.') }}" 
                                target="_blank"
                                class="inline-flex items-center space-x-2 text-[10px] font-black text-[#25D366] hover:text-green-700 uppercase tracking-widest bg-green-50 px-3 py-1.5 rounded-lg border border-green-100 transition-colors">
                                 <span>Send Thanks</span>

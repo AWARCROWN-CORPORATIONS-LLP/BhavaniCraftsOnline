@@ -102,6 +102,7 @@ Route::prefix('{locale}')->group(function () {
 
     // Performant API Routes (Moved to web middleware for session support)
     Route::prefix('api/auth')->group(function () {
+        Route::get('/check-username', [App\Http\Controllers\Api\AuthApiController::class, 'checkUsername']);
         Route::post('/login', [App\Http\Controllers\Api\AuthApiController::class, 'login']);
         Route::post('/register', [App\Http\Controllers\Api\AuthApiController::class, 'register']);
         Route::post('/send-otp', [App\Http\Controllers\Api\AuthApiController::class, 'sendOtp']);
@@ -178,11 +179,22 @@ Route::prefix('{locale}')->group(function () {
         // Future Content Modules can be added here
         Route::get('/settings', function() { return "Elite Settings Registry - Coming Soon"; })->name('settings');
 
+        // AI Generation & Multilingual Services
+        Route::post('/ai/generate-description', [App\Http\Controllers\Admin\AdminAIController::class, 'generateDescription'])->name('ai.generate');
+
+
         // Payment Verification Mastery
         Route::get('/payment/verify', [App\Http\Controllers\Shared\PaymentVerificationController::class, 'index'])->name('payment.verify.index');
         Route::get('/payment/verify/search', [App\Http\Controllers\Shared\PaymentVerificationController::class, 'search'])->name('payment.verify.search');
         Route::post('/payment/verify/{order}', [App\Http\Controllers\Shared\PaymentVerificationController::class, 'verify'])->name('payment.verify.verify');
+
+        // Billing Dashboard & Point of Sale (PoS)
+        Route::get('/billing', [App\Http\Controllers\Admin\QuickBillingController::class, 'index'])->name('billing.index');
+        Route::post('/billing/store', [App\Http\Controllers\Admin\QuickBillingController::class, 'store'])->name('billing.store');
+        Route::get('/billing/verify/{bill_id}', [App\Http\Controllers\Admin\QuickBillingController::class, 'verifyPayment'])->name('billing.verify');
+        Route::get('/billing/print/{id}', [App\Http\Controllers\Admin\QuickBillingController::class, 'print'])->name('billing.print');
     });
+
 
     // Supreme Admin Portal (Protected Routes - Only for Super Admin Tier)
     Route::get('/superadmin/check', function() { return "Superadmin prefix reachable"; });

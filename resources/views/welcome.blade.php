@@ -9,11 +9,11 @@
             <img src="{{ $pageContent['hero_bg_image'] ?? 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop' }}" 
                  class="w-full h-full object-cover opacity-50 scale-105" 
                  alt="Bhavani Crafts Ritual Heritage">
-            <div class="absolute inset-0 bg-gradient-to-b from-onyx-950/80 via-onyx-950/40 to-white"></div>
+           <!-- <div class="absolute inset-0 bg-gradient-to-b from-onyx-950/80 via-onyx-950/40 to-white"></div> -->
         </div>
 
         <div class="container mx-auto px-4 lg:px-8 relative z-10 text-center flex flex-col items-center">
-            <!-- Animated Title Badge -->
+            
             <div class="mb-8 flex items-center space-x-4 animate-fadeInDown">
                 <div class="h-[1px] w-12 bg-amber-400"></div>
                 <span class="text-[10px] md:text-[12px] font-black uppercase tracking-[6px] text-amber-400 italic">Established 1993 • Sacred Artisans</span>

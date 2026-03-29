@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register | Bhavani Crafts</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
+        [x-cloak] { display: none !important; }
         body { font-family: 'Inter', sans-serif; background: #ffffff; }
         h1, h2 { font-family: 'Playfair Display', serif; }
         
@@ -85,14 +90,18 @@
         @media (min-width: 1024px) {
             .no-scroll-desktop { height: 100vh; overflow: hidden; }
         }
+        body.bc-busy { cursor: wait !important; overflow: hidden !important; }
+        body.bc-busy * { pointer-events: none !important; }
+        body.bc-busy .loader-overlay, body.bc-busy .loader-overlay * { pointer-events: all !important; }
     </style>
+
 </head>
-<body class="no-scroll-desktop flex flex-col lg:flex-row min-h-screen" x-data="{ userType: 'individual', passwordType: 'password' }">
+<body class="no-scroll-desktop flex flex-col lg:flex-row min-h-screen">
 
     <!-- Normal Circular Loader -->
-    <div id="masterLoader" class="loader-overlay">
+    <div id="masterLoader" class="loader-overlay" x-show="busy" x-cloak>
         <span class="spinner"></span>
-        <p id="loaderText" class="text-[#ff9933] mt-4 text-[10px] font-black tracking-[4px] uppercase animate-pulse">Please wait...</p>
+        <p class="text-[#ff9933] mt-4 text-[10px] font-black tracking-[4px] uppercase animate-pulse" x-text="loaderMsg">Please wait...</p>
     </div>
 
     <!-- Left: Artistic Section -->
@@ -120,7 +129,28 @@
     </div>
 
     <!-- Right: High-End Form Area -->
-    <div class="w-full lg:w-7/12 bg-white flex flex-col justify-center px-6 sm:px-16 lg:px-24 py-12 lg:py-16 relative overflow-y-auto">
+    <div class="w-full lg:w-7/12 bg-white flex flex-col justify-center px-6 sm:px-16 lg:px-24 py-12 lg:py-16 relative overflow-y-auto"
+         x-data="{ 
+            userType: 'individual', 
+            passwordType: 'password', 
+            username: '', 
+            usernameStatus: '', 
+            usernameAvailable: null,
+            busy: false,
+            loaderMsg: 'Checking...',
+            
+            async checkUsername() {
+                if (this.username.length < 3) {
+                    this.usernameStatus = 'Too short';
+                    this.usernameAvailable = false;
+                    return;
+                }
+                const res = await fetch(`{{ url('/') }}/{{ app()->getLocale() }}/api/auth/check-username?username=${this.username}`);
+                const data = await res.json();
+                this.usernameAvailable = data.available;
+                this.usernameStatus = data.message;
+            }
+         }">
         <div class="max-w-2xl mx-auto w-full">
             <div class="mb-10 text-center lg:text-left">
                 <h2 class="text-4xl lg:text-5xl font-black text-gray-900 mb-2">Registration</h2>
@@ -154,12 +184,22 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-gray-500 tracking-[3px] uppercase block ml-1">Unique Username</label>
-                        <input type="text" name="username" required class="input-luxury w-full py-4 px-6 rounded-2xl text-gray-800 font-medium" placeholder="@aditya">
+                        <div class="flex items-center justify-between ml-1">
+                            <label class="text-[10px] font-black text-gray-500 tracking-[3px] uppercase block">Unique Username</label>
+                            <span x-show="username" :class="usernameAvailable ? 'text-green-500' : 'text-red-500'" class="text-[9px] font-bold uppercase tracking-widest" x-text="usernameStatus"></span>
+                        </div>
+                        <input type="text" name="username" required 
+                               x-model="username" 
+                               @keyup.debounce.500ms="checkUsername()"
+                               class="input-luxury w-full py-4 px-6 rounded-2xl text-gray-800 font-medium" 
+                               placeholder="Ex: aditya_99" 
+                               pattern="[a-zA-Z0-9_-]+" title="Letters, numbers, dashes and underscores only">
                     </div>
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-gray-500 tracking-[3px] uppercase block ml-1">WhatsApp Mobile</label>
-                        <input type="text" name="phone" required class="input-luxury w-full py-4 px-6 rounded-2xl text-gray-800 font-medium" placeholder="+91 9676...">
+                        <input type="tel" name="phone" required maxlength="10" minlength="10" 
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                               class="input-luxury w-full py-4 px-6 rounded-2xl text-gray-800 font-medium" placeholder="10-Digit Mobile Number">
                     </div>
                 </div>
 
@@ -185,7 +225,16 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pt-6">
-                    <button type="submit" class="btn-luxury w-full sm:w-auto px-16 py-5 rounded-2xl font-black text-xs uppercase tracking-[4px]">Sign Up</button>
+                    <button type="submit" 
+                            :disabled="busy"
+                            class="inline-flex items-center justify-center btn-luxury w-full sm:w-auto px-16 py-5 rounded-2xl font-black text-xs uppercase tracking-[4px] relative overflow-hidden transition-all"
+                            :class="busy ? 'opacity-70 cursor-not-allowed' : ''">
+                        <svg x-show="busy" class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span x-text="busy ? loaderMsg : 'Sign Up'">Sign Up</span>
+                    </button>
                     <a href="{{ route('google.login') }}" class="w-full sm:w-auto flex items-center justify-center space-x-3 px-10 py-5 border border-gray-100 rounded-2xl hover:border-orange-100 transition-all font-bold text-xs text-gray-500 uppercase tracking-widest">
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5 grayscale opacity-70" alt="Google">
                         <span>Google Signup</span>
@@ -205,20 +254,25 @@
 
     <script>
         const regForm = document.getElementById('regForm');
-        const masterLoader = document.getElementById('masterLoader');
-        const loaderText = document.getElementById('loaderText');
 
         regForm.onsubmit = async function(e) {
             e.preventDefault();
             
-            loaderText.textContent = 'Registering...';
-            masterLoader.style.display = 'flex';
+            const alpineData = Alpine.$data(this.closest('[x-data]'));
+            if (alpineData.usernameAvailable === false) {
+                alert('Please choose a different username.');
+                return;
+            }
+
+            alpineData.loaderMsg = 'Registering...';
+            alpineData.busy = true;
+            document.body.classList.add('bc-busy');
 
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
 
             try {
-                const response = await fetch('api/auth/register', {
+                const response = await fetch('{{ url("/") }}/{{ app()->getLocale() }}/api/auth/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -229,15 +283,15 @@
                 });
 
                 const result = await response.json();
-                masterLoader.style.display = 'none';
-
+                
                 if (result.success) {
-                    loaderText.textContent = result.message;
-                    masterLoader.style.display = 'flex';
+                    alpineData.loaderMsg = 'Success! Redirecting...';
                     setTimeout(() => {
                         window.location.href = result.redirect;
-                    }, 1000);
+                    }, 1500);
                 } else {
+                    alpineData.busy = false;
+                    document.body.classList.remove('bc-busy');
                     if (result.errors) {
                         const firstError = Object.values(result.errors)[0][0];
                         alert(firstError);
@@ -246,10 +300,12 @@
                     }
                 }
             } catch (error) {
-                masterLoader.style.display = 'none';
-                alert('Connection error.');
+                alpineData.busy = false;
+                document.body.classList.remove('bc-busy');
+                alert('Connection error. Please try again.');
             }
         };
+
     </script>
 
 </body>

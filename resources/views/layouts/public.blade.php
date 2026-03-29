@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Bhavani Crafts | Premium Products') }}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+
 
     <!-- Google Fonts: Modern & Premium -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -166,12 +170,10 @@
 
         /* Disable interactions on page during loading */
         body.bc-busy { cursor: wait !important; }
-        /* Block plain <a> links without onclick (navigations handled by progress bar) */
-        body.bc-busy a:not([onclick]):not([data-bc-allow]) { pointer-events: none !important; cursor: wait !important; }
-        /* Block submit buttons inside forms, but NOT action buttons with onclick */
-        body.bc-busy button[type="submit"]:not([data-bc-allow]) { pointer-events: none !important; cursor: wait !important; }
+        body.bc-busy * { pointer-events: none !important; }
         /* Allow the overlay itself always */
-        body.bc-busy #bc-loading-overlay { pointer-events: all !important; cursor: default !important; }
+        body.bc-busy #bc-loading-overlay, body.bc-busy #bc-loading-overlay * { pointer-events: all !important; }
+
 
         /* ── Global Text Legibility ─────────────────────────── */
         * { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }

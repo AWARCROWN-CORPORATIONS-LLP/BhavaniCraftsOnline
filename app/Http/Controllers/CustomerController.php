@@ -53,7 +53,7 @@ class CustomerController extends Controller
 
         $user->save();
 
-        return back()->with('success', 'Sacred profile updated successfully.');
+        return back()->with('success', 'Profile updated successfully.');
     }
 
     public function addresses()
@@ -84,19 +84,19 @@ class CustomerController extends Controller
         
         if ($request->wantsJson()) {
             return response()->json([
-                'success' => 'Ritual address saved.',
+                'success' => 'Address saved successfully.',
                 'address' => $address
             ]);
         }
 
-        return back()->with('success', 'Ritual address saved.');
+        return back()->with('success', 'Address saved successfully.');
     }
 
     public function deleteAddress(Address $address)
     {
         if ($address->user_id !== Auth::id()) abort(403);
         $address->delete();
-        return back()->with('success', 'Address removed from registry.');
+        return back()->with('success', 'Address deleted successfully.');
     }
 
     public function setDefaultAddress(Address $address)
@@ -104,7 +104,7 @@ class CustomerController extends Controller
         if ($address->user_id !== Auth::id()) abort(403);
         Auth::user()->addresses()->update(['is_default' => false]);
         $address->update(['is_default' => true]);
-        return back()->with('success', 'Default sanctuary updated.');
+        return back()->with('success', 'Default address updated.');
     }
 
     public function orders()
@@ -124,7 +124,7 @@ class CustomerController extends Controller
         
         $user->save();
         
-        $status = $user->wishlist_public ? 'Collection is now public for sharing.' : 'Collection is now private.';
+        $status = $user->wishlist_public ? 'Wishlist is now public.' : 'Wishlist is now private.';
         return back()->with('success', $status);
     }
 
@@ -171,12 +171,12 @@ class CustomerController extends Controller
 
         // State check: Only for orders in transit or processing
         if ($order->delivery_status === 'Delivered') {
-            return back()->with('error', 'Registry finalization captured. This order is already marked as Delivered.');
+            return back()->with('error', 'Order already delivered.');
         }
 
         // Limit check: Max 3 generations
         if ($order->pin_generations_count >= 3) {
-            return back()->with('error', 'Authentication Guard: Pin generation limit (3) exceeded for security. Please contact support if you forgot your PIN.');
+            return back()->with('error', 'Pin generation limit (3) exceeded. Please contact support.');
         }
 
         // Generate 6-digit numeric PIN
@@ -188,7 +188,7 @@ class CustomerController extends Controller
             'delivery_status' => $order->delivery_status === 'Pending' ? 'In Transit' : $order->delivery_status
         ]);
 
-        return back()->with('success', 'Secure Delivery PIN generated successfully. Please share this with the delivery agent upon arrival.');
+        return back()->with('success', 'Delivery PIN generated successfully. Share this with the delivery agent.');
     }
 
     /**
@@ -208,7 +208,7 @@ class CustomerController extends Controller
 
         $order->update(['delivery_rating' => $request->rating]);
 
-        return back()->with('success', 'Thank you for your feedback! Your rating is archived in the logistics registry.');
+        return back()->with('success', 'Thank you for your feedback! Your rating is saved.');
     }
 
     /**
@@ -224,7 +224,7 @@ class CustomerController extends Controller
         if ($order->user_id !== Auth::id()) abort(403);
         
         if ($order->delivery_status !== 'Delivered') {
-            return back()->with('error', 'Return requests are only available for delivered artifacts.');
+            return back()->with('error', 'Return requests are only available for delivered items.');
         }
 
         $order->update([
@@ -234,7 +234,7 @@ class CustomerController extends Controller
             'return_reason' => $request->reason
         ]);
 
-        return back()->with('success', 'Return Request Captured. Our logistics team will scan your registry for pick-up soon.');
+        return back()->with('success', 'Return request received. Our team will contact you for pick-up soon.');
     }
 
     /**
@@ -263,6 +263,6 @@ class CustomerController extends Controller
             'status' => 'Pending'
         ]);
 
-        return back()->with('success', 'Safety protocol initiated. Our security council will investigate this report immediately.');
+        return back()->with('success', 'Report submitted. Our team will investigate this immediately.');
     }
 }

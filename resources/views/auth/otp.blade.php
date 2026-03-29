@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify OTP | Bhavani Crafts</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -20,9 +24,32 @@
         .otp-input:focus { border-color: #f97316; outline: none; box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
         @keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .animate-fade-up { animation: fadeUp 0.6s ease-out forwards; }
+        
+        /* Global Loading */
+        #otp-loader {
+            position: fixed; inset: 0; z-index: 9999; background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center;
+        }
+        body.bc-busy { cursor: wait !important; overflow: hidden !important; }
+        body.bc-busy * { pointer-events: none !important; }
+        body.bc-busy #otp-loader, body.bc-busy #otp-loader * { pointer-events: all !important; }
     </style>
 </head>
 <body class="flex items-center justify-center p-6 hero-bg">
+    <div id="otp-loader">
+        <div class="flex flex-col items-center">
+            <div class="w-12 h-12 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin mb-4"></div>
+            <p class="text-[10px] font-black uppercase tracking-[3px] text-orange-600">Verifying...</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('submit', () => {
+             document.getElementById('otp-loader').style.display = 'flex';
+             document.body.classList.add('bc-busy');
+        });
+    </script>
+
 
     <div class="max-w-md w-full bg-white rounded-[40px] p-10 shadow-2xl animate-fade-up relative overflow-hidden">
         

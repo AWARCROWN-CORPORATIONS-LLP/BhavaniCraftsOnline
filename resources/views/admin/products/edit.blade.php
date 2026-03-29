@@ -6,49 +6,92 @@
 
 @section('header_extra')
     <div class="flex items-center space-x-4">
-        <h2 class="text-xl lg:text-3xl font-black text-gray-900 uppercase tracking-tighter">Refine Artifact</h2>
+        <h2 class="text-xl lg:text-3xl font-bold text-gray-900 tracking-tight">Edit Product</h2>
         <span class="text-gray-300">/</span>
-        <p class="text-[10px] items-center font-black text-[#ff9933] uppercase tracking-[4px]">Master Registry Update</p>
+        <p class="text-[10px] items-center font-bold text-blue-600 uppercase tracking-widest">Update Catalog</p>
     </div>
 @endsection
 
 @section('content')
 
-    <div class="max-w-4xl mx-auto">
-        <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data" class="card-premium p-12 space-y-12">
+    <div class="max-w-4xl mx-auto" x-data="{ 
+        product_name: '{{ old('product_name', $product->product_name) }}', 
+        telugu_name: '{{ old('telugu_name', $product->telugu_name) }}',
+        short_description: `{!! old('short_description', $product->short_description) !!}`,
+        full_description: `{!! old('full_description', $product->full_description) !!}`,
+        material_type: '{{ old('material_type', $product->material_type) }}',
+        category_name: '{{ $product->category->name ?? '' }}',
+        ai_loading: false,
+
+        async translate() {
+            if (!this.product_name || this.product_name.length < 3) return;
+            try {
+                const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(this.product_name)}&langpair=en|te`);
+                const data = await response.json();
+                if (data.responseData.translatedText) {
+                    this.telugu_name = data.responseData.translatedText;
+                }
+            } catch (e) { console.error(e); }
+        },
+
+        async generateAI() {
+            if (!this.product_name) { alert('Please enter product name first'); return; }
+            this.ai_loading = true;
+            try {
+                const response = await fetch('{{ route('admin.ai.generate') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify({
+                        name: this.product_name,
+                        category: this.category_name,
+                        material: this.material_type
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    this.short_description = result.data.english_short + '\n\n' + result.data.telugu_short;
+                    this.full_description = result.data.english_full + '\n\n' + result.data.telugu_full;
+                } else {
+                    alert('AI Generation Failed: ' + result.error);
+                }
+            } catch (e) { console.error(e); }
+            finally { this.ai_loading = false; }
+        }
+    }">
+        <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data" class="bg-white border border-gray-100 shadow-sm rounded-3xl p-12 space-y-12 transition-all">
             @csrf
             @method('PUT')
 
             <!-- CORE IDENTITY -->
             <div class="space-y-8">
                 <div class="flex items-center space-x-6">
-                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-[6px] leading-none">Artifact Identity</h3>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">Product Details</h3>
                     <div class="flex-grow h-[1px] bg-gray-100"></div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
-                        <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-4 block ml-1 leading-none">English Designation</label>
-                        <input type="text" name="product_name" required value="{{ $product->product_name }}" class="w-full bg-gray-50 border-none px-8 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#ff9933]/20 transition-all">
+                        <label class="text-[10px] font-bold text-gray-600 tracking-widest uppercase mb-4 block ml-1 leading-none">Product Title (English)</label>
+                        <input type="text" name="product_name" x-model="product_name" @blur="translate()" required class="w-full bg-gray-50 border-none px-8 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-600/10 transition-all">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-4 block ml-1 leading-none">Telugu Name (Optional)</label>
-                        <input type="text" name="telugu_name" value="{{ $product->telugu_name }}" class="w-full bg-gray-50 border-none px-8 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#ff9933]/20 transition-all">
+                        <label class="text-[10px] font-bold text-gray-600 tracking-widest uppercase mb-4 block ml-1 leading-none">Telugu Title (Auto)</label>
+                        <input type="text" name="telugu_name" x-model="telugu_name" class="w-full bg-gray-50 border-none px-8 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-600/10 transition-all">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-4 block ml-1 leading-none">Category Registry</label>
-                        <select name="category_id" required class="w-full bg-gray-50 border-none px-8 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#ff9933]/20 transition-all">
+                        <label class="text-[10px] font-bold text-gray-600 tracking-widest uppercase mb-4 block ml-1 leading-none">Select Category</label>
+                        <select name="category_id" x-on:change="category_name = $el.options[$el.selectedIndex].text" required class="w-full bg-gray-50 border-none px-8 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-600/10 transition-all cursor-pointer">
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-4 block ml-1 leading-none">Listing Presence</label>
-                        <select name="listed_status" required class="w-full bg-gray-50 border-none px-8 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#ff9933]/20 transition-all">
-                            <option value="Listed" {{ $product->listed_status == 'Listed' ? 'selected' : '' }}>Listed (Active)</option>
-                            <option value="Unlisted" {{ $product->listed_status == 'Unlisted' ? 'selected' : '' }}>Unlisted (Hidden)</option>
-                            <option value="Draft" {{ $product->listed_status == 'Draft' ? 'selected' : '' }}>Draft (In-Process)</option>
+                        <label class="text-[10px] font-bold text-gray-600 tracking-widest uppercase mb-4 block ml-1 leading-none">Listing Mode</label>
+                        <select name="listed_status" required class="w-full bg-gray-50 border-none px-8 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-600/10 transition-all cursor-pointer">
+                            <option value="Listed" {{ $product->listed_status == 'Listed' ? 'selected' : '' }}>Active Listing</option>
+                            <option value="Unlisted" {{ $product->listed_status == 'Unlisted' ? 'selected' : '' }}>Hidden from Public</option>
+                            <option value="Draft" {{ $product->listed_status == 'Draft' ? 'selected' : '' }}>Save as Draft</option>
                         </select>
                     </div>
                 </div>
@@ -57,197 +100,84 @@
             <!-- VISUAL ARTIFACTS -->
             <div class="space-y-8">
                 <div class="flex items-center space-x-6">
-                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-[6px] leading-none">Current Visual Suite</h3>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">Product Images</h3>
                     <div class="flex-grow h-[1px] bg-gray-100"></div>
                 </div>
 
                 <div class="grid grid-cols-3 gap-6">
                     @foreach($product->images as $image)
-                        <div class="relative aspect-square rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-gray-50">
+                        <div class="relative aspect-square rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-50">
                             <img src="{{ asset('storage/' . $image->image_url) }}" class="w-full h-full object-cover">
-                            <div class="absolute top-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-md text-[7px] font-black text-white uppercase tracking-widest">
-                                {{ $image->is_main ? 'Primary' : 'Detail' }}
-                            </div>
                         </div>
                     @endforeach
                 </div>
 
-                <div class="p-10 border-2 border-dashed border-gray-100 rounded-[30px] bg-gray-50/50 flex flex-col items-center text-center mt-8">
-                    <div class="h-16 w-16 bg-[#ff9933]/10 text-[#ff9933] rounded-2xl flex items-center justify-center mb-6">
-                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    </div>
-                    <p class="text-[12px] font-black text-gray-900 uppercase tracking-widest mb-2">Replace Entire Suite (Optional)</p>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-6">Uploading new images will replace the existing trinity. Exactly 3 required.</p>
-                    
-                    <input type="file" name="images[]" id="imageInput" multiple accept="image/*" class="text-[10px] font-black uppercase tracking-widest text-[#ff9933] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-[#ff9933] file:text-white hover:file:bg-[#fb8c00] transition-all cursor-pointer">
-
+                <div class="p-10 border-2 border-dashed border-gray-100 rounded-[30px] bg-gray-50/50 flex flex-col items-center text-center">
+                    <p class="text-[12px] font-bold text-gray-800 uppercase tracking-widest mb-1">Update Photos</p>
+                    <p class="text-[10px] text-gray-400 font-medium uppercase tracking-widest mb-6">Uploading new files will replace existing ones. Select 3 images.</p>
+                    <input type="file" name="images[]" id="imageInput" multiple accept="image/*" class="text-[10px] font-black uppercase tracking-widest text-blue-600 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition-all cursor-pointer">
                     <div id="imagePreview" class="grid grid-cols-3 gap-6 mt-10 w-full hidden"></div>
                 </div>
-
-                <!-- 3D AR PRODUCT VAULT -->
-                <div class="space-y-8 mt-12 p-10 bg-gray-50/50 rounded-[40px] border border-gray-100">
-                    <div class="flex items-center space-x-6">
-                        <h3 class="text-xs font-black text-[#ff9933] uppercase tracking-[6px] leading-none italic">3D AR Vault Update</h3>
-                        <div class="flex-grow h-[1px] bg-[#ff9933]/10"></div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- GLB Upload -->
-                        <div class="p-8 bg-white border-2 border-dashed border-gray-100 rounded-[30px] flex flex-col items-center text-center shadow-sm">
-                            <label class="text-[9px] font-black text-gray-400 tracking-[3px] uppercase mb-4 block leading-none">Web/Android (.GLB)</label>
-                            <input type="file" name="model_3d" id="glb_input" accept=".glb" class="hidden">
-                            <button type="button" onclick="document.getElementById('glb_input').click()" class="px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-[10px] font-black text-gray-600 uppercase tracking-widest hover:border-[#ff9933] transition-all">Replace GLB</button>
-                            
-                            @if($product->model_3d)
-                                <div class="mt-4 flex items-center space-x-2">
-                                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                                    <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest text-ellipsis overflow-hidden max-w-[150px]">Current: GLB Active</span>
-                                </div>
-                            @endif
-                            <div id="glb_status" class="mt-4 text-[9px] font-bold text-[#ff9933] hidden uppercase tracking-widest">New GLB Selected</div>
-                        </div>
-
-                        <!-- USDZ Upload -->
-                        <div class="p-8 bg-white border-2 border-dashed border-gray-100 rounded-[30px] flex flex-col items-center text-center shadow-sm">
-                            <label class="text-[9px] font-black text-gray-400 tracking-[3px] uppercase mb-4 block leading-none">iOS AR Support (.USDZ)</label>
-                            <input type="file" name="model_usdz" id="usdz_input" accept=".usdz" class="hidden">
-                            <button type="button" onclick="document.getElementById('usdz_input').click()" class="px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-[10px] font-black text-gray-600 uppercase tracking-widest hover:border-[#ff9933] transition-all">Replace USDZ</button>
-                            @if($product->model_usdz)
-                                <div class="mt-4 flex items-center space-x-2">
-                                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                                    <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest">iOS AR Matrix Ready</span>
-                                </div>
-                            @endif
-                            <div id="usdz_status" class="mt-4 text-[9px] font-bold text-[#ff9933] hidden uppercase tracking-widest">New Matrix Selected</div>
-                        </div>
-                    </div>
-
-                    <!-- PREVIEW ZONE -->
-                    <div id="viewer_container" class="{{ $product->model_3d ? '' : 'hidden' }} p-10 bg-black/5 rounded-[40px] border-4 border-white shadow-2xl relative overflow-hidden group">
-                        <div class="absolute top-6 left-6 z-10">
-                            <span class="px-4 py-2 bg-black/80 text-white text-[8px] font-black uppercase tracking-[4px] rounded-full backdrop-blur-md">Admin Visualization</span>
-                        </div>
-                        <model-viewer id="admin_preview" 
-                                      src="{{ $product->model_3d ? asset('storage/' . $product->model_3d) : '' }}"
-                                      style="width: 100%; height: 400px; --poster-color: transparent;"
-                                      camera-controls 
-                                      auto-rotate 
-                                      shadow-intensity="1">
-                        </model-viewer>
-                        <div class="mt-6 flex justify-center">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[4px]">Drag to orbit • Scroll to zoom</p>
-                        </div>
-                    </div>
-                </div>
-
-                <script>
-                    document.getElementById('glb_input').addEventListener('change', function(e) {
-                        const file = e.target.files[0];
-                        if (file) {
-                            document.getElementById('glb_status').classList.remove('hidden');
-                            document.getElementById('viewer_container').classList.remove('hidden');
-                            const url = URL.createObjectURL(file);
-                            document.getElementById('admin_preview').src = url;
-                        }
-                    });
-
-                    document.getElementById('usdz_input').addEventListener('change', function(e) {
-                        const file = e.target.files[0];
-                        if (file) {
-                            document.getElementById('usdz_status').classList.remove('hidden');
-                        }
-                    });
-                </script>
             </div>
 
-            <script>
-                document.getElementById('imageInput').addEventListener('change', function(e) {
-                    const preview = document.getElementById('imagePreview');
-                    preview.innerHTML = '';
-                    const files = Array.from(e.target.files);
-
-                    if (files.length > 0) {
-                        preview.classList.remove('hidden');
-                        if (files.length !== 3) {
-                            alert('Sacred Trinity Requirement: Please select exactly 3 images.');
-                            this.value = '';
-                            preview.classList.add('hidden');
-                            return;
-                        }
-
-                        files.forEach((file, index) => {
-                            const reader = new FileReader();
-                            reader.onload = function(event) {
-                                const div = document.createElement('div');
-                                div.className = 'relative aspect-square rounded-2xl overflow-hidden shadow-2xl border-4 border-white';
-                                div.innerHTML = `
-                                    <img src="${event.target.result}" class="w-full h-full object-cover">
-                                    <div class="absolute top-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-md text-[7px] font-black text-white uppercase tracking-widest">
-                                        ${index === 0 ? 'Primary' : 'Detail'}
-                                    </div>
-                                `;
-                                preview.appendChild(div);
-                            }
-                            reader.readAsDataURL(file);
-                        });
-                    } else {
-                        preview.classList.add('hidden');
-                    }
-                });
-            </script>
-
-            <!-- SACRED VALUE & STOCK -->
+            <!-- PRICING & STOCK -->
             <div class="space-y-8">
                 <div class="flex items-center space-x-6">
-                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-[6px] leading-none">Market Value & Inventory</h3>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">Pricing & Inventory</h3>
                     <div class="flex-grow h-[1px] bg-gray-100"></div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div>
-                        <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-4 block ml-1 leading-none">Wholesale Unit Price (₹)</label>
-                        <input type="number" name="price" step="0.01" required value="{{ $product->price }}" class="w-full bg-gray-50 border-none px-6 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#ff9933]/20 transition-all text-gray-900">
+                        <label class="text-[10px] font-bold text-gray-600 tracking-widest uppercase mb-4 block ml-1 leading-none">Selling Rate (₹)</label>
+                        <input type="number" name="price" step="0.01" required value="{{ $product->price }}" class="w-full bg-gray-50 border-none px-6 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-600/10 transition-all text-gray-900">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-4 block ml-1 leading-none">Market Price (MRP) (₹)</label>
-                        <input type="number" name="mrp" step="0.01" value="{{ $product->mrp }}" class="w-full bg-gray-50 border-none px-6 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#ff9933]/20 transition-all text-gray-400">
+                        <label class="text-[10px] font-bold text-gray-600 tracking-widest uppercase mb-4 block ml-1 leading-none">MRP (Original) (₹)</label>
+                        <input type="number" name="mrp" step="0.01" value="{{ $product->mrp }}" class="w-full bg-gray-50 border-none px-6 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-600/10 transition-all">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-[#ff9933] tracking-[3px] uppercase mb-4 block ml-1 leading-none">Manual Deflation (%)</label>
-                        <input type="number" name="discount_percent" value="{{ $product->discount_percent }}" min="0" max="100" placeholder="25" class="w-full bg-[#ff9933]/5 border-none px-6 py-5 rounded-2xl text-sm font-black text-[#ff9933] focus:ring-2 focus:ring-[#ff9933]/40 transition-all text-center">
+                        <label class="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-4 block ml-1 leading-none">Global Discount (%)</label>
+                        <input type="number" name="discount_percent" value="{{ $product->discount_percent }}" min="0" max="100" class="w-full bg-blue-50 border-none px-6 py-5 rounded-2xl text-sm font-bold text-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-all text-center">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-4 block ml-1 leading-none">Current Stock Level</label>
-                        <input type="number" name="stock" required value="{{ $product->stock }}" class="w-full bg-gray-50 border-none px-6 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#ff9933]/20 transition-all">
+                        <label class="text-[10px] font-bold text-gray-600 tracking-widest uppercase mb-4 block ml-1 leading-none">Stock Units Available</label>
+                        <input type="number" name="stock" required value="{{ $product->stock }}" class="w-full bg-gray-50 border-none px-6 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-600/10 transition-all">
                     </div>
                     <div class="md:col-span-2">
-                        <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-4 block ml-1 leading-none">Material / Divine Essence</label>
-                        <input type="text" name="material_type" value="{{ $product->material_type }}" class="w-full bg-gray-50 border-none px-6 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#ff9933]/20 transition-all">
+                        <label class="text-[10px] font-bold text-gray-600 tracking-widest uppercase mb-4 block ml-1 leading-none">Material Description</label>
+                        <input type="text" name="material_type" x-model="material_type" class="w-full bg-gray-50 border-none px-6 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-600/10 transition-all">
                     </div>
                 </div>
             </div>
 
             <!-- DESCRIPTION -->
             <div class="space-y-8">
-                <div class="flex items-center space-x-6">
-                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-[6px] leading-none">Artifact Chronicle</h3>
-                    <div class="flex-grow h-[1px] bg-gray-100"></div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-6">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">Product Narrative</h3>
+                        <div class="flex-grow h-[1px] bg-gray-100"></div>
+                    </div>
+                    <button type="button" @click="generateAI()" :disabled="ai_loading" class="inline-flex items-center px-6 py-3 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-blue-100 transition-all">
+                        <span x-show="!ai_loading">Auto-Rewrite with AI</span>
+                        <span x-show="ai_loading" class="animate-pulse">Updating content...</span>
+                    </button>
                 </div>
 
                 <div>
-                    <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-4 block ml-1 leading-none">Short Description</label>
-                    <textarea name="short_description" rows="3" placeholder="Handcrafted with pure brass, perfect for Deepawali rituals..." class="w-full bg-gray-50 border-none px-6 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#ff9933]/20 transition-all">{{ $product->short_description }}</textarea>
+                    <label class="text-[10px] font-bold text-gray-600 tracking-widest uppercase mb-4 block ml-1 leading-none">Short Information</label>
+                    <textarea name="short_description" x-model="short_description" rows="3" class="w-full bg-gray-50 border-none px-6 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-600/10 transition-all"></textarea>
                 </div>
 
                 <div>
-                    <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-4 block ml-1 leading-none">Full Narrative Description (Optional)</label>
-                    <textarea name="full_description" rows="6" placeholder="The intricate design represents the blessing of the divine..." class="w-full bg-gray-50 border-none px-6 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#ff9933]/20 transition-all">{{ $product->full_description }}</textarea>
+                    <label class="text-[10px] font-bold text-gray-600 tracking-widest uppercase mb-4 block ml-1 leading-none">Full Background Description</label>
+                    <textarea name="full_description" x-model="full_description" rows="6" class="w-full bg-gray-50 border-none px-6 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-600/10 transition-all"></textarea>
                 </div>
             </div>
 
             <div class="pt-10 flex items-center justify-between">
-                <a href="{{ route('admin.products.index') }}" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-500 transition-colors">Discard Changes</a>
-                <button type="submit" class="btn-luxury-saffron px-12 py-5 text-[11px] shadow-2xl">Synchronize Artifact Updates</button>
+                <a href="{{ route('admin.products.index') }}" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-red-500 transition-colors">Discard</a>
+                <button type="submit" class="bg-blue-700 text-white px-12 py-5 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl hover:bg-blue-800 transition-all">Update Product</button>
             </div>
         </form>
     </div>

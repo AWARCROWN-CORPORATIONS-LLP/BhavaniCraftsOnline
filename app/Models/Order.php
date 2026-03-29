@@ -38,18 +38,19 @@ class Order extends Model
      */
     public function encryptedId(): string
     {
-        return rtrim(strtr(base64_encode(Crypt::encryptString((string) $this->id)), '+/', '-_'), '=');
+        return str_replace(['+', '/', '='], ['-', '_', ''], Crypt::encryptString((string) $this->id));
     }
 
-    /**
-     * Decode an encrypted token back to a real order ID (int).
-     * Returns null if the token is invalid / tampered.
-     */
     public static function decryptOrderId(string $token): ?int
     {
         try {
-            $padded = str_pad(strtr($token, '-_', '+/'), strlen($token) + (4 - strlen($token) % 4) % 4, '=');
-            return (int) Crypt::decryptString(base64_decode($padded));
+            $base64 = str_replace(['-', '_'], ['+', '/'], $token);
+            $len = strlen($base64);
+            $remainder = $len % 4;
+            if ($remainder > 0) {
+                $base64 .= str_repeat('=', 4 - $remainder);
+            }
+            return (int) Crypt::decryptString($base64);
         } catch (\Exception $e) {
             return null;
         }

@@ -99,10 +99,10 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users',
-            'email' => 'required|string|email|max:255|unique:users',
+            'username' => 'required|string|min:3|max:20|alpha_dash|unique:users,username',
+            'email' => 'required|string|email:rfc,dns|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'phone' => 'required|string|max:15',
+            'phone' => 'required|digits:10|unique:users,phone',
             'user_type' => 'required|in:individual,business',
         ]);
 
@@ -118,8 +118,19 @@ class AuthController extends Controller
             'session_token' => hash('sha256', Str::random(60)),
         ]);
 
+        // Assign Dynamic Role from Database
+        $roleName = ($data['user_type'] === 'business') ? 'Franchise' : 'customer';
+        $role = \App\Models\Role::where('name', $roleName)->first();
+        if ($role) {
+            $user->roles()->attach($role->id);
+        }
+
         // Fire Registered Event (Triggers Email Verification)
-        event(new Registered($user));
+        try {
+            event(new Registered($user));
+        } catch (\Throwable $t) {
+            \Illuminate\Support\Facades\Log::error('Registration Event Failure: ' . $t->getMessage());
+        }
 
         Auth::login($user);
         $request->session()->regenerate();

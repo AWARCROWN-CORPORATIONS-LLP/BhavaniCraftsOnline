@@ -147,39 +147,80 @@
         </div>
     </div>
 
-    @if(isset($activeBroadcasts) && $activeBroadcasts->count() > 0)
-        <!-- ACTIVE BROADCAST TICKER -->
-        <div class="mt-12 space-y-4">
-            @foreach($activeBroadcasts as $broadcast)
-                <div class="card-premium p-6 flex flex-col md:flex-row items-center justify-between border-l-4 
-                    {{ $broadcast->urgency == 'critical' ? 'border-red-500 bg-red-50/30' : 
-                       ($broadcast->urgency == 'warning' ? 'border-amber-500 bg-amber-50/30' : 'border-blue-500 bg-blue-50/30') }}">
-                    <div class="flex items-start md:items-center space-x-4 mb-4 md:mb-0">
-                        <div class="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-xl 
-                            {{ $broadcast->urgency == 'critical' ? 'bg-red-500/10 text-red-500 animate-pulse' : 
-                               ($broadcast->urgency == 'warning' ? 'bg-amber-500/10 text-amber-500' : 'bg-blue-500/10 text-blue-500') }}">
-                            @if($broadcast->urgency == 'critical')
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                            @else
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            @endif
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-3 mb-1 mt-1">
-                                <h4 class="text-sm font-black uppercase tracking-widest text-gray-900 leading-none">{{ $broadcast->title }}</h4>
-                                <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-[2px] 
-                                    {{ $broadcast->target_audience == 'all' ? 'bg-gray-200 text-gray-600' : 'bg-purple-100 text-purple-600' }}">
-                                    {{ $broadcast->target_audience == 'all' ? 'Global' : 'Staff Only' }}
-                                </span>
-                            </div>
-                            <p class="text-[11px] font-bold text-gray-500 leading-relaxed">{{ $broadcast->message }}</p>
-                        </div>
-                    </div>
-                    <time class="text-[9px] font-black text-gray-400 uppercase tracking-[3px] ml-4 flex-shrink-0">{{ $broadcast->created_at->diffForHumans() }}</time>
+    <!-- SYSTEM TELEMETRY & ACTIVE BROADCASTS -->
+    <div class="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- SYSTEM TELEMETRY CORE -->
+        <div class="lg:col-span-8 card-premium p-10 relative overflow-hidden flex flex-col justify-between">
+            <div class="relative z-10 flex items-center justify-between mb-10">
+                <div>
+                   <h3 class="text-xl font-black text-gray-900 uppercase tracking-widest leading-none mb-4">Infrastructure Pulse</h3>
+                   <span class="text-[9px] font-black uppercase text-[#ff9933] border border-[#ff9933] px-3 py-1 rounded-full tracking-[2px]">System Telemetry Registry</span>
                 </div>
-            @endforeach
+                <div class="h-12 w-12 bg-gray-50 text-gray-400 flex items-center justify-center rounded-2xl shadow-inner group hover:text-[#1e40af] transition-all">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 relative z-10">
+                <div class="space-y-1">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Kernel / PHP</p>
+                    <p class="text-[12px] font-black text-gray-900">{{ $telemetry['php_version'] }} ({{ $telemetry['server_os'] }})</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Framework</p>
+                    <p class="text-[12px] font-black text-gray-900">Laravel v{{ $telemetry['laravel_version'] }}</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Memory Pulse</p>
+                    <p class="text-[12px] font-black text-gray-900">{{ $telemetry['memory_usage'] }} / {{ $telemetry['memory_limit'] }}</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Global Access</p>
+                    <p class="text-[12px] font-black text-gray-900">{{ $telemetry['environment'] }} • {{ $telemetry['timezone'] }}</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Security Integrity</p>
+                    <p class="text-[12px] font-black text-gray-900">{{ $telemetry['debug_mode'] }}</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Primary Registry</p>
+                    <p class="text-[12px] font-black text-gray-900 uppercase">{{ $telemetry['database'] }} Engine</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Infrastructure Status</p>
+                    <div class="flex items-center space-x-2">
+                         <div class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></div>
+                         <p class="text-[12px] font-black text-emerald-600 uppercase">Sanctuary Operational</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="absolute -right-20 -bottom-20 h-64 w-64 bg-gray-50 rounded-full blur-3xl opacity-50"></div>
         </div>
-    @endif
+
+        <!-- BROADCAST SHORTS -->
+        <div class="lg:col-span-4 card-premium p-10 relative overflow-hidden flex flex-col justify-between bg-[#111111]">
+            <h3 class="text-lg font-black text-white uppercase tracking-widest leading-none mb-8 z-10">Active Broadcasts</h3>
+            
+            <div class="space-y-6 z-10 overflow-y-auto max-h-[300px] no-scrollbar">
+                @forelse($activeBroadcasts as $broadcast)
+                    <div class="border-l-2 pl-4 py-1 
+                        {{ $broadcast->urgency == 'critical' ? 'border-red-500' : ($broadcast->urgency == 'warning' ? 'border-amber-500' : 'border-[#ff9933]') }}">
+                        <h4 class="text-[10px] font-black uppercase tracking-widest text-[#ff9933]">{{ $broadcast->title }}</h4>
+                        <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1 truncate">{{ $broadcast->message }}</p>
+                        <time class="text-[7px] font-black text-gray-600 uppercase tracking-widest mt-2 block">{{ $broadcast->created_at->diffForHumans() }}</time>
+                    </div>
+                @empty
+                    <div class="py-12 text-center">
+                         <p class="text-[10px] text-gray-700 font-black uppercase tracking-[4px]">No Active Broadcasts</p>
+                    </div>
+                @endforelse
+            </div>
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-80 pointer-events-none"></div>
+        </div>
+    </div>
+
 
     <!-- QUICK ACTIONS -->
     <div class="mt-16">

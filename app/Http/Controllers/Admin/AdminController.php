@@ -52,7 +52,21 @@ class AdminController extends Controller
                                 ->get();
         });
 
-        return view('admin.dashboard', compact('stats', 'activeBroadcasts', 'revenueTrend'));
+        // 🟢 System Telemetry: Real-time pulse of the sanctuary infrastructure
+        $telemetry = [
+            'php_version' => PHP_VERSION,
+            'laravel_version' => app()->version(),
+            'server_os' => PHP_OS_FAMILY,
+            'memory_limit' => ini_get('memory_limit'),
+            'memory_usage' => number_format(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
+            'environment' => app()->environment(),
+            'debug_mode' => config('app.debug') ? 'Enabled (Dev Mode)' : 'Disabled (Secure)',
+            'database' => config('database.default'),
+            'timezone' => config('app.timezone'),
+        ];
+
+        return view('admin.dashboard', compact('stats', 'activeBroadcasts', 'revenueTrend', 'telemetry'));
+
     }
 
     /**

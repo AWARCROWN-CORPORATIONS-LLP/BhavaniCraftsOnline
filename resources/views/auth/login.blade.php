@@ -4,9 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In | Bhavani Crafts</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        [x-cloak] { display: none !important; }
         body { font-family: 'Inter', sans-serif; background: #ffffff; }
         h1, h2 { font-family: 'Playfair Display', serif; }
         
@@ -77,14 +83,18 @@
         @media (min-width: 1024px) {
             .no-scroll-desktop { height: 100vh; overflow: hidden; }
         }
+        body.bc-busy { cursor: wait !important; overflow: hidden !important; }
+        body.bc-busy * { pointer-events: none !important; }
+        body.bc-busy .loader-overlay, body.bc-busy .loader-overlay * { pointer-events: all !important; }
     </style>
+
 </head>
-<body class="no-scroll-desktop flex flex-col lg:flex-row min-h-screen">
+<body class="no-scroll-desktop flex flex-col lg:flex-row min-h-screen" x-data="{ busy: false, loaderMsg: 'Verifying credentials...' }">
 
     <!-- Normal Circular Loader -->
-    <div id="masterLoader" class="loader-overlay">
+    <div id="masterLoader" class="loader-overlay" x-show="busy" x-cloak>
         <span class="spinner"></span>
-        <p id="loaderText" class="text-[#ff9933] mt-4 text-[10px] font-black tracking-[4px] uppercase animate-pulse">Please wait...</p>
+        <p class="text-[#ff9933] mt-4 text-[10px] font-black tracking-[4px] uppercase animate-pulse" x-text="loaderMsg">Please wait...</p>
     </div>
 
     <!-- Left: Immersive Artwork -->
@@ -140,7 +150,16 @@
                 </div>
 
                 <div class="pt-4">
-                    <button type="submit" class="btn-luxury w-full py-6 rounded-2xl font-black text-sm uppercase shadow-2xl">Sign In</button>
+                    <button type="submit" 
+                            :disabled="busy"
+                            class="inline-flex items-center justify-center btn-luxury w-full py-6 rounded-2xl font-black text-sm uppercase shadow-2xl relative overflow-hidden transition-all"
+                            :class="busy ? 'opacity-70 cursor-not-allowed' : ''">
+                        <svg x-show="busy" class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span x-text="busy ? loaderMsg : 'Sign In'">Sign In</span>
+                    </button>
                 </div>
             </form>
 
@@ -164,20 +183,20 @@
     </div>
 
     <script>
-        const masterLoader = document.getElementById('masterLoader');
-        const loaderText = document.getElementById('loaderText');
-
         // Password Login
         document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
-            loaderText.textContent = 'Verifying credentials...';
-            masterLoader.style.display = 'flex';
+            const alpineData = Alpine.$data(document.body);
+            
+            alpineData.loaderMsg = 'Verifying...';
+            alpineData.busy = true;
+            document.body.classList.add('bc-busy');
 
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
 
             try {
-                const response = await fetch('api/auth/login', {
+                const response = await fetch('{{ url("/") }}/{{ app()->getLocale() }}/api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -189,14 +208,19 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    window.location.href = result.redirect;
+                    alpineData.loaderMsg = 'Success! Redirecting...';
+                    setTimeout(() => {
+                        window.location.href = result.redirect;
+                    }, 500);
                 } else {
-                    masterLoader.style.display = 'none';
+                    alpineData.busy = false;
+                    document.body.classList.remove('bc-busy');
                     alert(result.message || 'Authentication failed.');
                 }
             } catch (error) {
-                masterLoader.style.display = 'none';
-                alert('Connection error.');
+                alpineData.busy = false;
+                document.body.classList.remove('bc-busy');
+                alert('Connection error. Please try again.');
             }
         };
     </script>

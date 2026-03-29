@@ -27,7 +27,7 @@ class CheckoutController extends Controller
         $cartQuery = CartItem::with(['product.images'])
             ->where('user_id', Auth::id());
 
-        if (request()->has('single_cart_item')) {
+        if (request()->filled('single_cart_item')) {
             $cartQuery->where('id', request('single_cart_item'));
         }
 
@@ -86,7 +86,7 @@ class CheckoutController extends Controller
 
         $cartQuery = CartItem::with('product')->where('user_id', Auth::id());
 
-        if ($request->has('single_cart_item')) {
+        if ($request->filled('single_cart_item')) {
             $cartQuery->where('id', $request->single_cart_item);
         }
 

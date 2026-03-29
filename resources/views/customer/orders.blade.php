@@ -3,8 +3,8 @@
 @section('customer_content')
 <div class="space-y-8 animate-fadeIn">
     <div>
-        <h2 class="text-2xl font-black text-onyx-900 uppercase tracking-widest leading-none mb-2">Sacred Orders</h2>
-        <p class="text-sm text-gray-400 font-medium">Trace the journey of your curated artifacts.</p>
+        <h2 class="text-2xl font-black text-onyx-900 uppercase tracking-widest leading-none mb-2">Order History</h2>
+        <p class="text-sm text-gray-400 font-medium">View and track your previous orders.</p>
     </div>
 
     @if(session('success'))
@@ -21,13 +21,13 @@
         <div class="px-8 py-5 bg-gray-50/50 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center space-x-8">
                 <div>
-                    <p class="text-[9px] font-black uppercase tracking-[2px] text-gray-400 mb-1">Ritual Ordered</p>
+                    <p class="text-[9px] font-black uppercase tracking-[2px] text-gray-400 mb-1">Order Date</p>
                     <p class="text-xs font-bold text-onyx-900">
                         {{ $order->ordered_date ? $order->ordered_date->format('d M, Y') : ($order->created_at?->format('d M, Y') ?? 'N/A') }}
                     </p>
                 </div>
                 <div>
-                    <p class="text-[9px] font-black uppercase tracking-[2px] text-gray-400 mb-1">Total Value</p>
+                    <p class="text-[9px] font-black uppercase tracking-[2px] text-gray-400 mb-1">Total Amount</p>
                     <p class="text-xs font-black text-onyx-900">₹{{ number_format($order->total_amount, 2) }}</p>
                 </div>
                 <div>
@@ -55,7 +55,7 @@
                 </div>
             </div>
             <div class="text-right">
-                <p class="text-[9px] font-black uppercase tracking-[2px] text-gray-400 mb-1">Registry Code</p>
+                <p class="text-[9px] font-black uppercase tracking-[2px] text-gray-400 mb-1">Order ID</p>
                 <p class="text-xs font-black text-onyx-900">#{{ $order->order_id_string }}</p>
             </div>
         </div>
@@ -89,7 +89,7 @@
                             {{ $order->items->first()?->product_name ?? 'Order Items' }}
                             @if($order->items->count() > 1) <span class="text-gray-400 font-normal text-xs">+ {{ $order->items->count() - 1 }} more</span> @endif
                         </p>
-                        <p class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">{{ $order->items->count() }} artifact(s)</p>
+                        <p class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">{{ $order->items->count() }} item(s)</p>
                     </div>
                 </div>
 
@@ -113,7 +113,7 @@
                     </a>
                     <a href="{{ route('customer.orders.show', $order->encryptedId()) }}" 
                        class="px-6 py-2.5 border border-gray-100 text-onyx-900 text-[10px] font-black uppercase tracking-widest rounded-xl hover:border-brand-500 hover:text-brand-500 transition-all">
-                        Registry Details →
+                        View Details →
                     </a>
                 </div>
             </div>
@@ -124,8 +124,8 @@
         <div class="h-20 w-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
             <svg class="h-10 w-10 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
         </div>
-        <p class="text-sm font-bold text-gray-400 uppercase tracking-widest italic">Your ritual history is clear.</p>
-        <a href="{{ url('/') }}" class="mt-8 text-[11px] font-black text-brand-500 uppercase tracking-[3px] hover:text-onyx-900 transition-colors">Start Your First Quest</a>
+        <p class="text-sm font-bold text-gray-400 uppercase tracking-widest italic">You have no orders yet.</p>
+        <a href="{{ url('/') }}" class="mt-8 text-[11px] font-black text-brand-500 uppercase tracking-[3px] hover:text-onyx-900 transition-colors">Start Shopping</a>
     </div>
     @endforelse
 

@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Partner Core | Bhavani Crafts</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+
+
     <!-- UI Core -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -70,9 +74,84 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+        /* ── Global Loading Overlay ───────────────────────── */
+        #bc-loading-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(17, 17, 17, 0.45);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #bc-loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .bc-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(30, 64, 175, 0.1);
+            border-top-color: #1e40af;
+            border-radius: 50%;
+            animation: bc-spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        @keyframes bc-spin { to { transform: rotate(360deg); } }
+
+        /* Disable interactions on page during loading */
+        body.bc-busy { cursor: wait !important; overflow: hidden !important; }
+        body.bc-busy * { pointer-events: none !important; }
+        body.bc-busy #bc-loading-overlay, body.bc-busy #bc-loading-overlay * { pointer-events: all !important; }
     </style>
 </head>
+
 <body x-data="{ sidebarOpen: true }" class="min-h-screen flex bg-gray-50 overflow-hidden">
+
+    {{-- ── Global Loading Overlay ───────────────────────────────────────── --}}
+    <div id="bc-loading-overlay">
+        <div class="text-center">
+            <div class="bc-spinner mx-auto mb-5"></div>
+            <p id="bc-loading-msg" class="text-white text-[10px] font-black uppercase tracking-[3px] opacity-80">Synchronizing...</p>
+        </div>
+    </div>
+
+    <script>
+        window.BcLoader = {
+            overlay: null, msg: null,
+            init() { 
+                this.overlay = document.getElementById('bc-loading-overlay'); 
+                this.msg = document.getElementById('bc-loading-msg'); 
+            },
+            show(message = 'Processing...') {
+                if (!this.overlay) this.init();
+                this.msg.textContent = message;
+                this.overlay.classList.add('active');
+                document.body.classList.add('bc-busy');
+            },
+            hide() {
+                if (!this.overlay) return;
+                this.overlay.classList.remove('active');
+                document.body.classList.remove('bc-busy');
+            }
+        };
+        document.addEventListener('submit', (e) => { 
+            if (e.target.dataset.noLoader === undefined) BcLoader.show('Synchronizing Business Data...'); 
+        });
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a[href]');
+            if (!link || link.target === '_blank' || link.href.includes('#') || link.href.startsWith('javascript') || link.href.startsWith('mailto')) return;
+            BcLoader.show('Loading Module...');
+        });
+        window.addEventListener('load', () => BcLoader.hide());
+    </script>
+
 
     <!-- SIDEBAR: Partner Hub -->
     <aside 

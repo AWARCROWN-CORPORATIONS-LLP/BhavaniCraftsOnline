@@ -19,17 +19,17 @@
             <table class="w-full text-left">
                 <thead class="bg-gray-50/50">
                     <tr>
-                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Product Details</th>
-                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Stock Level</th>
-                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Price (MRP)</th>
-                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Status</th>
-                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[3px] text-right">Actions</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Product Details</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Stock Level</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Price (MRP)</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Status</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px] text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($products as $product)
                         <tr class="hover:bg-gray-50/50 transition-all group">
-                            <td class="p-8">
+                            <td class="px-6 py-4">
                                 <div class="flex items-center space-x-4">
                                     <div class="h-16 w-16 rounded-xl bg-gray-100 flex items-center justify-center font-black text-gray-300 group-hover:bg-[#1e40af]/10 group-hover:text-[#1e40af] transition-all overflow-hidden border border-gray-100 uppercase shrink-0">
                                         @if($product->images->where('is_main', true)->first())
@@ -52,13 +52,13 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="p-8">
+                            <td class="px-6 py-4">
                                 <div class="flex items-center space-x-2">
                                     <span class="text-[11px] font-black text-gray-900">{{ $product->stock }}</span>
                                     <span class="text-[9px] text-gray-300 font-bold uppercase tracking-widest">Units in Stock</span>
                                 </div>
                             </td>
-                            <td class="p-8 font-black text-gray-900 text-sm">
+                            <td class="px-6 py-4 font-black text-gray-900 text-sm">
                                 <div class="flex items-end space-x-2">
                                     <span>₹{{ number_format($product->price, 2) }}</span>
                                     @if($product->discount_percent && $product->discount_percent > 0)
@@ -67,7 +67,7 @@
                                 </div>
                                 <p class="text-[8px] text-gray-300 italic line-through mt-0.5">MRP: ₹{{ number_format($product->mrp ?? $product->price, 2) }}</p>
                             </td>
-                            <td class="p-8">
+                            <td class="px-6 py-4">
                                 <span class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[2px] 
                                     @if($product->listed_status == 'Listed') bg-green-50 text-green-600 border border-green-100 
                                     @elseif($product->listed_status == 'Draft') bg-yellow-50 text-yellow-600 border border-yellow-100 
@@ -75,7 +75,7 @@
                                     {{ $product->listed_status }}
                                 </span>
                             </td>
-                            <td class="p-8 text-right">
+                            <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end space-x-4">
                                     <a href="{{ route('admin.products.edit', $product->id) }}" class="text-gray-400 hover:text-[#1e40af] transition-colors"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></a>
                                     <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this product?')">
@@ -88,8 +88,9 @@
                         </tr>
                     @empty
                         <tr>
-                                <td colspan="5" class="p-20 text-center text-gray-400 lowercase italic opacity-20">No products found.</td>
+                                <td colspan="5" class="py-12 text-center text-gray-400 lowercase italic opacity-20">No products found.</td>
                         </tr>
+
                     @endforelse
                 </tbody>
             </table>

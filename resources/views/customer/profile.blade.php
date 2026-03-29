@@ -4,8 +4,8 @@
 <div class="space-y-8 animate-fadeIn">
     <div class="bg-white rounded-[2rem] p-10 shadow-sm border border-gray-100">
         <div class="mb-10">
-            <h2 class="text-2xl font-black text-onyx-900 uppercase tracking-widest">Scribe Registry</h2>
-            <p class="text-sm text-gray-400 font-medium">Manage your sacred identity and credentials.</p>
+            <h2 class="text-2xl font-black text-onyx-900 uppercase tracking-widest">Your Profile</h2>
+            <p class="text-sm text-gray-400 font-medium">Manage your account details and password.</p>
         </div>
 
         <form action="{{ route('customer.profile.update') }}" method="POST" class="space-y-8">
@@ -35,7 +35,7 @@
             </div>
 
             <div class="pt-4">
-                <h3 class="text-sm font-black text-onyx-900 uppercase tracking-widest mb-6 italic">Secure Password Change</h3>
+                <h3 class="text-sm font-black text-onyx-900 uppercase tracking-widest mb-6 italic">Change Password</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div class="space-y-2">
                         <label class="text-[10px] font-black uppercase tracking-[2px] text-onyx-900 ml-1">Current Password</label>
@@ -59,7 +59,7 @@
 
             <div class="pt-10 flex justify-end">
                 <button type="submit" class="px-12 py-4 bg-brand-600 text-white text-[11px] font-black uppercase tracking-[4px] rounded-2xl hover:bg-brand-500 transition-all duration-500 shadow-xl shadow-brand-900/10 hover:shadow-brand-500/30">
-                    Refine Sacred Details
+                    Update Profile
                 </button>
             </div>
         </form>

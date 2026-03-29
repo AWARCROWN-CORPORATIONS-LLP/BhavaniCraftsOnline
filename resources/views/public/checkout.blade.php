@@ -119,7 +119,7 @@
                                     </div>
                                     <p class="text-sm font-black text-onyx-900">Cash on Delivery</p>
                                 </div>
-                                <p class="text-[10px] text-gray-400 font-medium">Pay when your artifacts arrive</p>
+                                <p class="text-[10px] text-gray-400 font-medium">Pay when your items arrive</p>
                             </div>
                         </label>
                     </div>
@@ -134,7 +134,7 @@
                     <div x-show="errorMessage" x-cloak class="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-medium mb-6" x-text="errorMessage"></div>
 
                     <!-- Place order button -->
-                    <button @click="initiatePayment()"
+                    <button type="button" @click="initiatePayment()"
                             :disabled="processing || !selectedAddressId"
                             class="w-full h-16 bg-brand-500 text-white text-[11px] font-black uppercase tracking-[3px] rounded-2xl shadow-xl shadow-brand-500/20 hover:bg-brand-600 transition-all flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed">
                         <template x-if="!processing">
@@ -245,7 +245,6 @@
 
         </div>
     </div>
-</div>
 
 {{-- Razorpay SDK --}}
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -286,7 +285,7 @@ function checkoutApp() {
 
         applyCoupon() {
             if (!this.couponCode) return;
-            BcLoader.show('Validating blessing...');
+            BcLoader.show('Checking coupon...');
             
             fetch('{{ route("checkout.coupon.apply") }}', {
                 method: 'POST',
@@ -336,13 +335,11 @@ function checkoutApp() {
             let missing = requiredFields.filter(f => !this.newAddress[f]);
             
             if (missing.length > 0) {
-                window.dispatchEvent(new CustomEvent('notify', { 
-                    detail: { message: 'Please fill all required ritual fields: ' + missing.join(', ').replace(/_/g, ' '), type: 'error' } 
-                }));
+                    detail: { message: 'Please fill all required fields: ' + missing.join(', ').replace(/_/g, ' '), type: 'error' } 
                 return;
             }
 
-            BcLoader.show('Sanctifying your address...');
+            BcLoader.show('Saving address...');
             try {
                 const res = await fetch('{{ route("customer.addresses.store") }}', {
                     method: 'POST',
@@ -362,7 +359,7 @@ function checkoutApp() {
                     this.showAddressModal = false;
                     // Reset to clean state
                     this.newAddress = { full_name: '', phone_number: '', address_line1: '', address_line2: '', city: '', state: '', postal_code: '', address_type: 'home', is_default: false };
-                    window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Divine address saved successfully!' } }));
+                    window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Address saved successfully!' } }));
                 } else {
                     // Handle validation errors from backend
                     let msg = data.message || 'Validation error.';
@@ -458,7 +455,7 @@ function checkoutApp() {
                     currency: data.currency,
                     order_id: data.razorpay_order_id,
                     name: 'Bhavani Crafts',
-                    description: 'Sacred Artifacts Collection',
+                    description: 'Bhavani Crafts Order',
                     image: '/favicon.ico',
                     prefill: {
                         name:    data.user_name,
@@ -531,7 +528,7 @@ function checkoutApp() {
 
 <!-- New Address Modal -->
 <div x-show="showAddressModal" x-cloak
-     class="fixed inset-0 z-[100] overflow-y-auto"
+     class="fixed inset-0 z-[100] overflow-hidden"
      x-transition:enter="transition ease-out duration-300"
      x-transition:enter-start="opacity-0"
      x-transition:enter-end="opacity-100"
@@ -539,11 +536,14 @@ function checkoutApp() {
      x-transition:leave-start="opacity-100"
      x-transition:leave-end="opacity-0">
     
-    <div class="flex items-center justify-center min-h-screen px-4 py-8 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity bg-onyx-900/60 backdrop-blur-sm" @click="showAddressModal = false"></div>
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-onyx-900/60 backdrop-blur-sm transition-opacity" @click="showAddressModal = false"></div>
 
-        <div class="inline-block w-full max-w-2xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-[2.5rem] border border-gray-100">
-            <div class="p-8 sm:p-12">
+    <!-- Scrollable Container -->
+    <div class="fixed inset-0 z-10 overflow-y-auto" data-lenis-prevent>
+        <div class="flex items-center justify-center min-h-full p-4 sm:p-8">
+            <div class="inline-block w-full max-w-2xl overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-[2.5rem] border border-gray-100">
+                <div class="p-8 sm:p-12">
                 <div class="flex items-center justify-between mb-10">
                     <div>
                         <span class="text-[10px] font-black uppercase tracking-[4px] text-brand-500 block mb-2">New Address</span>
@@ -588,12 +588,47 @@ function checkoutApp() {
                     <div class="space-y-2">
                         <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">State</label>
                         <select x-model="newAddress.state" class="w-full h-14 bg-gray-50 border-transparent rounded-2xl px-6 text-sm font-bold text-onyx-900 focus:bg-white focus:ring-brand-500 focus:border-brand-500 transition-all">
-                            <option value="">Select State</option>
-                            <option value="Karnataka">Karnataka</option>
-                            <option value="Maharashtra">Maharashtra</option>
-                            <option value="Delhi">Delhi</option>
-                            <option value="Tamil Nadu">Tamil Nadu</option>
-                            <option value="Other">Other</option>
+                            <option value="">Select State / UT</option>
+                            <optgroup label="States">
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                <option value="Assam">Assam</option>
+                                <option value="Bihar">Bihar</option>
+                                <option value="Chhattisgarh">Chhattisgarh</option>
+                                <option value="Goa">Goa</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Haryana">Haryana</option>
+                                <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                <option value="Jharkhand">Jharkhand</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Manipur">Manipur</option>
+                                <option value="Meghalaya">Meghalaya</option>
+                                <option value="Mizoram">Mizoram</option>
+                                <option value="Nagaland">Nagaland</option>
+                                <option value="Odisha">Odisha</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="Sikkim">Sikkim</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Telangana">Telangana</option>
+                                <option value="Tripura">Tripura</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Uttarakhand">Uttarakhand</option>
+                                <option value="West Bengal">West Bengal</option>
+                            </optgroup>
+                            <optgroup label="Union Territories">
+                                <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                <option value="Chandigarh">Chandigarh</option>
+                                <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra & Nagar Haveli and Daman & Diu</option>
+                                <option value="Delhi">Delhi (NCT)</option>
+                                <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                <option value="Ladakh">Ladakh</option>
+                                <option value="Lakshadweep">Lakshadweep</option>
+                                <option value="Puducherry">Puducherry</option>
+                            </optgroup>
                         </select>
                     </div>
                     <div class="space-y-2">
@@ -624,6 +659,8 @@ function checkoutApp() {
                 </div>
             </div>
         </div>
+    </div>
+    </div>
     </div>
 </div>
 @endsection

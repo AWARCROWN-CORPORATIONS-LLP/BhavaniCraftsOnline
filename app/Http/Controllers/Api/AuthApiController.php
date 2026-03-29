@@ -130,10 +130,10 @@ class AuthApiController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users',
-            'email' => 'required|string|email|max:255|unique:users',
+            'username' => 'required|string|min:3|max:20|alpha_dash|unique:users,username',
+            'email' => 'required|string|email:rfc,dns|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'phone' => 'required|string|max:15',
+            'phone' => 'required|digits:10|unique:users,phone',
             'user_type' => 'required|in:individual,business',
         ]);
 
@@ -157,18 +157,17 @@ class AuthApiController extends Controller
                 'session_token' => hash('sha256', Str::random(60)),
             ]);
 
-            // Assign Dynamic Role from Database
-            $roleName = ($request->user_type === 'business') ? 'franchise' : 'customer';
+            // Assign Dynamic Role from Database (Case Sensitive Check)
+            $roleName = ($request->user_type === 'business') ? 'Franchise' : 'customer';
             $role = \App\Models\Role::where('name', $roleName)->first();
             if ($role) {
                 $user->roles()->attach($role->id);
             }
 
-            // Fire Registered Event
-            event(new Registered($user));
-            
-            // Manual Verification Mail Dispatch (Bypassing potential Notification issues)
+            // Fire Registered Event & Manual Verification Mail Dispatch
             try {
+                event(new Registered($user));
+                
                 $verificationUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
                     'verification.verify',
                     now()->addMinutes(120),
@@ -179,7 +178,7 @@ class AuthApiController extends Controller
                     $message->to($user->email)->subject('Verify Your Account - Bhavani Crafts');
                 });
             } catch (\Throwable $t) {
-                \Illuminate\Support\Facades\Log::error('Manual Mail Verification Failure: ' . $t->getMessage());
+                \Illuminate\Support\Facades\Log::error('Email Dispatch Failure: ' . $t->getMessage());
             }
 
             if ($user->user_type === 'individual') {
@@ -331,5 +330,22 @@ class AuthApiController extends Controller
             'message' => 'Success! Logged in via OTP.',
             'redirect' => $redirectPath
         ], 200);
+    }
+
+    /**
+     * Real-time Username Availability Check
+     */
+    public function checkUsername(Request $request)
+    {
+        $username = $request->query('username');
+        if (!$username || strlen($username) < 3) {
+            return response()->json(['available' => false, 'message' => 'Username too short.']);
+        }
+
+        $exists = User::where('username', $username)->exists();
+        return response()->json([
+            'available' => !$exists,
+            'message' => $exists ? 'Username is already taken.' : 'Username is available.'
+        ]);
     }
 }

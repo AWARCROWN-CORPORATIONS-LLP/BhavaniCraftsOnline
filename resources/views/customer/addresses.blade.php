@@ -4,19 +4,19 @@
 <div class="space-y-8 animate-fadeIn" x-data="{ showForm: false }">
     <div class="flex items-center justify-between mb-2">
         <div>
-            <h2 class="text-2xl font-black text-onyx-900 uppercase tracking-widest leading-none mb-2">Delivery Registries</h2>
-            <p class="text-sm text-gray-400 font-medium">Manage the sanctuaries where your artifacts arrive.</p>
+            <h2 class="text-2xl font-black text-onyx-900 uppercase tracking-widest leading-none mb-2">Saved Addresses</h2>
+            <p class="text-sm text-gray-400 font-medium">Manage your delivery locations.</p>
         </div>
         <button @click="showForm = !showForm" 
                 class="px-6 py-3 bg-brand-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-brand-600 transition-all duration-500 shadow-lg shadow-brand-500/20">
-            <span x-text="showForm ? 'Cancel Entry' : 'Add New Sanctuary'"></span>
+            <span x-text="showForm ? 'Cancel' : 'Add New Address'"></span>
         </button>
     </div>
 
     <!-- Address Form -->
     <div x-show="showForm" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
          class="bg-white rounded-[2rem] p-10 shadow-xl border border-brand-500/20 mb-12">
-        <h3 class="text-sm font-black text-onyx-900 uppercase tracking-widest mb-8 italic">Sanctuary Details</h3>
+        <h3 class="text-sm font-black text-onyx-900 uppercase tracking-widest mb-8 italic">Address Details</h3>
         <form action="{{ route('customer.addresses.store') }}" method="POST" class="space-y-6">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -25,7 +25,7 @@
                     <input type="text" name="full_name" required class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-onyx-900 focus:ring-2 focus:ring-brand-500/20 transition-all">
                 </div>
                 <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-[2px] text-onyx-900 ml-1">Sanctuary Phone</label>
+                    <label class="text-[10px] font-black uppercase tracking-[2px] text-onyx-900 ml-1">Phone Number</label>
                     <input type="text" name="phone_number" required class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-onyx-900 focus:ring-2 focus:ring-brand-500/20 transition-all">
                 </div>
                 <div class="md:col-span-2 space-y-2">
@@ -49,21 +49,21 @@
                     <input type="text" name="postal_code" required class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-onyx-900 focus:ring-2 focus:ring-brand-500/20 transition-all">
                 </div>
                 <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-[2px] text-onyx-900 ml-1">Sanctuary Type</label>
+                    <label class="text-[10px] font-black uppercase tracking-[2px] text-onyx-900 ml-1">Address Type</label>
                     <select name="address_type" class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-onyx-900 focus:ring-2 focus:ring-brand-500/20 transition-all appearance-none">
-                        <option value="home">Sacred Home</option>
-                        <option value="office">Work Temple</option>
-                        <option value="other">Other Domain</option>
+                        <option value="home">Home</option>
+                        <option value="office">Office</option>
+                        <option value="other">Other</option>
                     </select>
                 </div>
             </div>
             <div class="flex items-center space-x-3 pt-4">
                 <input type="checkbox" name="is_default" value="1" id="is_default" class="h-5 w-5 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20">
-                <label for="is_default" class="text-xs font-bold text-gray-500 uppercase tracking-widest">Mark as Primary Delivery Point</label>
+                <label for="is_default" class="text-xs font-bold text-gray-500 uppercase tracking-widest">Set as default address</label>
             </div>
             <div class="pt-6">
                 <button type="submit" class="w-full py-5 bg-brand-600 text-white text-xs font-black uppercase tracking-[4px] rounded-2xl hover:bg-brand-500 transition-all duration-500 shadow-xl shadow-brand-900/10 hover:shadow-brand-500/30">
-                    Register Sanctuary
+                    Save Address
                 </button>
             </div>
         </form>
@@ -75,7 +75,7 @@
         <div class="bg-white rounded-[2rem] p-8 shadow-sm border {{ $address->is_default ? 'border-brand-500 shadow-brand-500/5' : 'border-gray-100 hover:border-brand-300' }} transition-all duration-500 relative group overflow-hidden">
             @if($address->is_default)
             <div class="absolute top-0 right-10 bg-brand-500 text-white text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-b-xl shadow-lg">
-                Primary Registry
+                Default Address
             </div>
             @endif
 
@@ -106,10 +106,10 @@
                     <button type="submit" class="text-[10px] font-black uppercase tracking-widest text-brand-500 hover:text-onyx-900 transition-colors">Set Primary</button>
                 </form>
                 @endif
-                <form action="{{ route('customer.addresses.delete', $address->id) }}" method="POST" onsubmit="return confirm('Remove this sanctuary?')">
+                <form action="{{ route('customer.addresses.delete', $address->id) }}" method="POST" onsubmit="return confirm('Delete this address?')">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-600 transition-colors">Dissolve Registry</button>
+                    <button type="submit" class="text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-600 transition-colors">Delete Address</button>
                 </form>
             </div>
         </div>
@@ -118,8 +118,8 @@
             <div class="h-20 w-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
                 <svg class="h-10 w-10 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             </div>
-            <p class="text-sm font-bold text-gray-400 uppercase tracking-widest italic">No sanctuaries registered yet.</p>
-            <button @click="showForm = true" class="mt-8 text-[11px] font-black text-brand-500 uppercase tracking-[3px] hover:text-onyx-900 transition-colors">Initiate First Entry</button>
+            <p class="text-sm font-bold text-gray-400 uppercase tracking-widest italic">No addresses saved yet.</p>
+            <button @click="showForm = true" class="mt-8 text-[11px] font-black text-brand-500 uppercase tracking-[3px] hover:text-onyx-900 transition-colors">Add Your First Address</button>
         </div>
         @endforelse
     </div>

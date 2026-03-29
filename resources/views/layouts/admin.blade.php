@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bhavani Admin | Store Administration</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+
+
     <!-- UI Core -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,7 +43,9 @@
             box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
             border-radius: 20px;
             transition: transform 0.3s;
+            width: 100%;
         }
+
 
         .card-premium:hover { transform: translateY(-5px); }
 
@@ -76,9 +82,86 @@
             -webkit-text-fill-color: transparent;
             font-weight: 900;
         }
+
+        /* ── Global Loading Overlay ───────────────────────── */
+        #bc-loading-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(17, 17, 17, 0.45);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #bc-loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .bc-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(30, 64, 175, 0.1);
+            border-top-color: #1e40af;
+            border-radius: 50%;
+            animation: bc-spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        @keyframes bc-spin { to { transform: rotate(360deg); } }
+
+        /* Disable interactions on page during loading */
+        body.bc-busy { cursor: wait !important; overflow: hidden !important; }
+        body.bc-busy * { pointer-events: none !important; }
+        body.bc-busy #bc-loading-overlay, body.bc-busy #bc-loading-overlay * { pointer-events: all !important; }
     </style>
+
 </head>
 <body x-data="{ sidebarOpen: true }" class="min-h-screen flex bg-gray-50 overflow-hidden">
+
+    {{-- ── Global Loading Overlay ───────────────────────────────────────── --}}
+    <div id="bc-loading-overlay">
+        <div class="text-center">
+            <div class="bc-spinner mx-auto mb-5"></div>
+            <p id="bc-loading-msg" class="text-white text-[10px] font-black uppercase tracking-[3px] opacity-80">Syncing Records...</p>
+        </div>
+    </div>
+
+    <script>
+        window.BcLoader = {
+            overlay: null, msg: null,
+            init() { 
+                this.overlay = document.getElementById('bc-loading-overlay'); 
+                this.msg = document.getElementById('bc-loading-msg'); 
+            },
+            show(message = 'Processing...') {
+                if (!this.overlay) this.init();
+                this.msg.textContent = message;
+                this.overlay.classList.add('active');
+                document.body.classList.add('bc-busy');
+            },
+            hide() {
+                if (!this.overlay) return;
+                this.overlay.classList.remove('active');
+                document.body.classList.remove('bc-busy');
+            }
+        };
+        // Auto-intercept forms & standard links
+        document.addEventListener('submit', (e) => { 
+            if (e.target.dataset.noLoader === undefined) BcLoader.show('Synchronizing...'); 
+        });
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a[href]');
+            if (!link || link.target === '_blank' || link.href.includes('#') || link.href.startsWith('javascript') || link.href.startsWith('mailto')) return;
+            // Handle Livewire specifics if needed, but for standard admin pages:
+            BcLoader.show('Switching View...');
+        });
+        window.addEventListener('load', () => BcLoader.hide());
+    </script>
+
 
     <!-- SIDEBAR: Elite Core -->
     <aside 
@@ -165,6 +248,12 @@
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
                 <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Order Management</span>
             </a>
+
+            <a href="{{ route('admin.billing.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.billing.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Billing Terminal</span>
+            </a>
+
 
             <a href="{{ route('admin.restocks.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.restocks.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
@@ -287,7 +376,8 @@
         </header>
 
         <!-- CONTENT -->
-        <div class="p-8 lg:p-12 animate-in fade-in duration-700">
+        <div class="p-4 md:p-6 lg:p-10 animate-in fade-in duration-700 w-full max-w-[100%] overflow-x-hidden">
+
             @if(session('success'))
                 <div x-data="{ show: true }" x-show="show" x-transition.duration.500ms class="mb-8 p-6 bg-green-50 border-l-4 border-green-500 rounded-2xl flex items-center justify-between">
                     <div class="flex items-center space-x-4">
