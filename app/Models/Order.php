@@ -30,30 +30,16 @@ class Order extends Model
         'created_at'   => 'datetime',
     ];
 
-    // ── Encrypted URL helpers ──────────────────────────────────────────────
-
-    /**
-     * Returns a URL-safe encrypted token that hides the real order ID.
-     * Use this in every route() call instead of $order->id.
-     */
+   
     public function encryptedId(): string
     {
-        return str_replace(['+', '/', '='], ['-', '_', ''], Crypt::encryptString((string) $this->id));
+        return $this->order_id_string;
     }
 
     public static function decryptOrderId(string $token): ?int
     {
-        try {
-            $base64 = str_replace(['-', '_'], ['+', '/'], $token);
-            $len = strlen($base64);
-            $remainder = $len % 4;
-            if ($remainder > 0) {
-                $base64 .= str_repeat('=', 4 - $remainder);
-            }
-            return (int) Crypt::decryptString($base64);
-        } catch (\Exception $e) {
-            return null;
-        }
+        $order = self::where('order_id_string', $token)->first();
+        return $order ? $order->id : null;
     }
 
     // ── Relationships ──────────────────────────────────────────────────────

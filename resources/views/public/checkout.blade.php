@@ -1,13 +1,231 @@
 @extends('layouts.public')
 
 @section('content')
+<script>
+function checkoutApp() {
+    return {
+        selectedAddressId: @php echo $addresses->where("is_default", true)->first()?->id ?? $addresses->first()?->id ?? 'null'; @endphp,
+        paymentMethod: 'razorpay',
+        processing: false,
+        errorMessage: '',
+        singleCartItemId: new URLSearchParams(window.location.search).get('single_cart_item'),
+        addresses: @json($addresses),
+        showAddressModal: false,
+        newAddress: {
+            full_name: '',
+            phone_number: '',
+            address_line1: '',
+            address_line2: '',
+            city: '',
+            state: '',
+            postal_code: '',
+            address_type: 'home',
+            is_default: true
+        },
+        
+        // Coupon Data
+        couponCode: '',
+        appliedCoupon: @json($appliedCoupon),
+        discountAmount: {{ $discountAmount }},
+        subtotal: {{ $subtotal }},
+        
+        // Computed-like getters for totals
+        get discountedSubtotal() { return Math.max(0, this.subtotal - this.discountAmount); },
+        get gstAmount() { return Math.round(this.discountedSubtotal * 0.18 * 100) / 100; },
+        get shippingAmount() { return this.discountedSubtotal >= 999 ? 0 : 80; },
+        get totalAmount() { return this.discountedSubtotal + this.gstAmount + this.shippingAmount; },
+
+        // Session Timer Logic
+        timeLeft: 300, // 5 minutes in seconds
+        timerExpired: false,
+        get timerText() {
+            const minutes = Math.floor(this.timeLeft / 60);
+            const seconds = this.timeLeft % 60;
+            return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        },
+
+        init() {
+            // Auto-switch payment method if total exceeds 5000 (COD safeguard)
+            this.$watch('totalAmount', value => {
+                if (value > 5000 && this.paymentMethod === 'cod') {
+                    this.paymentMethod = 'razorpay';
+                    window.dispatchEvent(new CustomEvent('notify', { 
+                        detail: { message: 'Cash on Delivery is only available for orders below ₹5,000. Switched to online payment.', type: 'info' } 
+                    }));
+                }
+            });
+
+            const countdown = setInterval(() => {
+                if (this.timeLeft > 0) {
+                    this.timeLeft--;
+                } else {
+                    clearInterval(countdown);
+                    this.timerExpired = true;
+                    this.closeCheckout();
+                }
+            }, 1000);
+        },
+
+        closeCheckout() {
+            BcLoader.show('Session expired. Redirecting...');
+            window.location.href = '{{ route("home") }}?checkout_status=expired';
+        },
+
+        applyCoupon() {
+            if (!this.couponCode) return;
+            BcLoader.show('Checking coupon...');
+            fetch('{{ route("checkout.coupon.apply") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                body: JSON.stringify({ coupon_code: this.couponCode })
+            })
+            .then(r => r.json())
+            .then(data => {
+                BcLoader.hide();
+                if (data.error) {
+                    window.dispatchEvent(new CustomEvent('notify', { detail: { message: data.error, type: 'error' } }));
+                    return;
+                }
+                this.appliedCoupon = { code: this.couponCode };
+                this.discountAmount = parseFloat(data.discount_amount);
+                this.couponCode = '';
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: data.success, type: 'success' } }));
+            })
+            .catch(() => {
+                BcLoader.hide();
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Unexpected error. Try again.', type: 'error' } }));
+            });
+        },
+
+        removeCoupon() {
+            BcLoader.show('Removing coupon...');
+            fetch('{{ route("checkout.coupon.remove") }}', {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                BcLoader.hide();
+                this.appliedCoupon = null;
+                this.discountAmount = 0;
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: data.success } }));
+            });
+        },
+
+        async saveAddress() {
+            const requiredFields = ['full_name', 'phone_number', 'address_line1', 'city', 'state', 'postal_code'];
+            let missing = requiredFields.filter(f => !this.newAddress[f]);
+            if (missing.length > 0) {
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Please fill all required fields: ' + missing.join(', ').replace(/_/g, ' '), type: 'error' } }));
+                return;
+            }
+            BcLoader.show('Saving address...');
+            try {
+                const res = await fetch('{{ route("customer.addresses.store") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: JSON.stringify(this.newAddress)
+                });
+                const data = await res.json();
+                if (res.ok && data.address) {
+                    this.addresses.push(data.address);
+                    this.selectedAddressId = data.address.id;
+                    this.showAddressModal = false;
+                    this.newAddress = { full_name: '', phone_number: '', address_line1: '', address_line2: '', city: '', state: '', postal_code: '', address_type: 'home', is_default: false };
+                    window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Address saved successfully!' } }));
+                } else {
+                    let msg = data.message || 'Validation error.';
+                    if (data.errors) msg = Object.values(data.errors).flat().join(' ');
+                    window.dispatchEvent(new CustomEvent('notify', { detail: { message: msg, type: 'error' } }));
+                }
+            } catch (e) {
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Connection interrupted. Please try again.', type: 'error' } }));
+            } finally {
+                BcLoader.hide();
+            }
+        },
+
+        initiatePayment() {
+            if (!this.selectedAddressId) { this.errorMessage = 'Please select a delivery address before proceeding.'; return; }
+            this.processing = true; this.errorMessage = '';
+            if (this.paymentMethod === 'cod') { BcLoader.show('Placing your order...'); this.placeCodOrder(); }
+            else { BcLoader.show('Connecting to payment gateway...'); this.initiateRazorpay(); }
+        },
+
+        placeCodOrder() {
+            fetch('{{ route("checkout.create_order") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                body: JSON.stringify({ address_id: this.selectedAddressId, payment_method: 'cod', single_cart_item: this.singleCartItemId })
+            })
+            .then(r => r.json())
+            .then(data => {
+                this.processing = false; BcLoader.hide();
+                if (data.error) { this.errorMessage = data.error; return; }
+                if (data.success) window.location.href = data.redirect;
+            })
+            .catch(() => { BcLoader.hide(); this.processing = false; this.errorMessage = 'Something went wrong. Please try again.'; });
+        },
+
+        initiateRazorpay() {
+            fetch('{{ route("checkout.create_order") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                body: JSON.stringify({ address_id: this.selectedAddressId, payment_method: 'razorpay', single_cart_item: this.singleCartItemId })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) { this.errorMessage = data.error; this.processing = false; BcLoader.hide(); return; }
+                const options = {
+                    key: data.key, amount: data.amount, currency: data.currency, order_id: data.razorpay_order_id, name: 'Bhavani Crafts', description: 'Bhavani Crafts Order', image: '/favicon.ico',
+                    prefill: { name: data.user_name, email: data.user_email, contact: data.user_phone }, theme: { color: '#C62828' },
+                    handler: (response) => { BcLoader.show('Verifying payment...'); this.verifyPayment(response); },
+                    modal: { ondismiss: () => { BcLoader.hide(); this.processing = false; this.errorMessage = 'Payment was cancelled. Please try again.'; } }
+                };
+                BcLoader.hide(); const rzp = new Razorpay(options); rzp.open();
+            })
+            .catch(() => { BcLoader.hide(); this.processing = false; this.errorMessage = 'Something went wrong. Please try again.'; });
+        },
+
+        verifyPayment(response) {
+            fetch('{{ route("checkout.verify_payment") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                body: JSON.stringify({ razorpay_payment_id: response.razorpay_payment_id, razorpay_order_id: response.razorpay_order_id, razorpay_signature: response.razorpay_signature })
+            })
+            .then(r => r.json())
+            .then(data => {
+                this.processing = false; BcLoader.hide();
+                if (data.success) window.location.href = data.redirect;
+                else this.errorMessage = data.message || 'Payment verification failed.';
+            })
+            .catch(() => { BcLoader.hide(); this.processing = false; this.errorMessage = 'Verification error.'; });
+        }
+    };
+}
+</script>
+
 <div x-data="checkoutApp()" class="bg-gray-50 min-h-screen py-16 pb-32">
     <div class="container mx-auto px-4 lg:px-8 max-w-7xl">
 
-        <!-- Header -->
-        <div class="mb-12">
-            <span class="text-[10px] font-black uppercase tracking-[4px] text-brand-500 block mb-2">Secure Checkout</span>
-            <h1 class="text-4xl font-serif font-bold text-onyx-900 italic">Checkout <span class="text-brand-500">Process</span></h1>
+        <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+                <span class="text-[10px] font-black uppercase tracking-[4px] text-brand-500 block mb-2">Secure Checkout</span>
+                <h1 class="text-4xl font-serif font-bold text-onyx-900 italic">Checkout <span class="text-brand-500">Process</span></h1>
+            </div>
+            
+            <!-- Countdown Timer Card -->
+            <div class="bg-white px-6 py-4 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 flex items-center space-x-4 animate-pulse-slow">
+                <div class="h-10 w-10 rounded-full bg-brand-50 flex items-center justify-center">
+                    <svg class="h-5 w-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Session Expiry</span>
+                    <span class="text-lg font-black text-onyx-900 tracking-widest" :class="timeLeft < 60 ? 'text-red-600 animate-pulse' : ''" x-text="timerText">5:00</span>
+                </div>
+            </div>
         </div>
 
         @if(session('success'))
@@ -67,6 +285,7 @@
 
                     <div class="space-y-6">
                         @foreach($cartItems as $item)
+                        {{ /** @var \App\Models\CartItem $item */ }}
                         <div class="flex items-center space-x-5">
                             <div class="h-20 w-20 rounded-2xl overflow-hidden bg-gray-50 shrink-0 border border-gray-100">
                                 @php $img = $item->product->images->where('is_main', true)->first() ?? $item->product->images->first(); @endphp
@@ -108,8 +327,10 @@
                         </label>
 
                         <!-- COD -->
-                        <label class="cursor-pointer">
-                            <input type="radio" name="payment_method" value="cod" x-model="paymentMethod" class="sr-only peer">
+                        <label class="cursor-pointer" :class="totalAmount > 5000 ? 'opacity-50 cursor-not-allowed' : ''">
+                            <input type="radio" name="payment_method" value="cod" x-model="paymentMethod" 
+                                   :disabled="totalAmount > 5000"
+                                   class="sr-only peer">
                             <div class="p-5 rounded-2xl border-2 transition-all duration-300
                                         peer-checked:border-brand-500 peer-checked:bg-brand-50/30
                                         border-gray-100 hover:border-gray-200">
@@ -125,9 +346,16 @@
                     </div>
 
                     <!-- COD notice -->
-                    <div x-show="paymentMethod === 'cod'" x-cloak
+                    <div x-show="paymentMethod === 'cod' && totalAmount <= 5000" x-cloak
                          class="p-4 bg-yellow-50 border border-yellow-100 rounded-2xl text-yellow-700 text-[11px] font-medium mb-6">
                         💰 Cash on Delivery is available. Please keep the exact amount ready at the time of delivery. COD charges ₹30 may apply.
+                    </div>
+
+                    <!-- COD Disabled Notice -->
+                    <div x-show="totalAmount > 5000" x-cloak
+                         class="p-4 bg-brand-50 border border-brand-100 rounded-2xl text-brand-700 text-[11px] font-medium mb-6 flex items-center space-x-3">
+                        <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>Cash on Delivery is restricted for orders above ₹5,000 to ensure security. Please proceed with Online Payment.</span>
                     </div>
 
                     <!-- Error message -->
@@ -248,283 +476,6 @@
 
 {{-- Razorpay SDK --}}
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-<script>
-function checkoutApp() {
-    return {
-        selectedAddressId: @php echo $addresses->where("is_default", true)->first()?->id ?? $addresses->first()?->id ?? 'null'; @endphp,
-        paymentMethod: 'razorpay',
-        processing: false,
-        errorMessage: '',
-        singleCartItemId: new URLSearchParams(window.location.search).get('single_cart_item'),
-        addresses: @json($addresses),
-        showAddressModal: false,
-        newAddress: {
-            full_name: '',
-            phone_number: '',
-            address_line1: '',
-            address_line2: '',
-            city: '',
-            state: '',
-            postal_code: '',
-            address_type: 'home',
-            is_default: true
-        },
-        
-        // Coupon Data
-        couponCode: '',
-        appliedCoupon: @json($appliedCoupon),
-        discountAmount: {{ $discountAmount }},
-        subtotal: {{ $subtotal }},
-        
-        // Computed-like getters for totals
-        get discountedSubtotal() { return Math.max(0, this.subtotal - this.discountAmount); },
-        get gstAmount() { return Math.round(this.discountedSubtotal * 0.18 * 100) / 100; },
-        get shippingAmount() { return this.discountedSubtotal >= 999 ? 0 : 80; },
-        get totalAmount() { return this.discountedSubtotal + this.gstAmount + this.shippingAmount; },
-
-        applyCoupon() {
-            if (!this.couponCode) return;
-            BcLoader.show('Checking coupon...');
-            
-            fetch('{{ route("checkout.coupon.apply") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ coupon_code: this.couponCode })
-            })
-            .then(r => r.json())
-            .then(data => {
-                BcLoader.hide();
-                if (data.error) {
-                    window.dispatchEvent(new CustomEvent('notify', { detail: { message: data.error, type: 'error' } }));
-                    return;
-                }
-                this.appliedCoupon = { code: this.couponCode };
-                this.discountAmount = parseFloat(data.discount_amount);
-                this.couponCode = '';
-                window.dispatchEvent(new CustomEvent('notify', { detail: { message: data.success, type: 'success' } }));
-            })
-            .catch(() => {
-                BcLoader.hide();
-                window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Unexpected error. Try again.', type: 'error' } }));
-            });
-        },
-
-        removeCoupon() {
-            BcLoader.show('Removing coupon...');
-            fetch('{{ route("checkout.coupon.remove") }}', {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
-            })
-            .then(r => r.json())
-            .then(data => {
-                BcLoader.hide();
-                this.appliedCoupon = null;
-                this.discountAmount = 0;
-                window.dispatchEvent(new CustomEvent('notify', { detail: { message: data.success } }));
-            });
-        },
-
-        async saveAddress() {
-            // Validate all required fields
-            const requiredFields = ['full_name', 'phone_number', 'address_line1', 'city', 'state', 'postal_code'];
-            let missing = requiredFields.filter(f => !this.newAddress[f]);
-            
-            if (missing.length > 0) {
-                    detail: { message: 'Please fill all required fields: ' + missing.join(', ').replace(/_/g, ' '), type: 'error' } 
-                return;
-            }
-
-            BcLoader.show('Saving address...');
-            try {
-                const res = await fetch('{{ route("customer.addresses.store") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(this.newAddress)
-                });
-                
-                const data = await res.json();
-                
-                if (res.ok && data.address) {
-                    this.addresses.push(data.address);
-                    this.selectedAddressId = data.address.id;
-                    this.showAddressModal = false;
-                    // Reset to clean state
-                    this.newAddress = { full_name: '', phone_number: '', address_line1: '', address_line2: '', city: '', state: '', postal_code: '', address_type: 'home', is_default: false };
-                    window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Address saved successfully!' } }));
-                } else {
-                    // Handle validation errors from backend
-                    let msg = data.message || 'Validation error.';
-                    if (data.errors) {
-                        msg = Object.values(data.errors).flat().join(' ');
-                    }
-                    window.dispatchEvent(new CustomEvent('notify', { detail: { message: msg, type: 'error' } }));
-                }
-            } catch (e) {
-                console.error(e);
-                window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Connection interrupted. Please try again.', type: 'error' } }));
-            } finally {
-                BcLoader.hide();
-            }
-        },
-
-        initiatePayment() {
-            if (!this.selectedAddressId) {
-                this.errorMessage = 'Please select a delivery address before proceeding.';
-                return;
-            }
-            this.processing = true;
-            this.errorMessage = '';
-
-            if (this.paymentMethod === 'cod') {
-                BcLoader.show('Placing your order...');
-                this.placeCodOrder();
-            } else {
-                BcLoader.show('Connecting to payment gateway...');
-                this.initiateRazorpay();
-            }
-        },
-
-        placeCodOrder() {
-            fetch('{{ route("checkout.create_order") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    address_id: this.selectedAddressId,
-                    payment_method: 'cod',
-                    single_cart_item: this.singleCartItemId,
-                })
-            })
-            .then(r => r.json())
-            .then(data => {
-                this.processing = false;
-                BcLoader.hide();
-                if (data.error) {
-                    this.errorMessage = data.error;
-                    return;
-                }
-                if (data.success) {
-                    window.location.href = data.redirect;
-                }
-            })
-            .catch(() => {
-                BcLoader.hide();
-                this.processing = false;
-                this.errorMessage = 'Something went wrong. Please try again.';
-            });
-        },
-
-        initiateRazorpay() {
-            fetch('{{ route("checkout.create_order") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    address_id: this.selectedAddressId,
-                    payment_method: 'razorpay',
-                    single_cart_item: this.singleCartItemId,
-                })
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.error) {
-                    this.errorMessage = data.error;
-                    this.processing = false;
-                    BcLoader.hide();
-                    return;
-                }
-
-                const options = {
-                    key: data.key,
-                    amount: data.amount,
-                    currency: data.currency,
-                    order_id: data.razorpay_order_id,
-                    name: 'Bhavani Crafts',
-                    description: 'Bhavani Crafts Order',
-                    image: '/favicon.ico',
-                    prefill: {
-                        name:    data.user_name,
-                        email:   data.user_email,
-                        contact: data.user_phone,
-                    },
-                    theme: { color: '#C62828' },
-                    handler: (response) => {
-                        BcLoader.show('Verifying payment...');
-                        this.verifyPayment(response);
-                    },
-                    modal: {
-                        ondismiss: () => {
-                            BcLoader.hide();
-                            this.processing = false;
-                            this.errorMessage = 'Payment was cancelled. Please try again.';
-                        }
-                    }
-                };
-
-                BcLoader.hide(); // Hide before Razorpay modal opens
-                const rzp = new Razorpay(options);
-                rzp.on('payment.failed', (response) => {
-                    BcLoader.hide();
-                    this.processing = false;
-                    this.errorMessage = 'Payment failed: ' + response.error.description;
-                });
-                rzp.open();
-            })
-            .catch(() => {
-                BcLoader.hide();
-                this.processing = false;
-                this.errorMessage = 'Something went wrong. Please try again.';
-            });
-        },
-
-        verifyPayment(response) {
-            fetch('{{ route("checkout.verify_payment") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_order_id:   response.razorpay_order_id,
-                    razorpay_signature:  response.razorpay_signature,
-                })
-            })
-            .then(r => r.json())
-            .then(data => {
-                this.processing = false;
-                BcLoader.hide();
-                if (data.success) {
-                    window.location.href = data.redirect;
-                } else {
-                    this.errorMessage = data.message || 'Payment verification failed. Please contact support.';
-                }
-            })
-            .catch(() => {
-                BcLoader.hide();
-                this.processing = false;
-                this.errorMessage = 'Verification error. Please contact support with your payment ID.';
-            });
-        }
-    };
-}
-</script>
 
 <!-- New Address Modal -->
 <div x-show="showAddressModal" x-cloak

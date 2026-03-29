@@ -120,6 +120,13 @@ class CheckoutController extends Controller
 
         // ── COD path: place order directly ──────────────────────────────────
         if ($paymentMethod === 'cod') {
+            // Security: Disable COD for high-value orders to prevent fraudulent activity
+            if ($total > 5000) {
+                return response()->json([
+                    'error' => 'Cash on Delivery (COD) is not available for orders above ₹5,000. Please select an online payment method to proceed.'
+                ], 400);
+            }
+            
             DB::beginTransaction();
             try {
                 $order = Order::create([
@@ -144,6 +151,7 @@ class CheckoutController extends Controller
                 }
 
                 foreach ($cartItems as $item) {
+                    /** @var \App\Models\CartItem $item */
                     OrderItem::create([
                         'order_id'     => $order->id,
                         'product_id'   => $item->product_id,
@@ -284,6 +292,7 @@ class CheckoutController extends Controller
             }
 
             foreach ($cartItems as $item) {
+                /** @var \App\Models\CartItem $item */
                 OrderItem::create([
                     'order_id'     => $order->id,
                     'product_id'   => $item->product_id,

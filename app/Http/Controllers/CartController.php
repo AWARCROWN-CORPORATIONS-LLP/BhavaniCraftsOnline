@@ -21,6 +21,7 @@ class CartController extends Controller
                                     ->where('product_id', $item->product_id)
                                     ->first();
             
+            /** @var \App\Models\CartItem $item */
             if ($existingItem) {
                 $existingItem->quantity += $item->quantity;
                 $existingItem->save();
@@ -178,7 +179,7 @@ class CartController extends Controller
     {
         // For Buy Now, we add to cart and redirect to checkout
         $this->add($request);
-        return redirect()->route('home', ['locale' => app()->getLocale()]) . '/checkout'; // Directing toward checkout URL structure
+        return redirect()->route('checkout', ['locale' => app()->getLocale()]); // Directing toward proper checkout route
     }
 
     public function buyKit(Request $request)

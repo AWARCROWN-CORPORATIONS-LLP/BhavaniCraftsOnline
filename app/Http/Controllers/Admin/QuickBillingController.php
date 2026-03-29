@@ -18,9 +18,15 @@ class QuickBillingController extends Controller
     {
         $bills = QuickBill::orderBy('created_at', 'desc')->paginate(20);
         
-        $todaySales = QuickBill::whereDate('created_at', Carbon::today())
+        $todayStats = QuickBill::whereDate('created_at', Carbon::today())
             ->where('payment_status', 'paid')
-            ->sum('total_amount');
+            ->selectRaw('payment_method, SUM(total_amount) as total')
+            ->groupBy('payment_method')
+            ->get();
+
+        $todaySales = $todayStats->sum('total');
+        $cashSales = $todayStats->where('payment_method', 'cash')->first()->total ?? 0;
+        $onlineSales = $todayStats->where('payment_method', 'online')->first()->total ?? 0;
 
         $dailyStats = QuickBill::where('payment_status', 'paid')
             ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
@@ -29,7 +35,7 @@ class QuickBillingController extends Controller
             ->take(7)
             ->get();
 
-        return view('admin.billing.dashboard', compact('bills', 'todaySales', 'dailyStats'));
+        return view('admin.billing.dashboard', compact('bills', 'todaySales', 'todayStats', 'cashSales', 'onlineSales', 'dailyStats'));
     }
 
     /**
@@ -41,6 +47,7 @@ class QuickBillingController extends Controller
             'customer_name' => 'nullable|string',
             'customer_phone' => 'nullable|string',
             'is_quotation' => 'nullable|boolean',
+            'payment_method' => 'nullable|string|in:cash,online',
             'discount_amount' => 'nullable|numeric|min:0',
             'items' => 'required|array|min:1',
             'items.*.name' => 'required|string',
@@ -57,6 +64,9 @@ class QuickBillingController extends Controller
         $gstAmount = ($taxableAmount * $gstPercent) / 100;
         $total = $taxableAmount + $gstAmount;
 
+        $paymentMethod = $request->payment_method ?? 'online';
+        $paymentStatus = ($paymentMethod === 'cash') ? 'paid' : 'pending';
+
         $bill = QuickBill::create([
             'bill_number' => ($request->is_quotation ? 'QUOT-' : 'BC-') . strtoupper(Str::random(8)),
             'is_quotation' => $request->is_quotation ?? false,
@@ -66,37 +76,32 @@ class QuickBillingController extends Controller
             'gst_percent' => $gstPercent,
             'gst_amount' => $gstAmount,
             'total_amount' => $total,
-            'payment_status' => $request->is_quotation ? 'pending' : 'pending',
+            'payment_status' => $request->is_quotation ? 'pending' : $paymentStatus,
+            'payment_method' => $paymentMethod,
             'customer_name' => $request->customer_name,
             'customer_phone' => $request->customer_phone,
-            'razorpay_order_id' => 'order_' . Str::random(14), // Dummy ID
+            'razorpay_order_id' => 'order_' . Str::random(14), // Dummy ID for simulation
         ]);
-
-
-        // Generate a dummy payment URL (In reality, this would be Razorpay's link)
-        $paymentUrl = route('admin.billing.verify', ['bill_id' => $bill->id, 'mock' => 'success']);
-        $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($paymentUrl);
 
         return response()->json([
             'success' => true,
             'bill_id' => $bill->id,
-            'qr_code' => $qrCodeUrl,
             'total' => $total,
-            'verify_url' => $paymentUrl
+            'payment_method' => $paymentMethod,
+            'razorpay_order_id' => $bill->razorpay_order_id,
         ]);
     }
 
     /**
      * Simulation of Payment Verification (Acting as a webhook or user callback)
      */
-    public function verifyPayment($locale, $bill_id)
+    public function verifyPayment(Request $request, $locale, $bill_id)
     {
         $bill = QuickBill::findOrFail($bill_id);
         
-        // Mock verification
         $bill->update([
             'payment_status' => 'paid',
-            'razorpay_payment_id' => 'pay_' . Str::random(14)
+            'razorpay_payment_id' => $request->payment_id ?? ('pay_' . Str::random(14))
         ]);
 
         return redirect()->route('admin.billing.print', $bill->id)->with('success', 'Payment Received & Verified!');

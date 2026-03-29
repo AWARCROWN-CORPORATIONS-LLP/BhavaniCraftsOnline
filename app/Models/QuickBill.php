@@ -20,6 +20,7 @@ class QuickBill extends Model
         'payment_status',
         'customer_name',
         'customer_phone',
+        'payment_method',
     ];
 
     protected $casts = [

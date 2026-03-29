@@ -44,10 +44,10 @@
                 <div>
                     <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3 border-l-2 border-brand-500 pl-3">Destiny Points</h3>
                     <p class="text-sm font-bold text-onyx-900 leading-relaxed italic">
-                        {{ $order->address->first_name }} {{ $order->address->last_name }}<br>
+                        {{ $order->address->full_name }}<br>
                         {{ $order->address->address_line1 }}<br>
                         {{ $order->address->city }}, {{ $order->address->state }}<br>
-                        {{ $order->address->pincode }}
+                        {{ $order->address->postal_code }}
                     </p>
                 </div>
                 <div>

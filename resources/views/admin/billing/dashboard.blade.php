@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('header_extra')
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <div class="flex items-center space-x-4">
         <div class="p-2 bg-blue-50 rounded-lg">
             <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
@@ -14,7 +15,7 @@
 
 @section('content')
 
-<div x-data="{ 
+<div x-cloak x-data="{
     items: [{ name: '', telugu_name: '', amount: '' }],
     customer_name: '',
     customer_phone: '',
@@ -23,6 +24,7 @@
     gst_percent: 18,
     qr_code: null,
     verify_url: null,
+    payment_method: 'online',
     processing: false,
     
     addItem() { this.items.push({ name: '', telugu_name: '', amount: '' }) },
@@ -36,7 +38,6 @@
             const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(name)}&langpair=en|te`);
             const data = await response.json();
             if (data.responseData.translatedText) {
-                // Remove some common API artifacts if any
                 this.items[index].telugu_name = data.responseData.translatedText;
             }
         } catch (e) { console.error('Translation error:', e); }
@@ -73,26 +74,49 @@
                     customer_phone: this.customer_phone,
                     is_quotation: this.is_quotation,
                     discount_amount: this.discount_amount,
+                    payment_method: this.payment_method,
                     items: this.items
                 })
             });
             const result = await response.json();
             if (result.success) {
-                this.qr_code = result.qr_code;
-                this.verify_url = result.verify_url;
+                if (result.payment_method === 'cash') {
+                    window.location.href = `{{ url('/') }}/{{ app()->getLocale() }}/admin/billing/print/${result.bill_id}`;
+                    return;
+                }
+                this.initiateRazorpay(result);
             }
         } catch (e) { console.error(e); }
         finally { this.processing = false; }
+    },
+
+    initiateRazorpay(data) {
+        let options = {
+            'key': '{{ config('services.razorpay.key') }}',
+            'amount': data.total * 100,
+            'currency': 'INR',
+            'name': 'Bhavani Crafts',
+            'description': 'Payment for Bill #' + data.bill_id,
+            'order_id': data.razorpay_order_id, 
+            'handler': async (response) => {
+                window.location.href = `{{ url('/') }}/{{ app()->getLocale() }}/admin/billing/verify/${data.bill_id}?payment_id=` + response.razorpay_payment_id;
+            },
+            'prefill': {
+                'name': this.customer_name,
+                'contact': this.customer_phone
+            },
+            'theme': { 'color': '#1e40af' }
+        };
+        let rzp = new Razorpay(options);
+        rzp.open();
     }
 }" class="space-y-6 max-w-[1600px] mx-auto">
 
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <!-- MAIN BILLING AREA -->
         <div class="lg:col-span-8 space-y-8">
             
-            <!-- PRODUCT ENTRY FORM -->
             <div class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-8 py-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
                     <h3 class="text-xs font-bold text-gray-700 uppercase tracking-widest">Enter Items Details</h3>
@@ -149,7 +173,6 @@
                 </div>
             </div>
 
-            <!-- RECENT BILLS TABLE -->
             <div class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-8 py-5 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
                     <h3 class="text-xs font-bold text-gray-700 uppercase tracking-widest">Recent Activity</h3>
@@ -220,11 +243,9 @@
             </div>
         </div>
 
-        <!-- SUMMARY & STATS SIDEBAR -->
         <div class="lg:col-span-4 space-y-8">
             <div class="sticky top-24 space-y-8">
                 
-                <!-- SUMMARY QUANTUM -->
                 <div class="bg-white border border-gray-200 rounded-3xl shadow-xl p-8 overflow-hidden relative group">
                     <div class="absolute inset-0 bg-blue-600 h-2 top-0"></div>
                     <h3 class="text-xs font-bold text-gray-400 uppercase tracking-[4px] mb-8 mt-2">Final Summary</h3>
@@ -252,9 +273,27 @@
                         </div>
                     </div>
 
+                    <div class="mt-8 pt-8 border-t border-gray-100">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[4px] mb-4">Select Payment Method</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button @click="payment_method = 'online'" 
+                                :class="payment_method === 'online' ? 'border-blue-600 bg-blue-50/50 text-blue-700' : 'border-gray-100 text-gray-500'"
+                                class="flex flex-col items-center justify-center p-4 border-2 rounded-2xl transition-all">
+                                <svg class="h-6 w-6 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12H4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                                <span class="text-[10px] font-black uppercase tracking-widest">Scan & Pay</span>
+                            </button>
+                            <button @click="payment_method = 'cash'" 
+                                :class="payment_method === 'cash' ? 'border-emerald-600 bg-emerald-50/50 text-emerald-700' : 'border-gray-100 text-gray-500'"
+                                class="flex flex-col items-center justify-center p-4 border-2 rounded-2xl transition-all">
+                                <svg class="h-6 w-6 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                <span class="text-[10px] font-black uppercase tracking-widest">Hand Cash</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <button @click="generateBill()" :disabled="processing"
-                        class="w-full mt-10 bg-blue-600 text-white py-4 rounded-2xl font-bold uppercase tracking-[2px] text-xs hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/20 disabled:opacity-50">
-                        <span x-show="!processing" x-text="is_quotation ? 'Create Quotation' : 'Generate Bill'"></span>
+                        class="w-full mt-8 bg-blue-600 text-white py-4 rounded-2xl font-bold uppercase tracking-[2px] text-xs hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/20 disabled:opacity-50">
+                        <span x-show="!processing" x-text="payment_method === 'cash' ? 'Complete & Print' : (is_quotation ? 'Create Quotation' : 'Generate Bill & Pay')"></span>
                         <span x-show="processing" class="flex items-center justify-center">
                             <svg class="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                             Creating...
@@ -263,31 +302,47 @@
                 </div>
 
                
-                <div x-show="qr_code" class="bg-white border border-gray-200 rounded-3xl p-8 animate-in zoom-in duration-300">
+                <div x-show="processing && payment_method === 'online'" class="bg-white border border-gray-200 rounded-3xl p-8 animate-in zoom-in duration-300">
                     <div class="text-center">
-                        <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-[4px] mb-6">UPI Payment Code</h4>
-                        <div class="bg-gray-50 p-6 rounded-2xl inline-block border border-gray-100 shadow-inner group">
-                            <img :src="qr_code" class="w-56 h-56 transition-transform group-hover:scale-102" alt="Payment QR">
+                        <div class="flex justify-center mb-6">
+                            <svg class="animate-spin h-12 w-12 text-blue-600" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         </div>
-                        <p class="text-[10px] font-bold text-gray-400 mt-6 uppercase tracking-widest">Waiting for confirmation...</p>
-                        <a :href="verify_url" 
-                           class="inline-block mt-4 text-[9px] font-bold uppercase text-blue-600 border-b border-blue-100 hover:border-blue-600 transition-all">Mock Payment Success</a>
+                        <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-[4px]">Initiating Razorpay...</h4>
+                        <p class="text-xs text-gray-500 mt-2 font-medium">Please complete the payment in the popup.</p>
                     </div>
                 </div>
 
               
-                <div class="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-4">
-                        <div class="h-10 w-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-                            <svg class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+                    <div class="bg-white border border-emerald-100 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4">
+                            <div class="h-8 w-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                                <svg class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            </div>
                         </div>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 leading-none">Manual Hand Cash</p>
+                        <h3 class="text-2xl font-bold text-gray-900 leading-tight tracking-tight">₹{{ number_format($cashSales, 0) }}</h3>
                     </div>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 leading-none">Today's Sales</p>
-                    <h3 class="text-3xl font-bold text-gray-900 leading-tight tracking-tight">₹{{ number_format($todaySales, 2) }}</h3>
-                    <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-2">+12% from previous cycle</p>
+
+                    <div class="bg-white border border-blue-100 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4">
+                            <div class="h-8 w-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                                <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01" /></svg>
+                            </div>
+                        </div>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 leading-none">Online Transactions</p>
+                        <h3 class="text-2xl font-bold text-gray-900 leading-tight tracking-tight">₹{{ number_format($onlineSales, 0) }}</h3>
+                    </div>
                 </div>
 
-                <!-- DAILY TREND (MINIMAL) -->
+                <div class="bg-blue-600 rounded-3xl p-8 shadow-xl relative overflow-hidden">
+                    <p class="text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-1 leading-none">Total Today's Revenue</p>
+                    <h3 class="text-3xl font-black text-white leading-tight tracking-tight">₹{{ number_format($todaySales, 0) }}</h3>
+                    <div class="mt-4 flex items-center space-x-2">
+                        <span class="px-2 py-0.5 bg-white/20 rounded text-[9px] font-bold text-white uppercase tracking-widest">Live Updates</span>
+                    </div>
+                </div>
+
                 <div class="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
                     <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-[4px] mb-8">7-Day Sales History</h4>
                     <div class="space-y-5">

@@ -19,7 +19,15 @@ Route::redirect('/superadmin/dashboard', '/en/superadmin/dashboard');
 Route::prefix('{locale}')->group(function () {
     Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-    // Shopping Experience
+    // Static Pages & Policies
+    Route::get('/privacy-policy', [App\Http\Controllers\PageController::class, 'privacy'])->name('pages.privacy');
+    Route::get('/terms-of-service', [App\Http\Controllers\PageController::class, 'terms'])->name('pages.terms');
+    Route::get('/cookie-policy', [App\Http\Controllers\PageController::class, 'cookie'])->name('pages.cookie');
+    Route::get('/shipping-policy', [App\Http\Controllers\PageController::class, 'shipping'])->name('pages.shipping');
+    Route::get('/faq', [App\Http\Controllers\PageController::class, 'faq'])->name('pages.faq');
+    Route::get('/sacred-kit', [App\Http\Controllers\PageController::class, 'bundleBuilder'])->name('pages.sacred-kit');
+
+
     Route::get('/cart/data', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/update', [App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
@@ -55,23 +63,28 @@ Route::prefix('{locale}')->group(function () {
     Route::get('/artifact/{slug}', [App\Http\Controllers\ProductController::class, 'show'])->name('artifact.show');
     Route::post('/artifact/{slug}/reviews', [App\Http\Controllers\ProductReviewController::class, 'store'])->name('artifact.reviews.store')->middleware('auth');
 
-    // Customer Dashboard Mastery
-    Route::middleware(['auth', 'verified'])->prefix('my-account')->name('customer.')->group(function() {
-        Route::get('/', [App\Http\Controllers\CustomerController::class, 'dashboard'])->name('dashboard');
-        Route::get('/profile', [App\Http\Controllers\CustomerController::class, 'profile'])->name('profile');
-        Route::post('/profile', [App\Http\Controllers\CustomerController::class, 'updateProfile'])->name('profile.update');
-        Route::get('/orders', [App\Http\Controllers\CustomerController::class, 'orders'])->name('orders');
+    // Customer Dashboard Mastery (Shared Auth space)
+    Route::middleware(['auth'])->prefix('my-account')->name('customer.')->group(function() {
+        // Address Management (Essential for Checkout, allowed for unverified)
         Route::get('/addresses', [App\Http\Controllers\CustomerController::class, 'addresses'])->name('addresses');
         Route::post('/addresses', [App\Http\Controllers\CustomerController::class, 'storeAddress'])->name('addresses.store');
         Route::post('/addresses/{address}/default', [App\Http\Controllers\CustomerController::class, 'setDefaultAddress'])->name('addresses.default');
         Route::delete('/addresses/{address}', [App\Http\Controllers\CustomerController::class, 'deleteAddress'])->name('addresses.delete');
-        Route::post('/wishlist/toggle-sharing', [App\Http\Controllers\CustomerController::class, 'toggleWishlistSharing'])->name('wishlist.toggle_sharing');
-        Route::get('/orders/{token}', [App\Http\Controllers\CustomerController::class, 'showOrder'])->name('orders.show');
-        Route::post('/orders/{token}/generate-pin', [App\Http\Controllers\CustomerController::class, 'generateDeliveryPin'])->name('orders.generate_pin');
-        Route::post('/orders/{token}/rate', [App\Http\Controllers\CustomerController::class, 'rateOrder'])->name('orders.rate');
-        Route::post('/orders/{token}/return', [App\Http\Controllers\CustomerController::class, 'requestReturn'])->name('orders.return');
-        Route::post('/orders/{token}/safety-complaint', [App\Http\Controllers\CustomerController::class, 'storeSafetyComplaint'])->name('orders.safety_complaint');
-        Route::patch('/orders/{token}/cancel', [App\Http\Controllers\CustomerController::class, 'cancelOrder'])->name('orders.cancel');
+
+        // Verified-only High Privilege Actions
+        Route::middleware(['verified'])->group(function() {
+            Route::get('/', [App\Http\Controllers\CustomerController::class, 'dashboard'])->name('dashboard');
+            Route::get('/profile', [App\Http\Controllers\CustomerController::class, 'profile'])->name('profile');
+            Route::post('/profile', [App\Http\Controllers\CustomerController::class, 'updateProfile'])->name('profile.update');
+            Route::get('/orders', [App\Http\Controllers\CustomerController::class, 'orders'])->name('orders');
+            Route::post('/wishlist/toggle-sharing', [App\Http\Controllers\CustomerController::class, 'toggleWishlistSharing'])->name('wishlist.toggle_sharing');
+            Route::get('/orders/{token}', [App\Http\Controllers\CustomerController::class, 'showOrder'])->name('orders.show');
+            Route::post('/orders/{token}/generate-pin', [App\Http\Controllers\CustomerController::class, 'generateDeliveryPin'])->name('orders.generate_pin');
+            Route::post('/orders/{token}/rate', [App\Http\Controllers\CustomerController::class, 'rateOrder'])->name('orders.rate');
+            Route::post('/orders/{token}/return', [App\Http\Controllers\CustomerController::class, 'requestReturn'])->name('orders.return');
+            Route::post('/orders/{token}/safety-complaint', [App\Http\Controllers\CustomerController::class, 'storeSafetyComplaint'])->name('orders.safety_complaint');
+            Route::patch('/orders/{token}/cancel', [App\Http\Controllers\CustomerController::class, 'cancelOrder'])->name('orders.cancel');
+        });
     });
 
     // Auth Routes
@@ -108,6 +121,9 @@ Route::prefix('{locale}')->group(function () {
         Route::post('/send-otp', [App\Http\Controllers\Api\AuthApiController::class, 'sendOtp']);
         Route::post('/verify-otp', [App\Http\Controllers\Api\AuthApiController::class, 'verifyOtp']);
         Route::post('/login-with-otp', [App\Http\Controllers\Api\AuthApiController::class, 'loginWithOtp']);
+        
+        // Sacred Specialist (AI Chatbot Backend)
+        Route::post('/chat/ask', [App\Http\Controllers\Api\ChatController::class, 'ask'])->name('api.chat.ask');
     });
 
     // Poojari (Ritual Specialists) Ecosystem
