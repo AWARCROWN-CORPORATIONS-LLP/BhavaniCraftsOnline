@@ -9,8 +9,8 @@
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     
-    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/@hotwired/turbo@7.3.0/dist/turbo.es2017-umd.js"></script>
     
     <!-- TailwindCSS & Plugins -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -103,14 +103,11 @@
                 document.body.classList.remove('bc-busy');
             }
         };
-        document.addEventListener('submit', (e) => { 
-            if (e.target.dataset.noLoader === undefined) BcLoader.show('Updating Server...'); 
-        });
-        document.addEventListener('click', (e) => {
-            const link = e.target.closest('a[href]');
-            if (!link || link.target === '_blank' || link.href.includes('#') || link.href.startsWith('javascript') || link.href.startsWith('mailto')) return;
-            BcLoader.show('Navigating...');
-        });
+        // Turbo Interceptors
+        document.addEventListener('turbo:visit', () => BcLoader.show('Navigating...'));
+        document.addEventListener('turbo:load', () => BcLoader.hide());
+        document.addEventListener('turbo:submit-start', () => BcLoader.show('Updating Server...'));
+        
         window.addEventListener('load', () => BcLoader.hide());
     </script>
 

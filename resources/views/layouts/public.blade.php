@@ -44,6 +44,7 @@
 
     <!-- Google Model Viewer (3D/AR Support) -->
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script src="https://unpkg.com/@hotwired/turbo@7.3.0/dist/turbo.es2017-umd.js"></script>
 
     <style>
         html { scroll-behavior: smooth; }
@@ -207,6 +208,13 @@
             }
         };
         window.BcLoader = BcLoader;
+
+        // Turbo Interceptors
+        document.addEventListener('turbo:visit', () => BcLoader.show('Traversing Heritage...'));
+        document.addEventListener('turbo:load', () => BcLoader.hide());
+        document.addEventListener('turbo:submit-start', () => BcLoader.show('Synchronizing Devotion...'));
+        
+        window.addEventListener('load', () => BcLoader.hide());
     </script>
 
     <!-- Top Navigation -->
@@ -227,7 +235,7 @@
             </button>
 
             <!-- Logo -->
-            <a wire:navigate href="{{ route('home') }}" class="flex items-center shrink-0 group">
+            <a href="{{ route('home') }}" class="flex items-center shrink-0 group">
                 <div class="h-16 w-auto group-hover:scale-105 transition-all duration-300">
                     <img src="{{ $siteLogo }}" alt="Bhavani Crafts" class="h-full w-auto object-contain">
                 </div>
@@ -241,7 +249,7 @@
                     </svg>
                 </div>
                 
-                <form wire:navigate action="{{ route('search') }}" method="GET" class="w-full h-full flex items-center xl:pl-44" 
+                <form action="{{ route('search') }}" method="GET" class="w-full h-full flex items-center xl:pl-44" 
                       @submit="if(!query.trim() && !selectedCategory) { $event.preventDefault(); return false; }">
                     <!-- Category dropdown inside the form -->
                     <select name="category" x-model="selectedCategory" class="absolute inset-y-0 left-12 w-32 bg-transparent text-xs font-semibold text-gray-500 border-none outline-none focus:ring-0 cursor-pointer hidden xl:flex items-center">
@@ -361,12 +369,12 @@
 
                 <!-- Auth Buttons -->
                 <div class="hidden lg:flex items-center space-x-6">
-                    <a wire:navigate href="{{ route('poojari.index') }}" class="text-[11px] font-black uppercase tracking-[2px] text-onyx-900 border-b-2 {{ Request::is('*/poojari*') ? 'border-brand-500' : 'border-transparent' }} hover:text-brand-500 transition-all">Ritual Services</a>
+                    <a href="{{ route('poojari.index') }}" class="text-[11px] font-black uppercase tracking-[2px] text-onyx-900 border-b-2 {{ Request::is('*/poojari*') ? 'border-brand-500' : 'border-transparent' }} hover:text-brand-500 transition-all">Ritual Services</a>
                     @auth
-                        <a wire:navigate href="{{ route('customer.dashboard') }}" class="text-xs font-bold text-gray-700 hover:text-brand-500 uppercase tracking-wider transition-colors">My Profile</a>
+                        <a href="{{ route('customer.dashboard') }}" class="text-xs font-bold text-gray-700 hover:text-brand-500 uppercase tracking-wider transition-colors">My Profile</a>
                     @else
-                        <a wire:navigate href="{{ route('login') }}" class="text-[11px] font-bold text-gray-700 hover:text-brand-500 uppercase tracking-widest transition-colors">Sign In</a>
-                        <a wire:navigate href="{{ route('register') }}" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all duration-300 shadow-md shadow-brand-900/10 hover:shadow-brand-500/30">
+                        <a href="{{ route('login') }}" class="text-[11px] font-bold text-gray-700 hover:text-brand-500 uppercase tracking-widest transition-colors">Sign In</a>
+                        <a href="{{ route('register') }}" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all duration-300 shadow-md shadow-brand-900/10 hover:shadow-brand-500/30">
                             Create Account
                         </a>
                     @endauth
@@ -399,8 +407,8 @@
             </button>
             
             <nav class="flex flex-col items-center space-y-6 text-center w-full px-8 flex-1 mt-10">
-                <a wire:navigate href="{{ route('home') }}" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Home</a>
-                <a wire:navigate href="{{ route('poojari.index') }}" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Ritual Services</a>
+                <a href="{{ route('home') }}" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Home</a>
+                <a href="{{ route('poojari.index') }}" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Ritual Services</a>
                 <a href="#" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Categories</a>
                 <a href="#" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Franchise Program</a>
                 <a href="#" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Our Heritage</a>
@@ -432,7 +440,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
                 <!-- Branding -->
                 <div class="col-span-1 md:col-span-2 lg:col-span-1">
-                    <a wire:navigate href="{{ route('home') }}" class="flex items-center shrink-0 group mb-6">
+                    <a href="{{ route('home') }}" class="flex items-center shrink-0 group mb-6">
                         <div class="h-12 w-auto group-hover:scale-105 transition-all duration-300">
                             <img src="{{ $siteLogo }}" alt="Bhavani Crafts" class="h-full w-auto object-contain brightness-0 invert opacity-80">
                         </div>
@@ -444,7 +452,7 @@
                 <div>
                     <h4 class="text-xs font-black uppercase tracking-[3px] text-brand-500 mb-6">Collections</h4>
                     <ul class="space-y-3">
-                        <li><a wire:navigate href="{{ route('pages.sacred-kit') }}" class="text-sm font-black text-brand-600 hover:text-white transition-colors">Sacred Kit Builder ✨</a></li>
+                        <li><a href="{{ route('pages.sacred-kit') }}" class="text-sm font-black text-brand-600 hover:text-white transition-colors">Sacred Kit Builder ✨</a></li>
                         <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Brass Idols</a></li>
                         <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Pooja Mandirs</a></li>
                         <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Corporate Gifting</a></li>
@@ -456,11 +464,11 @@
                 <div>
                     <h4 class="text-xs font-black uppercase tracking-[3px] text-brand-500 mb-6">Support & Policy</h4>
                     <ul class="space-y-3">
-                        <li><a wire:navigate href="{{ route('pages.faq') }}" class="text-sm text-gray-400 hover:text-white transition-colors">Sacred FAQ</a></li>
-                        <li><a wire:navigate href="{{ route('pages.shipping') }}" class="text-sm text-gray-400 hover:text-white transition-colors">Shipping & Returns</a></li>
-                        <li><a wire:navigate href="{{ route('pages.privacy') }}" class="text-sm text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
-                        <li><a wire:navigate href="{{ route('pages.terms') }}" class="text-sm text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
-                        <li><a wire:navigate href="{{ route('pages.cookie') }}" class="text-sm text-gray-400 hover:text-white transition-colors">Cookie Policy</a></li>
+                        <li><a href="{{ route('pages.faq') }}" class="text-sm text-gray-400 hover:text-white transition-colors">Sacred FAQ</a></li>
+                        <li><a href="{{ route('pages.shipping') }}" class="text-sm text-gray-400 hover:text-white transition-colors">Shipping & Returns</a></li>
+                        <li><a href="{{ route('pages.privacy') }}" class="text-sm text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="{{ route('pages.terms') }}" class="text-sm text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+                        <li><a href="{{ route('pages.cookie') }}" class="text-sm text-gray-400 hover:text-white transition-colors">Cookie Policy</a></li>
                     </ul>
                 </div>
 
@@ -622,7 +630,7 @@
                 </div>
                 
                 <div class="flex items-center gap-6 shrink-0 w-full lg:w-auto justify-center">
-                    <a wire:navigate href="{{ route('pages.cookie') }}" class="text-[9px] font-black text-gray-400 uppercase tracking-widest hover:text-brand-600 transition-colors">Preferences</a>
+                    <a href="{{ route('pages.cookie') }}" class="text-[9px] font-black text-gray-400 uppercase tracking-widest hover:text-brand-600 transition-colors">Preferences</a>
                     <button @click="accept()" class="px-10 py-3 bg-brand-600 text-white text-[9px] font-black uppercase tracking-[3px] rounded-xl hover:bg-brand-500 transition-all shadow-xl shadow-brand-500/20 active:scale-95">Accept & Proceed</button>
                 </div>
             </div>
@@ -646,6 +654,7 @@
                 if (!msg.trim()) return;
                 
                 this.messages.push({ role: 'user', text: msg });
+                const currentHistory = [...this.messages];
                 this.userInput = '';
                 this.loading = true;
                 this.showGreeting = false;
@@ -662,7 +671,10 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
-                        body: JSON.stringify({ message: msg })
+                        body: JSON.stringify({ 
+                            message: msg,
+                            history: currentHistory
+                        })
                     });
                     const data = await response.json();
                     this.messages.push({ role: 'ai', text: data.response });
