@@ -191,6 +191,11 @@
                 <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Dashboard</span>
             </a>
 
+            <a href="{{ route('admin.billing.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.billing.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Billing Terminal</span>
+            </a>
+
             @if(Auth::user()->hasRole('super_admin'))
                 <a href="{{ route('admin.audit.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.audit.index') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
@@ -250,11 +255,6 @@
             <a href="{{ route('admin.orders.kanban') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.orders.kanban') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
                 <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Order Management</span>
-            </a>
-
-            <a href="{{ route('admin.billing.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.billing.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Billing Terminal</span>
             </a>
 
 
