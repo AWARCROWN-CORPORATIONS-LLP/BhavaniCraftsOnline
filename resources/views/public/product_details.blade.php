@@ -228,15 +228,28 @@
                                 })"
                                 class="w-full bg-brand-50 text-brand-600 border-2 border-brand-500 h-14 rounded-[1rem] text-[11px] font-black uppercase tracking-[2px] transition-all flex items-center justify-center space-x-3 group hover:bg-brand-500 hover:text-white">
                             <span x-show="!loading">Add to Cart</span>
-                            <svg x-show="loading" class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span x-show="loading" class="flex items-center space-x-2">
+                                <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                <span>Adding to Cart...</span>
+                            </span>
                         </button>
 
                         <div class="flex items-center space-x-3">
-                            <form action="{{ route('cart.buy-now') }}" method="POST" class="flex-1">
+                            <form action="{{ route('cart.buy-now') }}" method="POST" class="flex-1" x-data="{ loading: false }" @submit="loading = true">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                <button type="submit" class="w-full bg-brand-500 hover:bg-brand-600 text-white h-14 rounded-[1rem] text-[11px] font-black uppercase tracking-[2px] shadow-lg shadow-brand-500/20 transition-all">
-                                    Buy Now
+                                <input type="hidden" name="quantity" :value="quantity">
+                                <button type="submit" 
+                                        :disabled="loading"
+                                        class="w-full bg-brand-500 hover:bg-brand-600 text-white h-14 rounded-[1rem] text-[11px] font-black uppercase tracking-[2px] shadow-lg shadow-brand-500/20 transition-all flex items-center justify-center space-x-3">
+                                    <span x-show="!loading">Buy Now</span>
+                                    <span x-show="loading" class="flex items-center space-x-2">
+                                        <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span>Preparing Checkout...</span>
+                                    </span>
                                 </button>
                             </form>
 
@@ -283,6 +296,26 @@
         <div class="mt-32 pt-24 border-t border-gray-100 max-w-5xl mx-auto">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-16">
                 <div class="lg:col-span-2">
+                    @if($product->youtube_id)
+                        <div class="flex items-center justify-center lg:justify-start space-x-4 mb-10">
+                            <span class="h-[1px] w-12 bg-amber-500/50"></span>
+                            <h2 class="text-3xl font-serif font-bold text-onyx-900 italic">Sacred <span class="text-amber-500">Narrative</span></h2>
+                        </div>
+
+                        <div class="mb-16 aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-4 border-amber-50 group relative">
+                            <iframe 
+                                class="w-full h-full" 
+                                src="https://www.youtube.com/embed/{{ $product->youtube_id }}?autoplay=1&mute=1&loop=1&playlist={{ $product->youtube_id }}" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                            </iframe>
+                            <div class="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/60 to-transparent pointer-events-none transition-opacity duration-500 group-hover:opacity-0">
+                                <p class="text-[10px] items-center font-black text-white uppercase tracking-[4px]">Witness the Aura & Heritage</p>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="flex items-center justify-center lg:justify-start space-x-4 mb-10">
                         <span class="h-[1px] w-12 bg-amber-500/50"></span>
                         <h2 class="text-3xl font-serif font-bold text-onyx-900 italic">Product <span class="text-amber-500">Details</span></h2>
@@ -290,6 +323,48 @@
                     <div class="prose prose-onyx max-w-none text-gray-600 font-medium leading-[2] text-justify first-letter:text-5xl first-letter:font-serif first-letter:text-amber-600 first-letter:float-left first-letter:mr-3">
                         {!! $product->full_description !!}
                     </div>
+
+                    @if($product->ritualKits->count() > 0)
+                        <!-- Ritual Kit Upsell Corridor -->
+                        <div class="mt-20 bg-brand-50/50 rounded-[3rem] p-8 lg:p-12 border-2 border-dashed border-brand-200/50 relative overflow-hidden group">
+                           <div class="absolute -top-12 -right-12 h-40 w-40 bg-brand-500/[0.03] rounded-full blur-3xl"></div>
+                           <div class="absolute -bottom-12 -left-12 h-40 w-40 bg-brand-500/[0.03] rounded-full blur-3xl"></div>
+                           
+                           <div class="flex flex-col md:flex-row items-center gap-10 md:gap-16 relative z-10">
+                               <div class="shrink-0 relative">
+                                   <div class="h-48 w-48 lg:h-56 lg:w-56 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl transition-transform duration-700 group-hover:scale-[1.05]">
+                                       @if($product->ritualKits->first()->display_image)
+                                           <img src="{{ \Illuminate\Support\Facades\Storage::url($product->ritualKits->first()->display_image) }}" class="w-full h-full object-cover">
+                                       @else
+                                           <div class="w-full h-full bg-brand-100 flex items-center justify-center text-brand-300 font-serif text-6xl">🕉️</div>
+                                       @endif
+                                   </div>
+                               </div>
+                               
+                               <div class="flex-grow text-center md:text-left">
+                                   <div class="flex items-center justify-center md:justify-start space-x-3 mb-4">
+                                       <span class="px-3 py-1 bg-brand-500/10 text-brand-600 rounded-lg text-[9px] font-black uppercase tracking-widest border border-brand-500/20">Sacred Ascension</span>
+                                       <span class="h-[1px] w-8 bg-brand-500/20"></span>
+                                   </div>
+                                   
+                                   <h3 class="text-3xl font-serif font-bold text-onyx-900 mb-4 italic">Complete your <span class="text-brand-500">Sanctuary</span></h3>
+                                   <p class="text-sm text-gray-500 font-medium mb-8 leading-relaxed max-w-lg">
+                                       Upgrade this artifact with the matched <span class="text-onyx-900 font-bold">{{ $product->ritualKits->first()->name }}</span>. 
+                                       A curated selection of spiritual tools designed to amplify the artifact's energy in your ritual space.
+                                   </p>
+
+                                   <form action="{{ route('cart.buy-kit') }}" method="POST">
+                                       @csrf
+                                       <input type="hidden" name="ritual_kit_id" value="{{ $product->ritualKits->first()->id }}">
+                                       <button type="submit" class="w-full md:w-auto h-16 px-10 bg-brand-500 text-white rounded-[1.2rem] text-[11px] font-black uppercase tracking-[3px] shadow-2xl shadow-brand-500/30 hover:bg-brand-600 hover:scale-[1.02] transform transition-all flex items-center justify-center group/btn">
+                                           <span>Acquire the Complete Ritual Set (+ {{ App\Helpers\PriceHelper::format($product->ritualKits->first()->price) }})</span>
+                                           <svg class="h-5 w-5 ml-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                       </button>
+                                   </form>
+                               </div>
+                           </div>
+                        </div>
+                    @endif
                 </div>
                 
                 <div class="bg-amber-50/50 rounded-[3rem] p-10 border border-amber-100 h-fit sticky top-32">

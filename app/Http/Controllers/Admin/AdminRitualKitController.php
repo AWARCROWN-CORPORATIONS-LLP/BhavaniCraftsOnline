@@ -11,19 +11,19 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminRitualKitController extends Controller
 {
-    public function index()
+    public function index($locale)
     {
         $kits = RitualKit::withCount('products')->latest()->paginate(10);
         return view('admin.ritual-kits.index', compact('kits'));
     }
 
-    public function create()
+    public function create($locale)
     {
         $products = Product::where('listed_status', 'Listed')->get();
         return view('admin.ritual-kits.create', compact('products'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $locale)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -47,13 +47,13 @@ class AdminRitualKitController extends Controller
         return redirect()->route('admin.ritual-kits.index')->with('success', 'Ritual Kit created successfully.');
     }
 
-    public function edit(RitualKit $ritualKit)
+    public function edit($locale, RitualKit $ritualKit)
     {
         $products = Product::where('listed_status', 'Listed')->get();
         return view('admin.ritual-kits.edit', compact('ritualKit', 'products'));
     }
 
-    public function update(Request $request, RitualKit $ritualKit)
+    public function update(Request $request, $locale, RitualKit $ritualKit)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -79,7 +79,7 @@ class AdminRitualKitController extends Controller
         return redirect()->route('admin.ritual-kits.index')->with('success', 'Ritual Kit updated.');
     }
 
-    public function destroy(RitualKit $ritualKit)
+    public function destroy($locale, RitualKit $ritualKit)
     {
         if ($ritualKit->display_image) {
             Storage::disk('public')->delete($ritualKit->display_image);

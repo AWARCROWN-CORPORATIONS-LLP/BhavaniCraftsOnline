@@ -169,7 +169,7 @@ class CheckoutController extends Controller
                 return response()->json([
                     'success'  => true,
                     'order_id' => $order->order_id_string,
-                    'redirect' => route('checkout.success', $order->encryptedId()),
+                    'redirect' => route('checkout.success', ['token' => $order->encryptedId()]),
                 ]);
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -191,98 +191,23 @@ class CheckoutController extends Controller
             return response()->json(['error' => 'Payment gateway error. Please try again.'], 500);
         }
 
-        // Temporarily store context in session for verification
-        session([
-            'checkout_address_id'     => $address->id,
-            'checkout_total'          => $total,
-            'checkout_subtotal'       => $subtotal,
-            'checkout_discount'       => $discountAmount,
-            'checkout_coupon_id'      => $couponId,
-            'checkout_gst'            => $gst,
-            'checkout_shipping'       => $shipping,
-            'checkout_razorpay_order' => $razorpayOrder->id,
-            'checkout_single_item_id' => $request->single_cart_item,
-        ]);
-
-        return response()->json([
-            'razorpay_order_id' => $razorpayOrder->id,
-            'amount'            => (int) round($total * 100),
-            'currency'          => 'INR',
-            'key'               => config('services.razorpay.key'),
-            'user_name'         => Auth::user()->name,
-            'user_email'        => Auth::user()->email,
-            'user_phone'        => Auth::user()->phone ?? '',
-        ]);
-    }
-
-    /**
-     * Verify payment signature and place the order.
-     */
-    public function verifyPayment(Request $request)
-    {
-        if (!Auth::check()) {
-            return response()->json(['error' => 'Unauthenticated.'], 401);
-        }
-
-        $request->validate([
-            'razorpay_payment_id' => 'required|string',
-            'razorpay_order_id'   => 'required|string',
-            'razorpay_signature'  => 'required|string',
-        ]);
-
-        // Verify signature
-        $api = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
-
-        try {
-            $attributes = [
-                'razorpay_order_id'   => $request->razorpay_order_id,
-                'razorpay_payment_id' => $request->razorpay_payment_id,
-                'razorpay_signature'  => $request->razorpay_signature,
-            ];
-            $api->utility->verifyPaymentSignature($attributes);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Payment verification failed. Contact support.'], 400);
-        }
-
-        // Verify session data matches
-        if (session('checkout_razorpay_order') !== $request->razorpay_order_id) {
-            return response()->json(['success' => false, 'message' => 'Order mismatch detected.'], 400);
-        }
-
-        $addressId      = session('checkout_address_id');
-        $total          = session('checkout_total');
-        $subtotal       = session('checkout_subtotal');
-        $discountAmount = session('checkout_discount', 0);
-        $couponId       = session('checkout_coupon_id');
-        $gst            = session('checkout_gst');
-        $shipping       = session('checkout_shipping');
-        $singleItemId   = session('checkout_single_item_id');
-
-        $cartQuery = CartItem::with('product')->where('user_id', Auth::id());
-        if ($singleItemId) {
-            $cartQuery->where('id', $singleItemId);
-        }
-        $cartItems = $cartQuery->get();
-
-        // Place order in DB
+        // ── CREATE THE ORDER IN DB (Pending status) ────────────────────────────────
         DB::beginTransaction();
         try {
             $order = Order::create([
                 'user_id'            => Auth::id(),
                 'order_id_string'    => 'BCM-' . strtoupper(Str::random(8)),
-                'address_id'         => $addressId,
-                'status'             => 'Processing',
+                'address_id'         => $address->id,
+                'status'             => 'Pending Payment',
                 'total_amount'       => $total,
                 'currency'           => 'INR',
                 'subtotal'           => $subtotal,
                 'discount_total'     => $discountAmount,
                 'tax_total'          => $gst,
                 'shipping_total'     => $shipping,
-                'payment_status'     => 'Paid',
+                'payment_status'     => 'Unpaid',
                 'payment_method'     => 'Razorpay',
-                'razorpay_order_id'  => $request->razorpay_order_id,
-                'razorpay_payment_id'=> $request->razorpay_payment_id,
-                'razorpay_signature' => $request->razorpay_signature,
+                'razorpay_order_id'  => $razorpayOrder->id,
                 'coupon_id'          => $couponId,
                 'discount_amount'    => $discountAmount,
             ]);
@@ -301,35 +226,89 @@ class CheckoutController extends Controller
                     'price'        => $item->product->price,
                     'tax_amount'   => round($item->product->price * $item->quantity * 0.18, 2),
                 ]);
-                $item->delete(); // Only delete what was bought
+                $item->delete(); // Items are removed once order is staged for payment
             }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Order staging failed. Please try again.'], 500);
+        }
 
-            // Clear session checkout data
-            session()->forget([
-                'checkout_address_id', 'checkout_total', 'checkout_subtotal',
-                'checkout_gst', 'checkout_shipping', 'checkout_razorpay_order',
-                'checkout_discount', 'checkout_coupon_id', 'applied_coupon'
+        return response()->json([
+            'razorpay_order_id' => $razorpayOrder->id,
+            'amount'            => (int) round($total * 100),
+            'currency'          => 'INR',
+            'key'               => config('services.razorpay.key'),
+            'user_name'         => Auth::user()->name,
+            'user_email'        => Auth::user()->email,
+            'user_phone'        => Auth::user()->phone ?? '',
+            'order_token'       => $order->encryptedId(),
+        ]);
+    }
+
+    /**
+     * Verify payment signature and update the order status.
+     */
+    public function verifyPayment(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+
+        $request->validate([
+            'razorpay_payment_id' => 'required|string',
+            'razorpay_order_id'   => 'required|string',
+            'razorpay_signature'  => 'required|string',
+        ]);
+
+        // Find existing order in DB
+        $order = Order::where('razorpay_order_id', $request->razorpay_order_id)->first();
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Order not found.'], 404);
+        }
+
+        // Verify signature
+        $api = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+
+        try {
+            $attributes = [
+                'razorpay_order_id'   => $request->razorpay_order_id,
+                'razorpay_payment_id' => $request->razorpay_payment_id,
+                'razorpay_signature'  => $request->razorpay_signature,
+            ];
+            $api->utility->verifyPaymentSignature($attributes);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Payment verification failed. Contact support.'], 400);
+        }
+
+        // Update the order status to PAID
+        try {
+            $order->update([
+                'status'              => 'Processing',
+                'payment_status'      => 'Paid',
+                'razorpay_payment_id' => $request->razorpay_payment_id,
+                'razorpay_signature'  => $request->razorpay_signature,
             ]);
 
-            DB::commit();
+            // Clear session data if any (legacy or related to cart state)
+            session()->forget('applied_coupon');
 
             return response()->json([
                 'success'    => true,
-                'message'    => 'Order placed successfully!',
+                'message'    => 'Order verified successfully!',
                 'order_id'   => $order->order_id_string,
-                'redirect'   => route('checkout.success', $order->encryptedId()),
+                'redirect'   => route('checkout.success', ['token' => $order->encryptedId()]),
             ]);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Order creation failed. Contact support.'], 500);
+            return response()->json(['success' => false, 'message' => 'Order update failed. Contact support.'], 500);
         }
     }
 
     /**
      * Show success page after order placement.
      */
-    public function success($token)
+    public function success($locale, $token)
     {
         $orderId = \App\Models\Order::decryptOrderId($token);
         if (!$orderId) abort(404);

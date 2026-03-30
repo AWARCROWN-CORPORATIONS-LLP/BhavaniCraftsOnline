@@ -13,7 +13,7 @@ class Product extends Model
 
     protected $fillable = [
         'product_name', 'telugu_name', 'slug', 'price', 'mrp', 'discount_percent', 'gst_rate',
-        'short_description', 'full_description', 'video_url',
+        'short_description', 'full_description', 'video_url', 'youtube_url',
         'category_id', 'material_type', 'festival_use', 'made_type',
         'customizable', 'requires_shipping', 'replacement_available',
         'replacement_conditions', 'product_code', 'listed_status', 'stock', 'user_id',
@@ -62,6 +62,13 @@ class Product extends Model
             return null;
         }
     }
+    public function getYoutubeIdAttribute()
+    {
+        if (!$this->youtube_url) return null;
+        preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $this->youtube_url, $match);
+        return isset($match[1]) ? $match[1] : null;
+    }
+
     public function ritualKits()
     {
         return $this->belongsToMany(RitualKit::class, 'ritual_kit_product');

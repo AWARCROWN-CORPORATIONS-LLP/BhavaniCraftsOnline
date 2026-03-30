@@ -71,10 +71,8 @@
         }
 
         /* Beautiful Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        *::-webkit-scrollbar { display: none; }
 
         .revenue-badge {
             background: #1e40af;
@@ -242,6 +240,11 @@
             <a href="{{ route('admin.products.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.products.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                 <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Products</span>
+            </a>
+            
+            <a href="{{ route('admin.ritual-kits.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.ritual-kits.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 011-1h1a2 2 0 100-4H7a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" /></svg>
+                <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Ritual Kits</span>
             </a>
 
             <a href="{{ route('admin.orders.kanban') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.orders.kanban') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">

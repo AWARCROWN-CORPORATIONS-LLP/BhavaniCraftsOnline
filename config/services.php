@@ -44,6 +44,7 @@ return [
     'razorpay' => [
         'key'    => env('RAZORPAY_KEY_ID', 'rzp_test_placeholder'),
         'secret' => env('RAZORPAY_KEY_SECRET', 'placeholder_secret'),
+        'webhook_secret' => env('RAZORPAY_WEBHOOK_SECRET', 'Awarcrown@0523'),
     ],
 
 ];

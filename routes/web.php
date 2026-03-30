@@ -160,6 +160,7 @@ Route::prefix('{locale}')->group(function () {
         // Master Catalog Management
         Route::resource('categories', App\Http\Controllers\Admin\AdminCategoryController::class);
         Route::resource('products', App\Http\Controllers\Admin\AdminProductController::class);
+        Route::resource('ritual-kits', App\Http\Controllers\Admin\AdminRitualKitController::class);
         
         // Master Order Master Hub
         Route::get('/orders/kanban', [App\Http\Controllers\Admin\KanbanOrderController::class, 'index'])->name('orders.kanban');

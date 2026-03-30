@@ -118,6 +118,22 @@
                     <input type="file" name="images[]" id="imageInput" multiple accept="image/*" class="text-[10px] font-black uppercase tracking-widest text-blue-600 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition-all cursor-pointer">
                     <div id="imagePreview" class="grid grid-cols-3 gap-6 mt-10 w-full hidden"></div>
                 </div>
+
+                <!-- SACRED CINEMA (VIDEO PORTAL) -->
+                <div class="space-y-8 mt-12 bg-gray-50/30 p-10 rounded-[40px] border border-gray-100/50">
+                    <div class="flex items-center space-x-6">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none text-red-600">Sacred Cinema (Video Narrative)</h3>
+                        <div class="flex-grow h-[1px] bg-red-600/10"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-8">
+                        <div>
+                            <label class="text-[9px] font-bold text-gray-400 tracking-widest uppercase mb-4 block leading-none">YouTube Video URL</label>
+                            <input type="url" name="youtube_url" value="{{ old('youtube_url', $product->youtube_url) }}" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-white border border-gray-100 px-8 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-red-600/10 transition-all">
+                            <p class="mt-4 text-[9px] text-gray-400 font-bold uppercase tracking-widest italic leading-relaxed">Modify the direct link to the artifact's audio-visual narrative. This video will be embedded for all seekers.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- PRICING & STOCK -->

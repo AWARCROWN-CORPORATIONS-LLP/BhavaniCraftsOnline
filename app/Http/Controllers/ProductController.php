@@ -12,7 +12,7 @@ class ProductController extends Controller
      */
     public function show($locale, $slug)
     {
-        $product = Product::with(['images', 'category', 'user', 'reviews.user'])
+        $product = Product::with(['images', 'category', 'user', 'reviews.user', 'ritualKits.products.images'])
             ->where('listed_status', 'Listed')
             ->where('slug', $slug)
             ->firstOrFail();

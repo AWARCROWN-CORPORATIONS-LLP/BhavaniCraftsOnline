@@ -285,7 +285,7 @@ function checkoutApp() {
 
                     <div class="space-y-6">
                         @foreach($cartItems as $item)
-                        {{ /** @var \App\Models\CartItem $item */ }}
+                        @php /** @var \App\Models\CartItem $item */ @endphp
                         <div class="flex items-center space-x-5">
                             <div class="h-20 w-20 rounded-2xl overflow-hidden bg-gray-50 shrink-0 border border-gray-100">
                                 @php $img = $item->product->images->where('is_main', true)->first() ?? $item->product->images->first(); @endphp

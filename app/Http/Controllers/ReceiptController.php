@@ -12,7 +12,7 @@ class ReceiptController extends Controller
     /**
      * Generate and download the order receipt as PDF.
      */
-    public function download($token)
+    public function download($locale, $token)
     {
         $orderId = Order::decryptOrderId($token);
         if (!$orderId) abort(404);

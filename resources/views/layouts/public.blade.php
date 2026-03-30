@@ -47,7 +47,8 @@
 
     <style>
         html { scroll-behavior: smooth; }
-        * { scrollbar-width: thin; scrollbar-color: rgba(198,40,40,0.3) transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        *::-webkit-scrollbar { display: none; }
     </style>
 
     <!-- Tailwind CSS (via CDN for immediate dev flexibility, ideally compiled in production) -->
@@ -164,6 +165,49 @@
             <p class="mt-6 text-[10px] font-black uppercase tracking-[4px] text-onyx-900 animate-pulse">Bhavani Crafts</p>
         </div>
     </div>
+
+    <script>
+        const BcLoader = {
+            get mainLoader() { return document.getElementById('bc-main-loader'); },
+            get progressBar() { return document.getElementById('bc-progress-bar'); },
+            show(text = '') {
+                const loader = this.mainLoader;
+                const bar = this.progressBar;
+                if(loader) {
+                    const p = loader.querySelector('p');
+                    if(p && text) p.innerText = text;
+                    loader.classList.remove('pointer-events-none', 'opacity-0');
+                    loader.classList.add('opacity-100');
+                }
+                if(bar) {
+                    bar.style.width = '40%';
+                    bar.style.opacity = '1';
+                }
+            },
+            hide() {
+                const loader = this.mainLoader;
+                const bar = this.progressBar;
+                if(loader) {
+                    loader.classList.add('pointer-events-none', 'opacity-0');
+                    loader.classList.remove('opacity-100');
+                }
+                if(bar) {
+                    bar.style.width = '100%';
+                    setTimeout(() => {
+                        const currentBar = this.progressBar;
+                        if(currentBar) {
+                            currentBar.style.opacity = '0';
+                            setTimeout(() => { 
+                                const finalBar = this.progressBar;
+                                if(finalBar) finalBar.style.width = '0%'; 
+                            }, 300);
+                        }
+                    }, 500);
+                }
+            }
+        };
+        window.BcLoader = BcLoader;
+    </script>
 
     <!-- Top Navigation -->
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-[100] border-b border-gray-100 transition-all duration-300" 
@@ -484,7 +528,7 @@
      */
     async function addToCart(productId) {
         try {
-            if (window.BcLoader) BcLoader.bar.style.opacity = '1';
+            if (window.BcLoader) BcLoader.show('Adding to cart...');
             const res = await fetch('{{ route("cart.add") }}', {
                 method: 'POST',
                 headers: {
@@ -496,7 +540,7 @@
                 body: JSON.stringify({ product_id: productId })
             });
             const data = await res.json();
-            if (window.BcLoader) BcLoader.bar.style.opacity = '0';
+            if (window.BcLoader) BcLoader.hide();
             if (data.error) {
                 window.dispatchEvent(new CustomEvent('notify', { detail: { message: data.error, type: 'error' } }));
             } else {
@@ -504,7 +548,7 @@
                 window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Added to cart ✓', type: 'success' } }));
             }
         } catch(e) {
-            if (window.BcLoader) BcLoader.bar.style.opacity = '0';
+            if (window.BcLoader) BcLoader.hide();
             window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Something went wrong', type: 'error' } }));
         }
     }

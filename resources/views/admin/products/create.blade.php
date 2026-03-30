@@ -153,6 +153,21 @@
                     </div>
                 </div>
 
+                <div class="space-y-8 mt-12 bg-gray-50/30 p-10 rounded-[40px] border border-gray-100/50">
+                    <div class="flex items-center space-x-6">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none text-red-600">Sacred Cinema (Optional)</h3>
+                        <div class="flex-grow h-[1px] bg-red-600/10"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-8">
+                        <div>
+                            <label class="text-[9px] font-bold text-gray-400 tracking-widest uppercase mb-4 block leading-none">YouTube Video URL</label>
+                            <input type="url" name="youtube_url" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-white border border-gray-100 px-8 py-5 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-red-600/10 transition-all">
+                            <p class="mt-4 text-[9px] text-gray-400 font-bold uppercase tracking-widest italic leading-relaxed">Ensure you use the direct link. This video will be embedded and autoplay for artifact seekers.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <script>
                     document.getElementById('glb_input').addEventListener('change', function(e) {
                         const file = e.target.files[0];
