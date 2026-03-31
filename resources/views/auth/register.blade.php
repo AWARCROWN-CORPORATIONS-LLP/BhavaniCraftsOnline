@@ -253,12 +253,37 @@
     </div>
 
     <script>
+        // CSRF Verification & Auto-Reload for Session Expiry
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrfToken = '{{ csrf_token() }}';
+            const csrfInput = document.querySelector('input[name="_token"]');
+            
+            if (!csrfToken || !csrfInput || !csrfInput.value) {
+                const alpineData = Alpine.$data(document.querySelector('[x-data]'));
+                alpineData.loaderMsg = 'Security session expired. Reloading...';
+                alpineData.busy = true;
+                document.body.classList.add('bc-busy');
+                
+                setTimeout(() => window.location.reload(), 1500);
+            }
+        });
+
         const regForm = document.getElementById('regForm');
 
         regForm.onsubmit = async function(e) {
             e.preventDefault();
             
             const alpineData = Alpine.$data(this.closest('[x-data]'));
+            
+            // Re-check CSRF on submission
+            if (!this.querySelector('input[name="_token"]')?.value) {
+                alpineData.loaderMsg = 'Security token missing. Reloading...';
+                alpineData.busy = true;
+                document.body.classList.add('bc-busy');
+                setTimeout(() => window.location.reload(), 1000);
+                return;
+            }
+            
             if (alpineData.usernameAvailable === false) {
                 alert('Please choose a different username.');
                 return;
