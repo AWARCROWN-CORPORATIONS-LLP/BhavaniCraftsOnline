@@ -17,7 +17,7 @@ class SearchController extends Controller
         // ── Text Search ──────────────────────────────────────────────────────
         if ($request->filled('q')) {
             $q = $request->q;
-            $query->whereNested(function ($sq) use ($q) {
+            $query->where(function ($sq) use ($q) {
                 $sq->where('product_name', 'LIKE', "%{$q}%")
                    ->orWhere('short_description', 'LIKE', "%{$q}%")
                    ->orWhere('telugu_name', 'LIKE', "%{$q}%")
