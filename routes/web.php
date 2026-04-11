@@ -32,7 +32,7 @@ Route::prefix('{locale}')->group(function () {
         return view('public.franchise_registration');
     })->name('franchise.register');
     Route::post('/franchise-registration', [App\Http\Controllers\FranchiseApplicationController::class, 'store'])->name('franchise.store');
-    Route::post('/corporate-catalog-request', [App\Http\Controllers\CorporateRequestController::class, 'store'])->name('corporate.catalog.request');
+    Route::post('/corporate-catalog-request', [App\Http\Controllers\CorporateRequestController::class, 'store'])->name('corporate.catalog');
 
     Route::get('/cart/data', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add');

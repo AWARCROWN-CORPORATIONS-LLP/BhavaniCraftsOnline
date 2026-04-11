@@ -1187,7 +1187,7 @@
                     <h4 class="text-xl font-serif font-bold text-onyx-900 mb-2">Request Catalog</h4>
                     <p class="text-[10px] text-gray-500 font-medium mb-8">Submit your details and our relationship manager will reach out within 24 hours.</p>
 
-                    <form action="{{ route('corporate.catalog.request', ['locale' => app()->getLocale()]) }}" method="POST" class="space-y-4">
+                    <form action="{{ route('corporate.catalog', ['locale' => app()->getLocale()]) }}" method="POST" class="space-y-4">
                         @csrf
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
