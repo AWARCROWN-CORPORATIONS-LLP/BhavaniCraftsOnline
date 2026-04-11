@@ -75,6 +75,20 @@
                                         
                                         <input type="hidden" name="{{ $item->key }}" :value="formValues['{{ $item->key }}']">
                                     </div>
+                                @elseif(str_ends_with($item->key, '_enabled') || str_ends_with($item->key, '_status'))
+                                    <div class="flex items-center">
+                                        <div class="relative inline-block w-14 h-8 transition duration-200 ease-in-out bg-gray-200 rounded-full"
+                                             :class="formValues['{{ $item->key }}'] == '1' ? 'bg-emerald-500' : 'bg-gray-200'">
+                                            <input type="checkbox" 
+                                                   @change="formValues['{{ $item->key }}'] = $event.target.checked ? '1' : '0'"
+                                                   :checked="formValues['{{ $item->key }}'] == '1'"
+                                                   class="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer">
+                                            <div class="absolute w-6 h-6 transition-all duration-200 ease-in-out bg-white rounded-full top-1 left-1"
+                                                 :style="formValues['{{ $item->key }}'] == '1' ? 'transform: translateX(1.5rem)' : ''"></div>
+                                        </div>
+                                        <span class="ml-4 text-[10px] font-black uppercase tracking-widest" :class="formValues['{{ $item->key }}'] == '1' ? 'text-emerald-600' : 'text-gray-400'" x-text="formValues['{{ $item->key }}'] == '1' ? 'Active' : 'Hidden'"></span>
+                                        <input type="hidden" name="{{ $item->key }}" :value="formValues['{{ $item->key }}']">
+                                    </div>
                                 @elseif($item->key == 'recommendation_mode')
                                     <select name="{{ $item->key }}" 
                                             x-model="formValues['{{ $item->key }}']"

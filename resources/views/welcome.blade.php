@@ -448,6 +448,7 @@
     </div>
     @endif
 
+    @if(isset($pageContent['gallery_enabled']) && $pageContent['gallery_enabled'] == '1')
     <!-- Gallery Section -->
     <section x-data="{ visible: false }" x-intersect.once="visible = true"
              :class="visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
@@ -497,6 +498,7 @@
             </div>
         </div>
     </section>
+    @endif
 
 @endsection
 
