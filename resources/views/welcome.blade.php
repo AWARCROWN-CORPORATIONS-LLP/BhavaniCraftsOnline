@@ -428,7 +428,7 @@
             <span class="text-[9px] font-black uppercase tracking-[3px] text-gray-400">Trusted Worldwide By Customers & Corporate Partners</span>
         </div>
         <div class="relative flex overflow-x-hidden no-scrollbar whitespace-nowrap">
-            <div class="flex animate-marquee-infinite pause-on-hover items-center whitespace-nowrap min-w-full">
+            <div class="flex flex-shrink-0 animate-marquee-infinite pause-on-hover items-center whitespace-nowrap min-w-full">
                 @for($i=1; $i<=5; $i++)
                     @php $logoKey = 'trust_logo_' . $i; @endphp
                     @if(isset($pageContent[$logoKey]))
@@ -436,7 +436,7 @@
                     @endif
                 @endfor
             </div>
-            <div class="flex animate-marquee-infinite pause-on-hover items-center whitespace-nowrap min-w-full">
+            <div class="flex flex-shrink-0 animate-marquee-infinite pause-on-hover items-center whitespace-nowrap min-w-full">
                 @for($i=1; $i<=5; $i++)
                     @php $logoKey = 'trust_logo_' . $i; @endphp
                     @if(isset($pageContent[$logoKey]))
@@ -459,7 +459,7 @@
         </div>
 
         <div class="relative flex overflow-x-hidden group no-scrollbar whitespace-nowrap">
-            <div class="py-4 animate-marquee-infinite flex whitespace-nowrap pause-on-hover px-4 no-scrollbar min-w-full">
+            <div class="py-4 animate-marquee-infinite flex flex-shrink-0 whitespace-nowrap pause-on-hover no-scrollbar min-w-full">
                 @for($i=1; $i<=6; $i++)
                     @php 
                         $imgKey = 'gallery_image_' . $i; 
@@ -478,7 +478,7 @@
                 @endfor
             </div>
 
-            <div class="py-4 animate-marquee-infinite flex whitespace-nowrap pause-on-hover px-4 no-scrollbar min-w-full">
+            <div class="py-4 animate-marquee-infinite flex flex-shrink-0 whitespace-nowrap pause-on-hover no-scrollbar min-w-full">
                 @for($i=1; $i<=6; $i++)
                     @php 
                         $imgKey = 'gallery_image_' . $i; 
