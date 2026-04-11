@@ -427,8 +427,8 @@
         <div class="container mx-auto px-4 mb-8 text-center no-scrollbar">
             <span class="text-[9px] font-black uppercase tracking-[3px] text-gray-400">Trusted Worldwide By Customers & Corporate Partners</span>
         </div>
-        <div class="relative flex overflow-x-hidden no-scrollbar">
-            <div class="flex animate-marquee-fast pause-on-hover items-center">
+        <div class="relative flex overflow-x-hidden no-scrollbar whitespace-nowrap">
+            <div class="flex animate-marquee-fast pause-on-hover items-center whitespace-nowrap">
                 @for($i=1; $i<=5; $i++)
                     @php $logoKey = 'trust_logo_' . $i; @endphp
                     @if(isset($pageContent[$logoKey]))
@@ -436,7 +436,7 @@
                     @endif
                 @endfor
             </div>
-            <div class="absolute top-0 flex animate-marquee-fast2 pause-on-hover items-center">
+            <div class="absolute top-0 flex animate-marquee-fast2 pause-on-hover items-center whitespace-nowrap">
                 @for($i=1; $i<=5; $i++)
                     @php $logoKey = 'trust_logo_' . $i; @endphp
                     @if(isset($pageContent[$logoKey]))
@@ -458,7 +458,7 @@
              <h2 class="font-serif text-3xl md:text-5xl font-bold text-onyx-900">{{ $pageContent['gallery_title'] ?? 'The Wedding & Marriage Collection' }}</h2>
         </div>
 
-        <div class="relative flex overflow-x-hidden group no-scrollbar">
+        <div class="relative flex overflow-x-hidden group no-scrollbar whitespace-nowrap">
             <div class="py-4 animate-marquee-fast flex whitespace-nowrap pause-on-hover px-4 no-scrollbar">
                 @for($i=1; $i<=6; $i++)
                     @php 

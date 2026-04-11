@@ -95,8 +95,37 @@
                             950: '#0f0d0c',
                             900: '#1a1614', // Deep Warm Charcoal
                             800: '#26211e', 
-                            DEFAULT: '#1a1614',
+                            ONYX: '#1a1614',
                         }
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-100%)' },
+                        },
+                        marquee2: {
+                            '0%': { transform: 'translateX(100%)' },
+                            '100%': { transform: 'translateX(0%)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        fadeInDown: {
+                            '0%': { opacity: '0', transform: 'translateY(-20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    },
+                    animation: {
+                        'marquee-fast': 'marquee 40s linear infinite',
+                        'marquee-fast2': 'marquee2 40s linear infinite',
+                        'fadeIn': 'fadeIn 1s ease-out forwards',
+                        'fadeInDown': 'fadeInDown 1s ease-out forwards',
+                        'fadeInUp': 'fadeInUp 1s ease-out forwards',
                     }
                 }
             }
