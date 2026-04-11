@@ -4,8 +4,8 @@
 <div class="p-8">
     <div class="flex items-center justify-between mb-10">
         <div>
-            <h2 class="text-3xl font-serif font-bold text-white mb-2 italic">Corporate Catalog Requests</h2>
-            <p class="text-white/50 text-[10px] font-black uppercase tracking-[3px]">Institutional & B2B Inquiry Management</p>
+            <h2 class="text-3xl font-serif font-bold text-black mb-2 italic">Corporate Catalog Requests</h2>
+            <p class="text-black/50 text-[10px] font-black uppercase tracking-[3px]">Institutional & B2B Inquiry Management</p>
         </div>
         <div class="flex items-center space-x-4">
             <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-brand-400">
