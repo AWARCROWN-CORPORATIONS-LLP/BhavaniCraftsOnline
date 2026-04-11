@@ -103,10 +103,6 @@
                             '0%': { transform: 'translateX(0%)' },
                             '100%': { transform: 'translateX(-100%)' },
                         },
-                        marquee2: {
-                            '0%': { transform: 'translateX(100%)' },
-                            '100%': { transform: 'translateX(0%)' },
-                        },
                         fadeIn: {
                             '0%': { opacity: '0' },
                             '100%': { opacity: '1' },
@@ -121,8 +117,7 @@
                         }
                     },
                     animation: {
-                        'marquee-fast': 'marquee 40s linear infinite',
-                        'marquee-fast2': 'marquee2 40s linear infinite',
+                        'marquee-infinite': 'marquee 40s linear infinite',
                         'fadeIn': 'fadeIn 1s ease-out forwards',
                         'fadeInDown': 'fadeInDown 1s ease-out forwards',
                         'fadeInUp': 'fadeInUp 1s ease-out forwards',
