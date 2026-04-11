@@ -16,7 +16,7 @@
 @section('content')
 
 <div x-cloak x-data="{
-    items: [{ name: '', telugu_name: '', amount: '' }],
+    items: [{ name: '', telugu_name: '', amount: '', quantity: 1 }],
     customer_name: '',
     customer_phone: '',
     discount_amount: 0,
@@ -27,7 +27,7 @@
     payment_method: 'online',
     processing: false,
     
-    addItem() { this.items.push({ name: '', telugu_name: '', amount: '' }) },
+    addItem() { this.items.push({ name: '', telugu_name: '', amount: '', quantity: 1 }) },
     removeItem(index) { this.items.splice(index, 1) },
     
     async translateName(index) {
@@ -44,7 +44,7 @@
     },
 
     get subtotal() {
-        return this.items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+        return this.items.reduce((sum, item) => sum + ((parseFloat(item.amount) || 0) * (parseInt(item.quantity) || 1)), 0);
     },
     get taxable() {
         return this.subtotal - (parseFloat(this.discount_amount) || 0);
@@ -143,6 +143,11 @@
                                 <label class="text-[10px] font-bold text-gray-400 uppercase mb-1.5 block">Price (₹)</label>
                                 <input type="number" x-model="item.amount" placeholder="0" 
                                     class="w-full bg-white border border-gray-200 px-5 py-3 rounded-xl text-sm font-bold focus:ring-1 focus:ring-blue-600/20 focus:border-blue-600 transition-all text-right">
+                            </div>
+                            <div class="w-24">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1.5 block">Qty</label>
+                                <input type="number" x-model="item.quantity" min="1" placeholder="1" 
+                                    class="w-full bg-white border border-gray-200 px-5 py-3 rounded-xl text-sm font-bold focus:ring-1 focus:ring-blue-600/20 focus:border-blue-600 transition-all text-center">
                             </div>
 
                             <button x-show="items.length > 1" @click="removeItem(index)" class="mb-3 p-2 text-gray-400 hover:text-red-500 transition-colors">

@@ -67,7 +67,9 @@
                     <tr class="bg-gray-900 text-white border-b-2 border-gray-900">
                         <th class="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-left">#</th>
                         <th class="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-left">Description</th>
-                        <th class="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-right">Amount (₹)</th>
+                        <th class="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-center">Qty</th>
+                        <th class="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-right">Price (₹)</th>
+                        <th class="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-right">Total (₹)</th>
                     </tr>
                 </thead>
                 <tbody class="border-x border-gray-50 divide-y divide-gray-50">
@@ -80,8 +82,9 @@
                                     <div class="text-[10px] text-gray-400 normal-case font-medium mt-0.5">{{ $item['telugu_name'] }}</div>
                                 @endif
                             </td>
-
-                            <td class="px-4 py-3 text-xs font-black text-gray-900 text-right font-mono">₹{{ number_format($item['amount'], 2) }}</td>
+                            <td class="px-4 py-3 text-xs font-bold text-gray-800 text-center font-mono">{{ $item['quantity'] ?? 1 }}</td>
+                            <td class="px-4 py-3 text-xs font-bold text-gray-600 text-right font-mono">₹{{ number_format($item['amount'], 2) }}</td>
+                            <td class="px-4 py-3 text-xs font-black text-gray-900 text-right font-mono">₹{{ number_format($item['amount'] * ($item['quantity'] ?? 1), 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

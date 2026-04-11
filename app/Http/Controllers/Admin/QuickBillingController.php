@@ -53,10 +53,13 @@ class QuickBillingController extends Controller
             'items.*.name' => 'required|string',
             'items.*.telugu_name' => 'nullable|string',
             'items.*.amount' => 'required|numeric|min:0',
+            'items.*.quantity' => 'required|integer|min:1',
         ]);
 
 
-        $subtotal = collect($request->items)->sum('amount');
+        $subtotal = collect($request->items)->sum(function($item) {
+            return $item['amount'] * ($item['quantity'] ?? 1);
+        });
         $discount = $request->discount_amount ?? 0;
         $gstPercent = 18; 
         

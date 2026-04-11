@@ -19,10 +19,10 @@ class AdminPageContentController extends Controller
         $data = $request->except('_token');
 
         foreach ($data as $key => $value) {
-            // Skip the 'file_' prefixed keys as they are handled via their original keys
+      
             if (str_starts_with($key, 'file_')) continue;
 
-            // Check if there is an uploaded file for this specific key
+           
             $fileKey = 'file_' . $key;
             if ($request->hasFile($fileKey)) {
                 $file = $request->file($fileKey);
@@ -31,8 +31,7 @@ class AdminPageContentController extends Controller
                 $value = '/storage/' . $path;
             }
 
-            // Only update if the value is NOT a temporary blob URL
-            // (prevents saving 'blob:http://...' strings to the database)
+          
             if (!str_starts_with($value, 'blob:')) {
                 PageContent::where('key', $key)->update(['value' => $value]);
             }
