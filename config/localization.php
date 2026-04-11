@@ -26,6 +26,12 @@ return [
             'symbol' => '£',
             'rate' => 0.0095,
         ],
+        'te' => [
+            'name' => 'తెలుగు (Telugu)',
+            'currency' => 'INR',
+            'symbol' => '₹',
+            'rate' => 1,
+        ],
     ],
     'default_locale' => 'en-in',
 ];

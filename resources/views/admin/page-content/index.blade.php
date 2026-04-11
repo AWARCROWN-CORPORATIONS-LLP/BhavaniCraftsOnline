@@ -138,7 +138,7 @@
                                      class="absolute inset-0 h-full w-full object-cover opacity-60">
                                 <div class="absolute inset-0 bg-gradient-to-t from-onyx-950 via-onyx-950/40 to-transparent"></div>
                                 <div class="relative h-full flex flex-col items-center justify-center text-center px-12">
-                                    <span class="inline-block py-2 px-6 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-[10px] font-black uppercase tracking-[5px] mb-8" x-text="'Established 1993 • Sacred Artisans'"></span>
+                                    <span class="inline-block py-2 px-6 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-[10px] font-black uppercase tracking-[5px] mb-8" x-text="'Established 2017 • Sacred Artisans'"></span>
                                     <h1 class="text-4xl md:text-5xl font-serif font-bold text-white mb-6 leading-tight" x-html="formValues['hero_title'] || 'Sacred Ritual Marketplace'"></h1>
                                     <p class="text-lg text-gray-300 font-light max-w-xl mx-auto mb-10" x-text="formValues['hero_subtitle'] || 'Serving your spiritual needs with wholesale & retail authentic brass idols and essentials.'"></p>
                                     <div class="flex items-center space-x-6">

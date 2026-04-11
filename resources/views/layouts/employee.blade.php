@@ -142,6 +142,7 @@
         document.addEventListener('turbo:visit', () => BcLoader.show('Loading Module...'));
         document.addEventListener('turbo:load', () => BcLoader.hide());
         document.addEventListener('turbo:submit-start', () => BcLoader.show('Updating Records...'));
+        document.addEventListener('turbo:before-cache', () => BcLoader.hide()); // Prevent cached loading state
         
         window.addEventListener('load', () => BcLoader.hide());
     </script>

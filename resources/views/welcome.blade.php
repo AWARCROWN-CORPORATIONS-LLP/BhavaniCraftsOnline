@@ -16,7 +16,7 @@
             
             <div class="mb-8 flex items-center space-x-4 animate-fadeInDown">
                 <div class="h-[1px] w-12 bg-amber-400"></div>
-                <span class="text-[10px] md:text-[12px] font-black uppercase tracking-[6px] text-amber-400 italic">Established 1993 • Sacred Artisans</span>
+                <span class="text-[10px] md:text-[12px] font-black uppercase tracking-[6px] text-amber-400 italic">Trusted Since 2017</span>
                 <div class="h-[1px] w-12 bg-amber-400"></div>
             </div>
 
@@ -24,7 +24,7 @@
                 @if(isset($pageContent['hero_title']))
                     {!! nl2br(e($pageContent['hero_title'])) !!}
                 @else
-                    Sacred Rituals,<br><span class="text-brand-500">Ancient Craft.</span>
+                    Premium Pooja Items,<br><span class="text-brand-500">Pure Brass.</span>
                 @endif
             </h1>
 
@@ -36,12 +36,12 @@
                 <!-- Retail Path -->
                 <a href="{{ route('search') }}" class="group relative px-10 py-5 bg-white rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 hover:scale-105 active:scale-95">
                     <div class="absolute inset-0 bg-gradient-to-r from-amber-400 to-amber-600 opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                    <span class="relative text-[11px] font-black uppercase tracking-[4px] text-onyx-950">{{ $pageContent['hero_cta_retail'] ?? 'Retail Collection' }}</span>
+                    <span class="relative text-[11px] font-black uppercase tracking-[4px] text-onyx-950">{{ $pageContent['hero_cta_retail'] ?? 'Shop Now' }}</span>
                 </a>
 
                 <!-- Wholesale Path -->
                 <a href="{{ route('register') }}" class="group px-10 py-5 bg-brand-600/90 backdrop-blur-md rounded-2xl border border-brand-500/30 shadow-2xl transition-all duration-500 hover:bg-brand-500 hover:scale-105 active:scale-95">
-                    <span class="text-[11px] font-black uppercase tracking-[4px] text-white">{{ $pageContent['hero_cta_wholesale'] ?? 'Wholesale Portal' }}</span>
+                    <span class="text-[11px] font-black uppercase tracking-[4px] text-white">{{ $pageContent['hero_cta_wholesale'] ?? 'Bulk Orders' }}</span>
                 </a>
             </div>
 
@@ -82,6 +82,7 @@
                                 @if($category->display_image)
                                     <img src="{{ $category->display_image }}"
                                          alt="{{ $category->name }}"
+                                         loading="lazy"
                                          class="h-full w-full object-cover group-hover:scale-125 transition-transform duration-[2000ms] opacity-90 group-hover:opacity-100">
                                 @else
                                     <div class="h-full w-full flex items-center justify-center bg-gradient-to-br from-brand-50 to-amber-50">
@@ -167,9 +168,9 @@
              class="py-24 bg-brand-50/30 transition-all duration-1000 ease-out">
         <div class="container mx-auto px-4 lg:px-8">
             <div class="mb-16 border-l-4 border-brand-500 pl-8">
-                <span class="text-[10px] font-black uppercase tracking-[5px] text-brand-500 block mb-2">Curated Solutions</span>
-                <h2 class="font-serif text-4xl md:text-5xl font-bold text-onyx-900 leading-tight italic">Sacred Ritual Kits</h2>
-                <p class="text-gray-500 max-w-xl mt-4 leading-relaxed font-medium">Expertly assembled bundles for specific ceremonies. Every artifact you need, hand-selected for spiritual accuracy.</p>
+                <span class="text-[10px] font-black uppercase tracking-[5px] text-brand-500 block mb-2">Ready to use</span>
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-onyx-900 leading-tight italic">Complete Pooja Kits</h2>
+                <p class="text-gray-500 max-w-xl mt-4 leading-relaxed font-medium">Carefully packed bundles for specific pujas. Everything you need, hand-selected to ensure your ceremonies go smoothly.</p>
             </div>
 
             <div class="flex pb-12 overflow-x-auto gap-8 no-scrollbar snap-x snap-mandatory scroll-smooth">
@@ -177,11 +178,13 @@
                 <div class="flex-none w-[320px] md:w-[450px] snap-start">
                     <div class="bg-white rounded-[40px] shadow-2xl overflow-hidden group border border-brand-100 hover:border-brand-500 transition-all duration-500">
                         <div class="relative h-[250px] md:h-[300px]">
-                            <img src="{{ $kit->display_image ? Storage::url($kit->display_image) : 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2000ms]">
+                            <img src="{{ $kit->display_image ? Storage::url($kit->display_image) : 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop' }}" 
+                                 loading="lazy"
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2000ms]">
                             <div class="absolute inset-0 bg-gradient-to-t from-onyx-950 via-onyx-950/20 to-transparent"></div>
                             <div class="absolute bottom-6 left-8">
                                 <h3 class="text-2xl text-white font-serif font-bold italic">{{ $kit->name }}</h3>
-                                <p class="text-xs text-white/80 font-medium uppercase tracking-widest mt-1">{{ $kit->products->count() }} Ritual Artifacts</p>
+                                <p class="text-xs text-white/80 font-medium uppercase tracking-widest mt-1">{{ $kit->products->count() }} Items Included</p>
                             </div>
                         </div>
                         <div class="p-8">
@@ -239,7 +242,7 @@
                     <div class="flex items-center space-x-3 mb-4">
                         <span class="h-[1px] w-8 bg-brand-500"></span>
                         <span class="text-[10px] font-black uppercase tracking-[5px] text-brand-500">
-                            {{ $pageContent['recommendation_mode'] === 'Festive' ? 'Season\'s High Velocity' : 'Hand-Picked Heritage' }}
+                            {{ $pageContent['recommendation_mode'] === 'Festive' ? 'Trending Now' : 'Handpicked for You' }}
                         </span>
                     </div>
                     <h2 class="font-serif text-4xl md:text-5xl font-bold text-white leading-tight">
@@ -302,45 +305,30 @@
                     <img src="/storage/poojari_booking_banner_1774718250281.png" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2000ms]">
                     <div class="absolute inset-0 bg-gradient-to-t from-onyx-950 via-onyx-950/20 to-transparent"></div>
                     <div class="absolute bottom-10 left-10 right-10">
-                        <span class="px-4 py-2 bg-amber-500 text-onyx-950 text-[10px] font-black uppercase tracking-widest rounded-lg mb-4 inline-block">Vedic Excellence</span>
-                        <h3 class="text-4xl text-white font-serif font-bold mb-4">The Vedic Poojari Hub</h3>
-                        <p class="text-gray-200 text-sm leading-relaxed max-w-sm">Authentic Vedic Priests for Marriages, Griha-Pravesh, and Sacred Pujas. Book a verified Acharya for your auspicious day.</p>
+                        <span class="px-4 py-2 bg-amber-500 text-onyx-950 text-[10px] font-black uppercase tracking-widest rounded-lg mb-4 inline-block">Pandit Booking</span>
+                        <h3 class="text-4xl text-white font-serif font-bold mb-4">Book a Verified Pandit</h3>
+                        <p class="text-gray-200 text-sm leading-relaxed max-w-sm">Find experienced purohits for Marriages, Griha-Pravesh, and everyday Pujas. Book securely for your auspicious day.</p>
                     </div>
                 </div>
 
                 <!-- Features & CTA -->
-                <div class="space-y-12 pl-0 lg:pl-12">
+                <div class="space-y-12 pl-0 lg:pl-12 flex flex-col justify-center">
                     <div>
                         <span class="text-[10px] font-black uppercase tracking-[5px] text-brand-500 block mb-4">Complete Marriage Supply</span>
-                        <h2 class="text-4xl md:text-5xl font-serif font-bold text-onyx-900 mb-6 italic leading-tight">Every Ritual, Every Need, Fully Supplied.</h2>
-                        <p class="text-gray-500 text-lg leading-relaxed">From the first engagement Diya to the final marriage Mantapam items—we are the largest wholesale source for bridal and ritual needs in the country.</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="p-8 bg-gray-50 rounded-3xl border border-gray-100 hover:border-amber-400 transition-all group">
-                            <div class="h-12 w-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-amber-500 mb-6 group-hover:bg-amber-500 group-hover:text-white transition-all">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            </div>
-                            <h4 class="text-sm font-black uppercase tracking-widest text-onyx-900 mb-2">Book a Priest</h4>
-                            <p class="text-xs text-gray-400 leading-relaxed italic">Verified qualified priests with deep ritual knowledge.</p>
-                            <a href="#" class="mt-4 inline-block text-[10px] font-black uppercase tracking-widest text-brand-500 hover:tracking-[3px] transition-all">Check Timings →</a>
-                        </div>
-
-                        <div class="p-8 bg-gray-50 rounded-3xl border border-gray-100 hover:border-amber-400 transition-all group">
-                            <div class="h-12 w-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-amber-500 mb-6 group-hover:bg-amber-500 group-hover:text-white transition-all">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                            </div>
-                            <h4 class="text-sm font-black uppercase tracking-widest text-onyx-900 mb-2">Bulk Logistics</h4>
-                            <p class="text-xs text-gray-400 leading-relaxed italic">Marriage kits, Brassware, and Pasupu-Kunkuma in bulk.</p>
-                            <a href="#" class="mt-4 inline-block text-[10px] font-black uppercase tracking-widest text-brand-500 hover:tracking-[3px] transition-all">View Packs →</a>
-                        </div>
+                        <h2 class="text-4xl md:text-5xl font-serif font-bold text-onyx-900 mb-6 italic leading-tight">Everything you need for the wedding.</h2>
+                        <p class="text-gray-500 text-lg leading-relaxed mb-8">From the first engagement Diya to the final marriage Mantapam items—we are your one-stop shop for bridal and puja needs.</p>
+                        
+                        <a href="https://wa.me/{{ $pageContent['contact_whatsapp_number'] ?? '919676832291' }}" target="_blank" class="inline-flex items-center space-x-3 px-8 py-4 bg-brand-50 hover:bg-brand-500 border border-brand-200 hover:border-brand-500 text-brand-600 hover:text-white rounded-[1rem] text-[11px] font-black uppercase tracking-[2px] transition-all group">
+                            <span>Contact Now</span>
+                            <svg class="h-4 w-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- VIVAHA CONCIERGE -->
+    <!-- WEDDING SERVICES -->
     <section x-data="{ visible: false }" x-intersect.once="visible = true"
              :class="visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
              class="py-24 bg-brand-50 transition-all duration-1000 ease-out">
@@ -352,21 +340,21 @@
                 </div>
                 <div class="lg:w-1/2 p-12 lg:p-20">
                      <span class="text-[10px] font-black uppercase tracking-[6px] text-brand-500 block mb-6">Expert Guidance</span>
-                     <h2 class="text-4xl lg:text-5xl font-serif font-bold text-onyx-900 mb-8 italic leading-tight">Vivaha Concierge</h2>
-                     <p class="text-lg text-gray-500 mb-10 leading-relaxed">Planning a grand ritual? Our spiritual consultants provide personalized guidance on Vastu, ritual brassware selection, and complete marriage logistics to ensure divine perfection.</p>
+                     <h2 class="text-4xl lg:text-5xl font-serif font-bold text-onyx-900 mb-8 italic leading-tight">Wedding & Big Event Guidance</h2>
+                     <p class="text-lg text-gray-500 mb-10 leading-relaxed">Planning a big puja or marriage? We provide personalized advice, brass item selection, and complete logistics support to make your day perfect and tension-free.</p>
                      
                      <div class="space-y-6">
                          <div class="flex items-start space-x-4">
                              <div class="h-6 w-6 text-brand-500 mt-1"><svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" /></svg></div>
-                             <p class="text-sm font-bold text-onyx-900 uppercase tracking-widest leading-none pt-1">Personalized Ritual Planning</p>
+                             <p class="text-sm font-bold text-onyx-900 uppercase tracking-widest leading-none pt-1">Expert Item Selection</p>
                          </div>
                          <div class="flex items-start space-x-4">
                              <div class="h-6 w-6 text-brand-500 mt-1"><svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" /></svg></div>
-                             <p class="text-sm font-bold text-onyx-900 uppercase tracking-widest leading-none pt-1">Vastu-Aligned Artifact Selection</p>
+                             <p class="text-sm font-bold text-onyx-900 uppercase tracking-widest leading-none pt-1">Setup & Delivery Assistance</p>
                          </div>
                      </div>
                      
-                     <button class="mt-12 px-10 py-5 bg-onyx-900 text-white text-[11px] font-black uppercase tracking-[4px] rounded-2xl hover:bg-brand-600 transition-all shadow-xl shadow-onyx-900/20">Book a Consultation</button>
+                     <button class="mt-12 px-10 py-5 bg-onyx-900 text-white text-[11px] font-black uppercase tracking-[4px] rounded-2xl hover:bg-brand-600 transition-all shadow-xl shadow-onyx-900/20">Talk to our Experts</button>
                 </div>
             </div>
         </div>
@@ -388,7 +376,7 @@
                 <p class="text-xl text-gray-400 mb-12 leading-relaxed">Impress your clients and stakeholders with the elegance of pure brass. Custom branding, premium velvet packaging, and global multi-unit shipping available.</p>
                 
                 <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-8">
-                     <button class="px-12 py-5 bg-white text-onyx-950 text-[11px] font-black uppercase tracking-[4px] rounded-2xl hover:bg-amber-500 transition-all">Request Corporate Catalog</button>
+                                           <button @click="corporateModalOpen = true" class="px-12 py-5 bg-white text-onyx-950 text-[11px] font-black uppercase tracking-[4px] rounded-2xl hover:bg-amber-500 transition-all">Request Corporate Catalog</button>
                      <div class="flex items-center space-x-4">
                          <div class="h-10 w-10 border border-white/20 rounded-full flex items-center justify-center">
                              <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7zm10 5a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"/></svg>
@@ -464,9 +452,9 @@
     <section x-data="{ visible: false }" x-intersect.once="visible = true"
              :class="visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
              class="py-24 bg-white overflow-hidden no-scrollbar transition-all duration-1000 ease-out">
-        <div class="container mx-auto px-4 lg:px-8 mb-16 text-center">
-             <span class="text-[10px] font-black uppercase tracking-[4px] text-brand-500 block mb-2">Vivaha & Mangalam</span>
-             <h2 class="font-serif text-3xl md:text-5xl font-bold text-onyx-900">{{ $pageContent['gallery_title'] ?? 'The Wedding & Marriage Suite' }}</h2>
+         <div class="container mx-auto px-4 lg:px-8 mb-16 text-center">
+             <span class="text-[10px] font-black uppercase tracking-[4px] text-brand-500 block mb-2">Shop by Occasion</span>
+             <h2 class="font-serif text-3xl md:text-5xl font-bold text-onyx-900">{{ $pageContent['gallery_title'] ?? 'The Wedding & Marriage Collection' }}</h2>
         </div>
 
         <div class="relative flex overflow-x-hidden group no-scrollbar">
@@ -579,9 +567,9 @@ function infiniteScroll() {
             const stockBadge = (p.stock > 0 && p.stock <= 5) ? `<span class="bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full animate-pulse">Only ${p.stock} left</span>` : (p.stock == 0 ? `<span class="bg-gray-800/80 text-white text-[9px] font-black px-2 py-0.5 rounded-full">Out of Stock</span>` : '');
 
             return `
-                <a href="/${window.AppLocale}/artifact/${p.slug}" class="group bg-white rounded-[1.5rem] border border-gray-100 hover:border-brand-500/30 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-brand-500/10 transition-all duration-500 flex flex-col h-full">
-                    <div class="relative aspect-square overflow-hidden bg-gray-50">
-                        <img src="${imgUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                <a href="/${window.AppLocale}/artifact/${p.slug}" class="stagger-item group backdrop-blur-xl bg-white/10 rounded-[1.5rem] border border-white/20 hover:border-brand-500/50 overflow-hidden shadow-2xl hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-700 flex flex-col relative z-10 hover:-translate-y-2 h-full">
+                    <div class="relative aspect-square overflow-hidden bg-onyx-950/5 rounded-t-[1.5rem]">
+                        <img src="${imgUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out">
                         <div class="absolute top-3 left-3 flex flex-col gap-1">${discountBadge}${stockBadge}</div>
                     </div>
                     <div class="p-5 flex flex-col flex-1">

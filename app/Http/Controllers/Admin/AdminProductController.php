@@ -68,7 +68,7 @@ class AdminProductController extends Controller
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('products', 'public');
+                $path = $this->uploadAndOptimize($image, 'products');
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_url' => $path,
@@ -133,7 +133,7 @@ class AdminProductController extends Controller
 
             // Register New Trinity
             foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('products', 'public');
+                $path = $this->uploadAndOptimize($image, 'products');
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_url' => $path,
@@ -152,5 +152,38 @@ class AdminProductController extends Controller
     {
         $product->delete();
         return redirect()->route('admin.products.index')->with('success', 'Artifact removed from catalog.');
+    }
+    /**
+     * Upload and optimize an image, converting to WebP if GD is available.
+     * Otherwise falls back to standard storage.
+     */
+    private function uploadAndOptimize($file, $folder)
+    {
+        if (function_exists('imagewebp')) {
+            try {
+                $filename = Str::random(40) . '.webp';
+                $tempPath = tempnam(sys_get_temp_dir(), 'webp');
+                
+                $info = getimagesize($file->getRealPath());
+                $image = match($info[2]) {
+                    IMAGETYPE_JPEG => imagecreatefromjpeg($file->getRealPath()),
+                    IMAGETYPE_PNG  => imagecreatefrompng($file->getRealPath()),
+                    IMAGETYPE_WEBP => imagecreatefromwebp($file->getRealPath()),
+                    default        => null
+                };
+
+                if ($image) {
+                    imagewebp($image, $tempPath, 80);
+                    $path = Storage::disk('public')->putFileAs($folder, new \Illuminate\Http\File($tempPath), $filename);
+                    imagedestroy($image);
+                    @unlink($tempPath);
+                    return $folder . '/' . $filename;
+                }
+            } catch (\Exception $e) {
+                \Log::error('Sacred WebP conversion failed: ' . $e->getMessage());
+            }
+        }
+        
+        return $file->store($folder, 'public');
     }
 }

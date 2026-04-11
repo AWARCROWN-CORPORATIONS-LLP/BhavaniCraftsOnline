@@ -146,6 +146,7 @@
         document.addEventListener('turbo:visit', () => BcLoader.show('Loading Module...'));
         document.addEventListener('turbo:load', () => BcLoader.hide());
         document.addEventListener('turbo:submit-start', () => BcLoader.show('Synchronizing Business Data...'));
+        document.addEventListener('turbo:before-cache', () => BcLoader.hide()); 
         
         window.addEventListener('load', () => BcLoader.hide());
     </script>

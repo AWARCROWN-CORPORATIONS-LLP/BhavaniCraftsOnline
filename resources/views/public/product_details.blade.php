@@ -21,6 +21,15 @@
             this.mainImage = this.frames[frameIndex];
             this.currentFrame = frameIndex;
         }
+    },
+    isZoomed: false,
+    zoomX: 50,
+    zoomY: 50,
+    updateZoom(e) {
+        if (this.is360Active) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        this.zoomX = ((e.clientX - rect.left) / rect.width) * 100;
+        this.zoomY = ((e.clientY - rect.top) / rect.height) * 100;
     }
 }">
     <div class="container mx-auto px-4 lg:px-8">
@@ -49,12 +58,15 @@
 
                 <!-- Main Image -->
                 <div class="relative w-full aspect-[4/5] md:aspect-auto md:h-[calc(100vh-120px)] rounded-[2rem] overflow-hidden bg-gray-50 border border-gray-100 group shadow-2xl shadow-brand-900/5 cursor-crosshair"
-                     @mousemove="rotate360($event)">
+                     @mousemove="rotate360($event); updateZoom($event)"
+                     @mouseenter="isZoomed = true"
+                     @mouseleave="isZoomed = false; zoomX = 50; zoomY = 50">
                     
                     <img :src="mainImage" 
                          alt="{{ $product->product_name }}" 
-                         class="w-full h-full object-contain md:object-cover transition-all duration-300 bg-white"
-                         :class="is360Active ? 'scale-110' : ''">
+                         class="w-full h-full object-contain md:object-cover transition-transform bg-white will-change-transform"
+                         :class="is360Active ? 'scale-110 duration-300' : (isZoomed ? 'scale-[2.5] duration-75' : 'scale-100 duration-500')"
+                         :style="isZoomed && !is360Active ? `transform-origin: ${zoomX}% ${zoomY}%` : 'transform-origin: center'">
                     
                     @if($product->discount_percent > 0)
                     <div class="absolute top-6 left-6 bg-brand-500 text-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl">
@@ -299,7 +311,7 @@
                     @if($product->youtube_id)
                         <div class="flex items-center justify-center lg:justify-start space-x-4 mb-10">
                             <span class="h-[1px] w-12 bg-amber-500/50"></span>
-                            <h2 class="text-3xl font-serif font-bold text-onyx-900 italic">Sacred <span class="text-amber-500">Narrative</span></h2>
+                            <h2 class="text-3xl font-serif font-bold text-onyx-900 italic">Product <span class="text-amber-500">Video</span></h2>
                         </div>
 
                         <div class="mb-16 aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-4 border-amber-50 group relative">
@@ -311,7 +323,7 @@
                                 allowfullscreen>
                             </iframe>
                             <div class="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/60 to-transparent pointer-events-none transition-opacity duration-500 group-hover:opacity-0">
-                                <p class="text-[10px] items-center font-black text-white uppercase tracking-[4px]">Witness the Aura & Heritage</p>
+                                <p class="text-[10px] items-center font-black text-white uppercase tracking-[4px]">Watch it in detail</p>
                             </div>
                         </div>
                     @endif
@@ -343,21 +355,23 @@
                                
                                <div class="flex-grow text-center md:text-left">
                                    <div class="flex items-center justify-center md:justify-start space-x-3 mb-4">
-                                       <span class="px-3 py-1 bg-brand-500/10 text-brand-600 rounded-lg text-[9px] font-black uppercase tracking-widest border border-brand-500/20">Sacred Ascension</span>
+                                       <span class="px-3 py-1 bg-brand-500/10 text-brand-600 rounded-lg text-[9px] font-black uppercase tracking-widest border border-brand-500/20">Frequently Bought Together</span>
                                        <span class="h-[1px] w-8 bg-brand-500/20"></span>
                                    </div>
                                    
-                                   <h3 class="text-3xl font-serif font-bold text-onyx-900 mb-4 italic">Complete your <span class="text-brand-500">Sanctuary</span></h3>
+                                   <h3 class="text-3xl font-serif font-bold text-onyx-900 mb-4 italic">Complete the <span class="text-brand-500">Set</span></h3>
                                    <p class="text-sm text-gray-500 font-medium mb-8 leading-relaxed max-w-lg">
-                                       Upgrade this artifact with the matched <span class="text-onyx-900 font-bold">{{ $product->ritualKits->first()->name }}</span>. 
-                                       A curated selection of spiritual tools designed to amplify the artifact's energy in your ritual space.
+                                       Upgrade this item with the matching <span class="text-onyx-900 font-bold">{{ $product->ritualKits->first()->name }}</span>. 
+                                       A complete set of items designed perfectly to go together for your daily puja needs.
                                    </p>
 
-                                   <form action="{{ route('cart.buy-kit') }}" method="POST">
+                                   <form action="{{ route('cart.buy-kit', ['locale' => app()->getLocale()]) }}" method="POST">
                                        @csrf
                                        <input type="hidden" name="ritual_kit_id" value="{{ $product->ritualKits->first()->id }}">
+                                       <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                       <input type="hidden" name="quantity" :value="quantity">
                                        <button type="submit" class="w-full md:w-auto h-16 px-10 bg-brand-500 text-white rounded-[1.2rem] text-[11px] font-black uppercase tracking-[3px] shadow-2xl shadow-brand-500/30 hover:bg-brand-600 hover:scale-[1.02] transform transition-all flex items-center justify-center group/btn">
-                                           <span>Acquire the Complete Ritual Set (+ {{ App\Helpers\PriceHelper::format($product->ritualKits->first()->price) }})</span>
+                                           <span>Add Complete Kit (+ {{ App\Helpers\PriceHelper::format($product->ritualKits->first()->price) }})</span>
                                            <svg class="h-5 w-5 ml-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                        </button>
                                    </form>
@@ -377,8 +391,8 @@
                         <div class="flex items-start space-x-4">
                             <div class="h-10 w-10 shrink-0 bg-white rounded-2xl flex items-center justify-center shadow-lg text-amber-500 font-black text-xs">01</div>
                             <div>
-                                <h4 class="text-xs font-black uppercase tracking-wider text-onyx-900 mb-1">Generational Mastery</h4>
-                                <p class="text-[11px] text-gray-500 leading-relaxed">Hand-forged by 5th generation artisans using secret alloys handed down through centuries.</p>
+                                <h4 class="text-xs font-black uppercase tracking-wider text-onyx-900 mb-1">Traditional Experts</h4>
+                                <p class="text-[11px] text-gray-500 leading-relaxed">Hand-made by 5th generation artisans using methods handed down directly from their ancestors.</p>
                             </div>
                         </div>
                         
@@ -442,15 +456,106 @@
         <div class="mt-24 pt-24 border-t border-gray-100 max-w-4xl mx-auto">
             <h3 class="text-3xl font-serif font-bold text-onyx-900 mb-12 italic text-center">Customer <span class="text-brand-500">Reviews</span></h3>
 
+            <!-- Review Aggregation Histogram -->
+            <div class="bg-white rounded-[2rem] p-8 mb-16 shadow-xl shadow-brand-900/5 border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
+                <div class="text-center md:border-r border-gray-100">
+                    <h4 class="text-6xl font-serif font-black text-onyx-900 mb-2">{{ $reviewStats['average'] }}</h4>
+                    <div class="flex justify-center text-brand-500 mb-2">
+                        @for($i=1; $i<=5; $i++)
+                            <svg class="h-6 w-6 {{ $i <= round($reviewStats['average']) ? 'text-brand-500' : 'text-gray-200' }}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        @endfor
+                    </div>
+                    <p class="text-[10px] font-black uppercase tracking-[3px] text-gray-400">{{ $reviewStats['total'] }} Reviews</p>
+                </div>
+                <div class="md:col-span-2 space-y-4">
+                    @foreach([5, 4, 3, 2, 1] as $star)
+                    <div class="flex items-center space-x-4">
+                        <span class="text-[10px] font-black uppercase text-onyx-900 w-12">{{ $star }} Star</span>
+                        <div class="flex-grow h-3 bg-gray-50 rounded-full overflow-hidden">
+                            <div class="h-full bg-brand-500 rounded-full transition-all duration-1000" style="width: {{ $reviewStats['distribution'][$star]['percent'] }}%"></div>
+                        </div>
+                        <span class="text-[10px] font-black text-brand-500 w-8 text-right">{{ round($reviewStats['distribution'][$star]['percent']) }}%</span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Lightbox Component -->
+            <div x-data="{ open: false, src: '' }"
+                 @open-lightbox.window="src = $event.detail; open = true"
+                 x-show="open"
+                 x-cloak
+                 class="fixed inset-0 z-[200] bg-onyx-900/95 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer transition-opacity"
+                 x-transition.opacity.duration.300ms
+                 @click="open = false"
+                 style="display: none;">
+                 
+                 <button class="absolute top-10 right-10 text-white bg-white/10 hover:bg-brand-500 rounded-full p-4 transition-all hover:rotate-90">
+                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                 </button>
+                 
+                 <img :src="src" class="max-h-[85vh] max-w-[85vw] object-contain rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-brand-500/20" @click.stop>
+            </div>
+
             <!-- Review Form -->
             @auth
-                <div class="bg-gray-50 rounded-[2rem] p-8 mb-16 border border-gray-100">
+                <div class="bg-gray-50 rounded-[2rem] p-8 mb-16 border border-gray-100" x-data="reviewSubmission">
+                    <script>
+                        document.addEventListener('alpine:init', () => {
+                            Alpine.data('reviewSubmission', () => ({
+                                loading: false,
+                                submitReview(e) {
+                                    this.loading = true;
+                                    let formData = new FormData(e.target);
+                                    fetch("{{ route('artifact.reviews.store', $product->slug) }}", {
+                                        method: 'POST',
+                                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                                        body: formData
+                                    })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        this.loading = false;
+                                        if(data.error) {
+                                            window.dispatchEvent(new CustomEvent('notify', { detail: { message: data.error, type: 'error' } }));
+                                        } else if(data.success) {
+                                            window.dispatchEvent(new CustomEvent('notify', { detail: { message: data.message, type: 'success' } }));
+                                            e.target.reset();
+                                            
+                                            const starsHtml = Array.from({length: 5}).map((_, i) => `<svg class="h-4 w-4 ${i < data.review.rating ? 'text-brand-500' : 'text-gray-200'}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>`).join('');
+                                            const imgHtml = data.review.image_url ? `<div class="mt-4 mt-6"><img src="${data.review.image_url}" class="h-32 w-32 object-cover rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:scale-105 transition-transform" onclick="window.dispatchEvent(new CustomEvent('open-lightbox', { detail: this.src }))"></div>` : '';
+                                            const html = `<div class="flex space-x-6 p-8 bg-white rounded-[2rem] border border-gray-50 shadow-sm mb-8 animate-fade-in-down"><div class="h-12 w-12 bg-brand-50 rounded-full flex items-center justify-center shrink-0"><span class="text-brand-500 font-bold uppercase text-lg">${data.review.user_initial}</span></div><div><div class="flex justify-between items-start mb-2"><div><h5 class="font-bold text-onyx-900 text-sm">${data.review.user_name}</h5><div class="flex text-brand-500 text-xs mt-1">${starsHtml}</div></div><span class="text-[9px] font-black uppercase text-gray-400 tracking-widest">Just now</span></div><p class="text-sm font-medium text-gray-500 leading-relaxed">${data.review.comment || ''}</p>${imgHtml}</div></div>`;
+                                            
+                                            document.getElementById('newReviews').insertAdjacentHTML('afterbegin', html);
+                                            let emptyEl = document.getElementById('emptyReviews');
+                                            if(emptyEl) emptyEl.remove();
+                                        }
+                                    })
+                                    .catch(err => {
+                                        this.loading = false;
+                                        window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Failed to submit review', type: 'error' } }));
+                                    });
+                                }
+                            }));
+                        });
+                    </script>
                     <h4 class="text-lg font-bold text-onyx-900 mb-6 font-serif italic">Share your experience</h4>
-                    <form action="{{ route('artifact.reviews.store', $product->encryptedId()) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <form @submit.prevent="submitReview" enctype="multipart/form-data" class="space-y-6">
                         @csrf
-                        <div>
-                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Rating (1-5)</label>
-                            <input type="number" name="rating" min="1" max="5" value="5" class="w-full h-12 bg-white border border-gray-200 rounded-xl px-4 text-sm font-bold focus:ring-brand-500 focus:border-brand-500" required>
+                        <div x-data="{ rating: 5, hoverRating: 0 }">
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Rating</label>
+                            <input type="hidden" name="rating" x-model="rating" required>
+                            <div class="flex items-center space-x-1">
+                                <template x-for="star in 5">
+                                    <svg @click="rating = star"
+                                         @mouseenter="hoverRating = star"
+                                         @mouseleave="hoverRating = 0"
+                                         :class="star <= (hoverRating || rating) ? 'text-brand-500' : 'text-gray-200'"
+                                         class="h-10 w-10 cursor-pointer transition-colors hover:scale-110 transform" 
+                                         fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                </template>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Your Review</label>
@@ -460,8 +565,10 @@
                             <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Product Image (Optional)</label>
                             <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 transition-colors">
                         </div>
-                        <button type="submit" class="px-8 py-3 bg-brand-500 text-white text-[11px] font-black uppercase tracking-[2px] rounded-xl hover:bg-brand-600 transition-colors shadow-lg shadow-brand-500/20">
-                            Post Review
+                        <button type="submit" :disabled="loading" class="px-8 py-3 bg-brand-500 text-white text-[11px] font-black uppercase tracking-[2px] rounded-xl hover:bg-brand-600 transition-all shadow-lg shadow-brand-500/20 flex items-center space-x-2 disabled:opacity-70">
+                            <span x-show="!loading">Post Review</span>
+                            <span x-show="loading">Posting...</span>
+                            <svg x-show="loading" style="display:none;" class="animate-spin h-4 w-4 ml-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                         </button>
                     </form>
                 </div>
@@ -475,7 +582,8 @@
             @endauth
 
             
-            <div class="space-y-8">
+            <div class="space-y-8" id="reviewsContainer">
+                <div id="newReviews"></div>
                 @forelse($product->reviews as $review)
                 <div class="flex space-x-6 p-8 bg-white rounded-[2rem] border border-gray-50 shadow-sm">
                     <div class="h-12 w-12 bg-brand-50 rounded-full flex items-center justify-center shrink-0">
@@ -495,14 +603,14 @@
                         </div>
                         <p class="text-sm font-medium text-gray-500 leading-relaxed">{{ $review->comment }}</p>
                         @if($review->image_url)
-                            <div class="mt-4 mt-6">
-                                <img src="{{ \Illuminate\Support\Facades\Storage::url($review->image_url) }}" class="h-32 w-32 object-cover rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:scale-105 transition-transform" onclick="window.open(this.src)">
+                            <div class="mt-4 mt-6" x-data>
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($review->image_url) }}" class="h-32 w-32 object-cover rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:scale-105 transition-transform" @click="$dispatch('open-lightbox', $el.src)">
                             </div>
                         @endif
                     </div>
                 </div>
                 @empty
-                <div class="text-center py-12">
+                <div id="emptyReviews" class="text-center py-12">
                     <p class="text-sm font-bold text-gray-400 uppercase tracking-widest italic">No reviews yet.</p>
                 </div>
                 @endforelse

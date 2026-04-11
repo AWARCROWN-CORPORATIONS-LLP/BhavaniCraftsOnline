@@ -490,7 +490,7 @@ function infiniteScroll() {
             return `
                 <a href="/${window.AppLocale}/artifact/${p.slug}" class="group bg-white rounded-[1.5rem] border border-gray-100 hover:border-brand-500/30 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-brand-500/10 transition-all duration-500 flex flex-col h-full">
                     <div class="relative aspect-square overflow-hidden bg-gray-50">
-                        <img src="${imgUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <img src="${imgUrl}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                         <div class="absolute top-3 left-3 flex flex-col gap-1">${discountBadge}${stockBadge}</div>
                     </div>
                     <div class="p-5 flex flex-col flex-1">

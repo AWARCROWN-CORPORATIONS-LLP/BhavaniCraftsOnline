@@ -7,31 +7,43 @@
         $p = $product;
     }
 
-    // Extract main image
+    // Extract main image and secondary lifestyle image
     $img = null;
+    $hoverImg = null;
     $pImages = data_get($p, 'images', []);
     if (count($pImages) > 0) {
         foreach($pImages as $item) {
             if (data_get($item, 'is_main')) {
                 $img = $item;
-                break;
+            } elseif (!$hoverImg) {
+                $hoverImg = $item;
             }
         }
-        if (!$img) $img = $pImages[0];
+        if (!$img) {
+            $img = $pImages[0];
+            $hoverImg = data_get($pImages, 1, null);
+        }
     }
 @endphp
 <a wire:navigate href="{{ route('artifact.show', $p->slug) }}"
-   class="stagger-item group bg-white rounded-[1.5rem] border border-gray-100 hover:border-brand-500/30 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-brand-500/10 transition-all duration-500 flex flex-col">
+   class="stagger-item group backdrop-blur-xl bg-white/10 rounded-[1.5rem] border border-white/20 hover:border-brand-500/50 overflow-hidden shadow-2xl hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-700 flex flex-col relative z-10 hover:-translate-y-2">
 
     {{-- Image --}}
-    <div class="relative aspect-square overflow-hidden bg-gray-50">
+    <div class="relative aspect-square overflow-hidden bg-onyx-950/5 rounded-t-[1.5rem]">
         @if($img)
             <img src="{{ \Illuminate\Support\Facades\Storage::url($img->image_url) }}"
                  alt="{{ $p->product_name }}"
-                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                 loading="lazy"
+                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out {{ $hoverImg ? 'group-hover:opacity-0 absolute inset-0 z-10' : '' }}">
+            @if($hoverImg)
+                <img src="{{ \Illuminate\Support\Facades\Storage::url($hoverImg->image_url) }}"
+                     alt="{{ $p->product_name }} Lifestyle"
+                     loading="lazy"
+                     class="w-full h-full object-cover absolute inset-0 group-hover:scale-110 transition-transform duration-1000 ease-out z-0">
+            @endif
         @else
             <div class="w-full h-full flex items-center justify-center">
-                <svg class="h-16 w-16 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                <svg class="h-16 w-16 text-gray-400/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
             </div>
         @endif
 

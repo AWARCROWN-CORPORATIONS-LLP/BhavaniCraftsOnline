@@ -12,6 +12,8 @@ use App\Models\OrderItem;
 use App\Models\Address;
 use App\Models\Product;
 use Razorpay\Api\Api;
+use App\Mail\OrderConfirmed;
+use Illuminate\Support\Facades\Mail;
 
 class CheckoutController extends Controller
 {
@@ -57,7 +59,17 @@ class CheckoutController extends Controller
         }
 
         $discountedSubtotal = max(0, $subtotal - $discountAmount);
-        $gst      = round($discountedSubtotal * 0.18, 2);
+        
+        // Dynamic GST calculation based on individual product rates
+        $gst = $cartItems->reduce(function($carry, $item) use ($subtotal, $discountAmount) {
+            $itemSubtotal = $item->product->price * $item->quantity;
+            // Distribute discount proportionally to items for accurate tax base
+            $proportionalDiscount = $subtotal > 0 ? ($itemSubtotal / $subtotal) * $discountAmount : 0;
+            $taxableValue = max(0, $itemSubtotal - $proportionalDiscount);
+            return $carry + ($taxableValue * (($item->product->gst_rate ?? 18) / 100));
+        }, 0);
+        $gst = round($gst, 2);
+
         $shipping = $discountedSubtotal >= 999 ? 0 : 80;
         $total    = $discountedSubtotal + $gst + $shipping;
 
@@ -112,7 +124,15 @@ class CheckoutController extends Controller
         }
 
         $discountedTotalLocal = max(0, $subtotal - $discountAmount);
-        $gst      = round($discountedTotalLocal * 0.18, 2);
+        
+        $gst = $cartItems->reduce(function($carry, $item) use ($subtotal, $discountAmount) {
+            $itemSubtotal = $item->product->price * $item->quantity;
+            $proportionalDiscount = $subtotal > 0 ? ($itemSubtotal / $subtotal) * $discountAmount : 0;
+            $taxableValue = max(0, $itemSubtotal - $proportionalDiscount);
+            return $carry + ($taxableValue * (($item->product->gst_rate ?? 18) / 100));
+        }, 0);
+        $gst = round($gst, 2);
+
         $shipping = $discountedTotalLocal >= 999 ? 0 : 80;
         $total    = $discountedTotalLocal + $gst + $shipping;
 
@@ -158,7 +178,7 @@ class CheckoutController extends Controller
                         'product_name' => $item->product->product_name,
                         'quantity'     => $item->quantity,
                         'price'        => $item->product->price,
-                        'tax_amount'   => round($item->product->price * $item->quantity * 0.18, 2),
+                        'tax_amount'   => round(($item->product->price * $item->quantity) * (($item->product->gst_rate ?? 18) / 100), 2),
                     ]);
                     $item->delete(); // Delete only the items processed in this order
                 }
@@ -166,10 +186,17 @@ class CheckoutController extends Controller
                 session()->forget('applied_coupon');
                 DB::commit();
 
+                // Send Confirmation Email
+                try {
+                    Mail::to(Auth::user()->email)->send(new OrderConfirmed($order));
+                } catch (\Exception $e) {
+                    \Log::error('Order Confirmation Email failed for order ' . $order->order_id_string . ': ' . $e->getMessage());
+                }
+
                 return response()->json([
                     'success'  => true,
                     'order_id' => $order->order_id_string,
-                    'redirect' => route('checkout.success', ['token' => $order->encryptedId()]),
+                    'redirect' => route('checkout.success', ['token' => $order->encryptedId(), 'locale' => app()->getLocale()]),
                 ]);
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -224,7 +251,7 @@ class CheckoutController extends Controller
                     'product_name' => $item->product->product_name,
                     'quantity'     => $item->quantity,
                     'price'        => $item->product->price,
-                    'tax_amount'   => round($item->product->price * $item->quantity * 0.18, 2),
+                    'tax_amount'   => round(($item->product->price * $item->quantity) * (($item->product->gst_rate ?? 18) / 100), 2),
                 ]);
                 $item->delete(); // Items are removed once order is staged for payment
             }
@@ -290,14 +317,18 @@ class CheckoutController extends Controller
                 'razorpay_signature'  => $request->razorpay_signature,
             ]);
 
-            // Clear session data if any (legacy or related to cart state)
-            session()->forget('applied_coupon');
+            // Send Confirmation Email
+            try {
+                Mail::to(Auth::user()->email)->send(new OrderConfirmed($order));
+            } catch (\Exception $e) {
+                \Log::error('Order Confirmation Email failed for order ' . $order->order_id_string . ': ' . $e->getMessage());
+            }
 
             return response()->json([
                 'success'    => true,
                 'message'    => 'Order verified successfully!',
                 'order_id'   => $order->order_id_string,
-                'redirect'   => route('checkout.success', ['token' => $order->encryptedId()]),
+                'redirect'   => route('checkout.success', ['token' => $order->encryptedId(), 'locale' => app()->getLocale()]),
             ]);
 
         } catch (\Exception $e) {

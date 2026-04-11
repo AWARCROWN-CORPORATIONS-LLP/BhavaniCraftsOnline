@@ -152,6 +152,7 @@
         document.addEventListener('turbo:visit', () => BcLoader.show('Switching View...'));
         document.addEventListener('turbo:load', () => BcLoader.hide());
         document.addEventListener('turbo:submit-start', () => BcLoader.show('Synchronizing...'));
+        document.addEventListener('turbo:before-cache', () => BcLoader.hide()); // Prevent cached loading state
         
         // Fallback for standard loads
         window.addEventListener('load', () => BcLoader.hide());
@@ -166,12 +167,8 @@
         <!-- Logo Section -->
         <div class="p-6 flex items-center mb-10 overflow-hidden min-h-[100px]">
             <a href="{{ route('home') }}" class="flex items-center group">
-                <div class="h-10 w-auto group-hover:scale-105 transition-all duration-300">
-                    <img src="{{ $siteLogo }}" alt="Bhavani Crafts" class="h-full w-auto object-contain brightness-0 invert shadow-2xl">
-                </div>
-                <div x-show="sidebarOpen" class="ml-4 flex flex-col items-start whitespace-nowrap">
-                    <h2 class="text-white text-xs font-black uppercase tracking-[4px] leading-none">Bhavani</h2>
-                    <span class="text-[#1e40af] text-[10px] uppercase tracking-[3px] font-bold mt-1">Admin Panel</span>
+                <div class="h-15 w-auto group-hover:scale-105 transition-all duration-300">
+                    <img src="{{ $siteLogo }}" alt="Bhavani Crafts" class="h-full w-auto object-contain shadow-2xl">
                 </div>
             </a>
         </div>
@@ -205,6 +202,16 @@
                 <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Franchise Management</span>
             </a>
 
+            <a href="{{ route('admin.franchise-applications.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.franchise-applications.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Partner Applications</span>
+            </a>
+
+            <a href="{{ route('admin.corporate-requests.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.corporate-requests.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A2.358 2.358 0 0119.354 15.4L12 18.2l-7.354-2.8a2.358 2.358 0 01-1.646-2.145V6.2a2.358 2.358 0 011.646-2.145L12 1.255l7.354 2.8A2.358 2.358 0 0121 6.2v7.055z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22.745V18.2M7 8h10M7 12h10" /></svg>
+                <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Corporate Requests</span>
+            </a>
+
             <a href="{{ route('admin.users') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.users') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354l.586.586H19v10.354L12.586 16H4V4.94L11.414 4H12zM12 11h.01" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11a1 1 0 100-2 1 1 0 000 2z" /></svg>
                 <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">User Management</span>
@@ -230,6 +237,11 @@
             <a href="{{ route('admin.page-content.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.page-content.index') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
                 <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Page Designer</span>
+            </a>
+
+            <a href="{{ route('admin.branches.index') }}" class="flex items-center space-x-4 p-4 rounded-xl transition-all hover:bg-white/5 {{ request()->routeIs('admin.branches.*') ? 'nav-item-active' : 'text-white/70 hover:text-white' }}">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <span x-show="sidebarOpen" class="font-bold text-sm tracking-widest text-[10px] uppercase">Branch Registry</span>
             </a>
 
             <p x-show="sidebarOpen" class="text-white/40 text-[10px] font-black uppercase tracking-[4px] px-6 mt-10 mb-4">Product Catalog</p>

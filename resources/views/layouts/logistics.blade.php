@@ -107,6 +107,7 @@
         document.addEventListener('turbo:visit', () => BcLoader.show('Navigating...'));
         document.addEventListener('turbo:load', () => BcLoader.hide());
         document.addEventListener('turbo:submit-start', () => BcLoader.show('Updating Server...'));
+        document.addEventListener('turbo:before-cache', () => BcLoader.hide()); // Prevent cached loading state
         
         window.addEventListener('load', () => BcLoader.hide());
     </script>

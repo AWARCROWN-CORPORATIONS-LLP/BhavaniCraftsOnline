@@ -34,46 +34,14 @@ class CartController extends Controller
         }
     }
 
-    public function add(Request $request)
+    public function add($locale, Request $request)
     {
         $productId = $request->input('product_id');
         $quantity = $request->input('quantity', 1);
 
-        $product = Product::findOrFail($productId);
-
-        if (Auth::check()) {
-            $cartItem = CartItem::where('user_id', Auth::id())
-                ->where('product_id', $productId)
-                ->first();
-
-            if ($cartItem) {
-                $cartItem->increment('quantity', $quantity);
-            } else {
-                CartItem::create([
-                    'user_id' => Auth::id(),
-                    'product_id' => $productId,
-                    'quantity' => $quantity,
-                ]);
-            }
-        } else {
-            $sessionId = Session::getId();
-            $cartItem = CartItem::where('session_id', $sessionId)
-                ->where('product_id', $productId)
-                ->first();
-
-            if ($cartItem) {
-                $cartItem->increment('quantity', $quantity);
-            } else {
-                CartItem::create([
-                    'session_id' => $sessionId,
-                    'product_id' => $productId,
-                    'quantity' => $quantity,
-                ]);
-            }
-        }
+        $this->addProductToCart($productId, $quantity);
 
         if ($request->ajax()) {
-            // Invalidate Cache
             $cacheKey = Auth::check() ? 'user_'.Auth::id() : 'session_'.Session::getId();
             Cache::forget("cart_{$cacheKey}");
 
@@ -91,7 +59,7 @@ class CartController extends Controller
         return redirect()->back()->with('success', 'Artifact added to your ritual cart.');
     }
 
-    public function index()
+    public function index($locale)
     {
         $cacheKey = Auth::check() ? 'user_'.Auth::id() : 'session_'.Session::getId();
 
@@ -128,7 +96,7 @@ class CartController extends Controller
         });
     }
 
-    public function update(Request $request)
+    public function update($locale, Request $request)
     {
         $request->validate([
             'cart_item_id' => 'required|exists:cart_items,id',
@@ -137,7 +105,6 @@ class CartController extends Controller
 
         $item = CartItem::findOrFail($request->cart_item_id);
         
-        // Security check
         if (Auth::check()) {
             if ($item->user_id !== Auth::id()) return response()->json(['error' => 'Unauthorized'], 403);
         } else {
@@ -149,10 +116,10 @@ class CartController extends Controller
         $cacheKey = Auth::check() ? 'user_'.Auth::id() : 'session_'.Session::getId();
         Cache::forget("cart_{$cacheKey}");
 
-        return $this->index();
+        return $this->index($locale);
     }
 
-    public function remove(Request $request)
+    public function remove($locale, Request $request)
     {
         $request->validate([
             'cart_item_id' => 'required|exists:cart_items,id'
@@ -160,7 +127,6 @@ class CartController extends Controller
 
         $item = CartItem::findOrFail($request->cart_item_id);
         
-        // Security check
         if (Auth::check()) {
             if ($item->user_id !== Auth::id()) return response()->json(['error' => 'Unauthorized'], 403);
         } else {
@@ -172,34 +138,37 @@ class CartController extends Controller
         $cacheKey = Auth::check() ? 'user_'.Auth::id() : 'session_'.Session::getId();
         Cache::forget("cart_{$cacheKey}");
 
-        return $this->index();
+        return $this->index($locale);
     }
 
-    public function buyNow(Request $request)
+    public function buyNow($locale, Request $request)
     {
-        // For Buy Now, we add to cart and redirect to checkout
-        $this->add($request);
-        return redirect()->route('checkout', ['locale' => app()->getLocale()]); // Directing toward proper checkout route
+        $this->add($locale, $request);
+        return redirect()->route('checkout', ['locale' => $locale]);
     }
 
-    public function buyKit(Request $request)
+    public function buyKit($locale, Request $request)
     {
         $request->validate([
-            'ritual_kit_id' => 'required|exists:ritual_kits,id'
+            'ritual_kit_id' => 'required|exists:ritual_kits,id',
+            'product_id' => 'nullable|exists:products,id'
         ]);
 
         $kit = \App\Models\RitualKit::with('products')->findOrFail($request->ritual_kit_id);
         
+        // Add the main product from the page first if provided
+        if ($request->has('product_id')) {
+            $this->addProductToCart($request->product_id, $request->input('quantity', 1));
+        }
+
         foreach ($kit->products as $product) {
-            // We simulate the add logic for each product
             $this->addProductToCart($product->id, 1);
         }
 
-        // Invalidate Cache
         $cacheKey = Auth::check() ? 'user_'.Auth::id() : 'session_'.Session::getId();
         Cache::forget("cart_{$cacheKey}");
 
-        return redirect()->route('checkout', ['locale' => app()->getLocale()]);
+        return redirect()->route('checkout', ['locale' => $locale]);
     }
 
     private function addProductToCart($productId, $quantity)

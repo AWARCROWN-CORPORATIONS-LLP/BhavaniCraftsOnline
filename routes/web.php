@@ -28,6 +28,12 @@ Route::prefix('{locale}')->group(function () {
     Route::get('/sacred-kit', [App\Http\Controllers\PageController::class, 'bundleBuilder'])->name('pages.sacred-kit');
 
 
+    Route::get('/franchise-registration', function() {
+        return view('public.franchise_registration');
+    })->name('franchise.register');
+    Route::post('/franchise-registration', [App\Http\Controllers\FranchiseApplicationController::class, 'store'])->name('franchise.store');
+    Route::post('/corporate-catalog-request', [App\Http\Controllers\CorporateRequestController::class, 'store'])->name('corporate.catalog.request');
+
     Route::get('/cart/data', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/update', [App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
@@ -153,6 +159,15 @@ Route::prefix('{locale}')->group(function () {
         
         // User & Franchise Mastery
         Route::get('/franchises', [App\Http\Controllers\Admin\AdminController::class, 'franchiseManagement'])->name('franchises');
+        Route::get('/franchise-applications', [App\Http\Controllers\FranchiseApplicationController::class, 'adminIndex'])->name('franchise-applications.index');
+        Route::get('/franchise-applications/{application}', [App\Http\Controllers\FranchiseApplicationController::class, 'adminShow'])->name('franchise-applications.show');
+        Route::patch('/franchise-applications/{application}/status', [App\Http\Controllers\FranchiseApplicationController::class, 'updateStatus'])->name('franchise-applications.status');
+
+        // Corporate & Institutional Mastery
+        Route::get('/corporate-requests', [App\Http\Controllers\CorporateRequestController::class, 'adminIndex'])->name('corporate-requests.index');
+        Route::get('/corporate-requests/{corporateRequest}', [App\Http\Controllers\CorporateRequestController::class, 'adminShow'])->name('corporate-requests.show');
+        Route::patch('/corporate-requests/{corporateRequest}/status', [App\Http\Controllers\CorporateRequestController::class, 'updateStatus'])->name('corporate-requests.status');
+
         Route::get('/users', [App\Http\Controllers\Admin\AdminController::class, 'userManagement'])->name('users');
         Route::post('/franchises/{user}/approve', [App\Http\Controllers\Admin\AdminController::class, 'approveFranchise'])->name('approve_franchise');
         Route::patch('/users/{user}/toggle-block', [App\Http\Controllers\Admin\AdminController::class, 'toggleBlock'])->name('toggle_block');
@@ -161,6 +176,7 @@ Route::prefix('{locale}')->group(function () {
         Route::resource('categories', App\Http\Controllers\Admin\AdminCategoryController::class);
         Route::resource('products', App\Http\Controllers\Admin\AdminProductController::class);
         Route::resource('ritual-kits', App\Http\Controllers\Admin\AdminRitualKitController::class);
+        Route::resource('branches', App\Http\Controllers\Admin\AdminBranchController::class);
         
         // Master Order Master Hub
         Route::get('/orders/kanban', [App\Http\Controllers\Admin\KanbanOrderController::class, 'index'])->name('orders.kanban');
