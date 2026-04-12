@@ -15,11 +15,18 @@ class UniversalSearch
         $results = [];
 
         // 1. Search Products
-        $products = Product::where('product_name', 'LIKE', "%{$q}%")
-            ->orWhere('product_code', 'LIKE', "%{$q}%")
-            ->orWhere('slug', 'LIKE', "%{$q}%")
+        $products = Product::whereFullText(['product_name', 'product_code', 'slug'], $q)
+            ->orWhereFullText(['product_name', 'product_code', 'slug'], $q) // Note: Laravel 9+ whereFullText handles OR with additional whereFullText or manually
             ->take(5)
             ->get();
+        
+        // Fallback for partial matches if needed (optional, FTS is good)
+        if ($products->isEmpty()) {
+            $products = Product::where('product_name', 'LIKE', "%{$q}%")
+                ->orWhere('product_code', 'LIKE', "%{$q}%")
+                ->take(5)
+                ->get();
+        }
 
         foreach ($products as $product) {
             $results[] = [
@@ -32,10 +39,13 @@ class UniversalSearch
         }
 
         // 2. Search Categories
-        $categories = Category::where('name', 'LIKE', "%{$q}%")
-            ->orWhere('slug', 'LIKE', "%{$q}%")
+        $categories = Category::whereFullText(['name', 'slug'], $q)
             ->take(3)
             ->get();
+        
+        if ($categories->isEmpty()) {
+            $categories = Category::where('name', 'LIKE', "%{$q}%")->take(3)->get();
+        }
 
         foreach ($categories as $category) {
             $results[] = [
@@ -54,10 +64,8 @@ class UniversalSearch
             $isPersonnel = $user->hasRole('employee') || $user->hasRole('franchise') || $user->hasRole('logistics');
 
             if ($isAdmin || $isPersonnel) {
-                // Search Online Orders
-                $orders = Order::where('order_id_string', 'LIKE', "%{$q}%")
-                    ->orWhere('razorpay_order_id', 'LIKE', "%{$q}%")
-                    ->orWhere('razorpay_payment_id', 'LIKE', "%{$q}%")
+                // Search Online Orders via Full-Text
+                $orders = Order::whereFullText(['order_id_string', 'razorpay_order_id', 'razorpay_payment_id'], $q)
                     ->orWhereHas('user', function($u) use ($q) {
                         $u->where('name', 'LIKE', "%{$q}%")
                           ->orWhere('email', 'LIKE', "%{$q}%")
@@ -67,6 +75,16 @@ class UniversalSearch
                     ->take(5)
                     ->get();
     
+                if ($orders->isEmpty()) {
+                     $orders = Order::where('order_id_string', 'LIKE', "%{$q}%")
+                        ->orWhereHas('user', function($u) use ($q) {
+                            $u->where('name', 'LIKE', "%{$q}%");
+                        })
+                        ->with('user')
+                        ->take(5)
+                        ->get();
+                }
+
                 foreach ($orders as $order) {
                     $routeNamespace = $isAdmin ? 'admin' : 'employee';
                     $matchedInfo = $order->user->name ?? 'Guest Member';
@@ -83,19 +101,24 @@ class UniversalSearch
                     ];
                 }
 
-                // Search Quick Bills (Store Sales)
-                $quickBills = \App\Models\QuickBill::where('bill_number', 'LIKE', "%{$q}%")
-                    ->orWhere('customer_name', 'LIKE', "%{$q}%")
-                    ->orWhere('customer_phone', 'LIKE', "%{$q}%")
+                // Search Quick Bills (Store Sales) Full-Text
+                $quickBills = \App\Models\QuickBill::whereFullText(['bill_number', 'customer_name', 'customer_phone'], $q)
                     ->take(3)
                     ->get();
                 
+                if ($quickBills->isEmpty()) {
+                   $quickBills = \App\Models\QuickBill::where('bill_number', 'LIKE', "%{$q}%")
+                        ->orWhere('customer_name', 'LIKE', "%{$q}%")
+                        ->take(3)
+                        ->get();
+                }
+
                 foreach ($quickBills as $bill) {
                     $results[] = [
                         'title' => 'Bill #' . $bill->bill_number,
                         'subtitle' => ($bill->customer_name ?? 'Walk-in') . ' (₹' . number_format($bill->total_amount, 2) . ')',
                         'type' => 'Retail Bill',
-                        'url' => route('admin.billing.dashboard', ['locale' => app()->getLocale()]), // Redirect to dashboard, could be deep link to scroll to row
+                        'url' => route('admin.billing.dashboard', ['locale' => app()->getLocale()]),
                         'image' => null,
                     ];
                 }
