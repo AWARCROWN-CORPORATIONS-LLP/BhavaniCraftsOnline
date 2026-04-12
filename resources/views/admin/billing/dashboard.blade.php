@@ -16,24 +16,93 @@
 @section('content')
 
 <div x-cloak x-data="{
-    items: [{ name: '', telugu_name: '', amount: '', quantity: 1 }],
+    items: [{ name: '', telugu_name: '', amount: '', quantity: 1, searchResults: [] }],
     customer_name: '',
     customer_phone: '',
+    customer_results: [],
     discount_amount: 0,
     is_quotation: false,
     gst_percent: 18,
-    qr_code: null,
-    verify_url: null,
     payment_method: 'online',
     processing: false,
+    quickSearch: '',
     
-    addItem() { this.items.push({ name: '', telugu_name: '', amount: '', quantity: 1 }) },
-    removeItem(index) { this.items.splice(index, 1) },
+    addItem() { 
+        this.items.push({ name: '', telugu_name: '', amount: '', quantity: 1, searchResults: [] });
+        this.$nextTick(() => {
+            const inputs = document.querySelectorAll('.product-name-input');
+            inputs[inputs.length - 1].focus();
+        });
+    },
+
+    removeItem(index) { 
+        this.items.splice(index, 1);
+        // Safety Net: If list becomes empty, add a fresh row
+        if (this.items.length === 0) {
+            this.items.push({ name: '', telugu_name: '', amount: '', quantity: 1, searchResults: [] });
+        }
+    },
+
+    async searchForCustomer() {
+        if (this.customer_phone.length < 3) { this.customer_results = []; return; }
+        const response = await fetch(`{{ route('admin.billing.search-customers') }}?q=${this.customer_phone}`);
+        this.customer_results = await response.json();
+    },
+
+    selectCustomer(c) {
+        this.customer_name = c.name;
+        this.customer_phone = c.phone;
+        this.customer_results = [];
+    },
+
+    quickGuest() {
+        this.customer_name = 'Walk-in Customer';
+        this.customer_phone = '9999999999';
+        this.customer_results = [];
+    },
+
+    async searchProduct(index) {
+        let q = this.items[index].name;
+        if (q.length < 2) { this.items[index].searchResults = []; return; }
+        const response = await fetch(`{{ route('admin.billing.search-products') }}?q=${q}`);
+        this.items[index].searchResults = await response.json();
+    },
+
+    selectProduct(index, p) {
+        // High-Efficiency Merging: Check if item already exists
+        let existingIndex = this.items.findIndex(item => item.name === p.product_name);
+        
+        if (existingIndex !== -1 && existingIndex !== index) {
+            this.items[existingIndex].quantity++;
+            // If we are selecting in a placeholder row that isn't the existing one, remove it
+            if (this.items[index] && !this.items[index].name) { 
+                this.removeItem(index); 
+            }
+            return;
+        }
+
+        if (this.items[index]) {
+            this.items[index].name = p.product_name;
+            this.items[index].telugu_name = p.telugu_name || '';
+            this.items[index].amount = p.price;
+            this.items[index].searchResults = [];
+        }
+    },
+
+    reduceProduct(name) {
+        let existingIndex = this.items.findIndex(item => item.name === name);
+        if (existingIndex !== -1) {
+            if (this.items[existingIndex].quantity > 1) {
+                this.items[existingIndex].quantity--;
+            } else {
+                this.removeItem(existingIndex);
+            }
+        }
+    },
     
     async translateName(index) {
         let name = this.items[index].name;
-        if (!name || name.length < 3) return;
-        
+        if (!name || name.length < 3 || this.items[index].telugu_name) return;
         try {
             const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(name)}&langpair=en|te`);
             const data = await response.json();
@@ -109,8 +178,75 @@
         };
         let rzp = new Razorpay(options);
         rzp.open();
+    },
+
+    // Global Scanner Logic
+    handleScanner(code) {
+        if (!code) return;
+        fetch(`{{ route('admin.billing.search-products') }}?q=${code}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const product = data[0];
+                    let lastIdx = this.items.length - 1;
+                    if (lastIdx >= 0 && !this.items[lastIdx].name && !this.items[lastIdx].amount) {
+                         this.selectProduct(lastIdx, product);
+                    } else {
+                         this.addItem();
+                         this.$nextTick(() => this.selectProduct(this.items.length - 1, product));
+                    }
+                }
+            }).catch(e => console.error('Scanner error:', e));
+    },
+
+    quickAdd(p) {
+        // Anti-Spam throttling
+        if (this.processing) return;
+        
+        let existingIndex = this.items.findIndex(item => item.name === p.product_name);
+        if (existingIndex !== -1) {
+            this.items[existingIndex].quantity++;
+        } else {
+            // Find first empty row OR add new
+            let emptyIdx = this.items.findIndex(item => !item.name);
+            if (emptyIdx !== -1) {
+                this.items[emptyIdx].name = p.product_name;
+                this.items[emptyIdx].amount = p.price;
+                this.items[emptyIdx].telugu_name = p.telugu_name || '';
+            } else {
+                this.items.push({ name: p.product_name, telugu_name: p.telugu_name || '', amount: p.price, quantity: 1, searchResults: [] });
+            }
+        }
+    },
+
+    getItemCount(name) {
+        if (!name) return 0;
+        return this.items.reduce((total, item) => {
+            return (item.name === name) ? total + (parseInt(item.quantity) || 0) : total;
+        }, 0);
     }
-}" class="space-y-6 max-w-[1600px] mx-auto">
+}" 
+x-init="
+    let scanBuffer = '';
+    window.addEventListener('keydown', (e) => {
+        // Keyboard Shortcuts
+        if (e.key === 'F2') { e.preventDefault(); addItem(); }
+        if (e.key === 'Insert') { e.preventDefault(); quickGuest(); }
+        
+        // Industrial Scanner Support (HID Mode)
+        if (e.key === 'Enter') {
+            if (scanBuffer.length >= 3) {
+                handleScanner(scanBuffer);
+                scanBuffer = '';
+            }
+        } else if (e.key.length === 1) {
+            scanBuffer += e.key;
+            // Clear buffer if no key for 100ms
+            setTimeout(() => { scanBuffer = ''; }, 200);
+        }
+    });
+"
+class="space-y-6 max-w-[1600px] mx-auto">
 
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -119,20 +255,42 @@
             
             <div class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-8 py-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
-                    <h3 class="text-xs font-bold text-gray-700 uppercase tracking-widest">Enter Items Details</h3>
+                    <div class="flex items-center space-x-4">
+                        <h3 class="text-xs font-bold text-gray-700 uppercase tracking-widest">Billing Terminal</h3>
+                        <div class="flex items-center space-x-2">
+                            <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Scanner Ready</span>
+                        </div>
+                    </div>
                     <button @click="addItem()" class="inline-flex items-center text-blue-600 hover:text-blue-700 text-xs font-bold uppercase tracking-wider transition-colors">
                         <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                        Add Item
+                        Add [F2]
                     </button>
                 </div>
 
-                <div class="p-8 space-y-4">
+                <!-- Scrollable Item Frame -->
+                <div class="max-h-[500px] overflow-y-auto px-8 py-6 space-y-4 custom-scrollbar">
                     <template x-for="(item, index) in items" :key="index">
                         <div class="flex items-end space-x-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                            <div class="flex-grow">
-                                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1.5 block">Product Name (English)</label>
-                                <input type="text" x-model="item.name" @blur="translateName(index)" placeholder="Enter name..." 
-                                    class="w-full bg-white border border-gray-200 px-5 py-3 rounded-xl text-sm font-medium focus:ring-1 focus:ring-blue-600/20 focus:border-blue-600 transition-all placeholder:text-gray-300">
+                            <div class="flex-grow relative">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase mb-1.5 block">Product Name (Search)</label>
+                                <input type="text" x-model="item.name" @input.debounce.300ms="searchProduct(index)" @blur="setTimeout(() => translateName(index), 200)" placeholder="Start typing name or code..." 
+                                    class="product-name-input w-full bg-white border border-gray-200 px-5 py-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition-all placeholder:text-gray-300">
+                                
+                                <!-- Product Search Results -->
+                                <div x-show="item.searchResults && item.searchResults.length > 0" class="absolute z-20 left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl overflow-hidden py-1">
+                                    <template x-for="p in item.searchResults" :key="p.product_code">
+                                        <button @click="selectProduct(index, p)" class="w-full text-left px-5 py-3 hover:bg-blue-50 transition-colors border-b border-gray-50 last:border-0">
+                                            <div class="flex justify-between items-center">
+                                                <div class="flex flex-col">
+                                                    <span class="text-xs font-bold text-gray-900" x-text="p.product_name"></span>
+                                                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider" x-text="p.product_code"></span>
+                                                </div>
+                                                <span class="text-xs font-black text-blue-600" x-text="'₹' + p.price"></span>
+                                            </div>
+                                        </button>
+                                    </template>
+                                </div>
                             </div>
                             <div class="flex-grow">
                                 <label class="text-[10px] font-bold text-gray-400 uppercase mb-1.5 block">Telugu Name (Auto)</label>
@@ -157,13 +315,31 @@
                     </template>
 
                     <div class="mt-8 pt-8 border-t border-gray-50 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="relative">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase block">Phone Number (Lookup)</label>
+                                <button @click="quickGuest()" class="text-[8px] font-black text-blue-600 uppercase tracking-widest hover:underline decoration-2 underline-offset-4">Quick Guest [Ins]</button>
+                            </div>
+                            <input type="text" x-model="customer_phone" @input.debounce.300ms="searchForCustomer()" placeholder="99xx..." class="w-full border border-gray-200 px-5 py-3 rounded-xl text-sm font-bold">
+                            
+                            <!-- Customer Search Results -->
+                            <div x-show="customer_results.length > 0" class="absolute z-20 left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl overflow-hidden py-1">
+                                <template x-for="c in customer_results" :key="c.phone">
+                                    <button @click="selectCustomer(c)" class="w-full text-left px-5 py-4 hover:bg-blue-50 transition-colors border-b border-gray-50 last:border-0">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 font-black text-[10px]" x-text="c.name.substring(0,1)"></div>
+                                            <div>
+                                                <p class="text-xs font-bold text-gray-900" x-text="c.name"></p>
+                                                <p class="text-[10px] text-gray-400 font-bold" x-text="c.phone"></p>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
                         <div>
                             <label class="text-[10px] font-bold text-gray-400 uppercase mb-1.5 block">Customer Name</label>
                             <input type="text" x-model="customer_name" class="w-full border border-gray-200 px-5 py-3 rounded-xl text-sm font-medium">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-400 uppercase mb-1.5 block">Phone Number</label>
-                            <input type="text" x-model="customer_phone" class="w-full border border-gray-200 px-5 py-3 rounded-xl text-sm font-bold">
                         </div>
                         <div>
                             <label class="text-[10px] font-bold text-gray-400 uppercase mb-1.5 block">Direct Discount (₹)</label>
@@ -205,35 +381,71 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50">
                             @foreach($bills as $bill)
-                                <tr class="hover:bg-gray-50/30 transition-colors">
+                                <tr x-data="{ 
+                                    deleted: false, 
+                                    loading: false,
+                                    async archiveBill() {
+                                        if (this.loading) return;
+                                        if (!confirm('Archive this bill record permanently?')) return;
+                                        
+                                        this.loading = true;
+                                        try {
+                                            const resp = await fetch('{{ route('admin.billing.destroy', $bill->id) }}', {
+                                                method: 'DELETE',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                    'X-Requested-With': 'XMLHttpRequest',
+                                                    'Accept': 'application/json'
+                                                }
+                                            });
+                                            if (resp.ok) this.deleted = true;
+                                        } catch (e) { console.error(e); } finally { this.loading = false; }
+                                    }
+                                }" 
+                                x-show="!deleted" 
+                                x-transition.duration.500ms
+                                class="hover:bg-slate-50 transition-all border-b border-slate-100 last:border-0 group">
                                     <td class="px-8 py-5">
-                                        <div class="flex flex-col">
-                                            <span class="text-xs font-bold text-gray-900 leading-none">#{{ $bill->bill_number }}</span>
-                                            <span class="text-[9px] text-gray-400 mt-1 uppercase font-medium">{{ $bill->created_at->format('d M, H:i') }}</span>
+                                        <div class="flex items-center space-x-4">
+                                            <div class="h-10 w-10 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-400 group-hover:bg-[#ff9933]/10 group-hover:text-[#ff9933] transition-all overflow-hidden border border-slate-100 uppercase">
+                                                {{ substr($bill->customer_name ?? 'G', 0, 1) }}
+                                            </div>
+                                            <div>
+                                                <p class="text-[11px] font-black text-slate-900 uppercase tracking-widest leading-none mb-1">{{ $bill->customer_name ?? 'Guest Member' }}</p>
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="text-[9px] text-slate-400 font-bold tracking-tighter">#{{ $bill->bill_number }}</span>
+                                                    <span class="text-[8px] text-slate-300 font-bold uppercase tracking-wider">• {{ $bill->created_at->format('d M, H:i') }}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="px-8 py-5">
-                                        <div class="flex flex-col">
-                                            <span class="text-xs font-bold text-gray-700 leading-none">{{ $bill->customer_name ?? 'Walk-in Customer' }}</span>
-                                            <span class="text-[10px] text-gray-400 mt-1 font-medium">{{ $bill->customer_phone ?? 'N/A' }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-8 py-5">
-                                        <span class="text-sm font-bold text-gray-900">₹{{ number_format($bill->total_amount, 2) }}</span>
+                                        <p class="text-[11px] font-bold text-slate-900 leading-none mb-1">₹{{ number_format($bill->total_amount, 2) }}</p>
+                                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{{ $bill->payment_method }}</p>
                                     </td>
                                     <td class="px-8 py-5 text-center">
-                                        @if($bill->is_quotation)
-                                            <span class="inline-block px-3 py-1 bg-amber-50 text-amber-600 text-[9px] font-bold uppercase tracking-widest rounded-full border border-amber-100">Quotation</span>
+                                        @if($bill->type == 'quotation')
+                                            <span class="inline-block px-3 py-1 bg-amber-50 text-amber-600 text-[9px] font-black uppercase tracking-widest rounded-full border border-amber-100">Quote</span>
                                         @else
-                                            <span class="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-[9px] font-bold uppercase tracking-widest rounded-full border border-blue-100">Bill</span>
+                                            <span class="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-[9px] font-black uppercase tracking-widest rounded-full border border-blue-100">Bill</span>
                                         @endif
                                     </td>
                                     <td class="px-8 py-5 text-right">
-                                        @if($bill->payment_status == 'paid')
-                                            <a href="{{ route('admin.billing.print', $bill->id) }}" class="text-[10px] font-bold uppercase text-blue-600 hover:text-blue-800 transition-colors">Print PDF</a>
-                                        @else
-                                            <a href="{{ route('admin.billing.verify', $bill->id) }}" class="text-[10px] font-bold uppercase text-amber-600 hover:text-amber-800 transition-colors">Confirm Pay</a>
-                                        @endif
+                                        <div class="flex items-center justify-end space-x-4">
+                                            @if($bill->payment_status == 'paid')
+                                                <a href="{{ route('admin.billing.print', $bill->id) }}" class="text-[10px] font-black uppercase text-blue-600 hover:text-blue-800 transition-colors">Print</a>
+                                            @else
+                                                <a href="{{ route('admin.billing.verify', $bill->id) }}" class="text-[10px] font-black uppercase text-amber-600 hover:text-amber-800 transition-colors">Verify</a>
+                                            @endif
+                                            
+                                            <!-- Silent Archive Utility -->
+                                            <button @click="archiveBill()" class="relative p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors flex items-center justify-center" title="Archive Record">
+                                                <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-white/80 rounded-lg">
+                                                    <svg class="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                                </div>
+                                                <svg x-show="!loading" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -246,9 +458,60 @@
                     </div>
                 @endif
             </div>
+
         </div>
 
         <div class="lg:col-span-4 space-y-8">
+            <!-- Quick-Pick Grid (Pinned Sidebar for Zero-Scroll) -->
+            @php
+                $topProducts = \App\Models\Product::orderBy('stock', 'desc')->take(12)->get();
+            @endphp
+            <div class="card-premium p-6">
+                <div class="mb-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xs font-bold text-gray-700 uppercase tracking-[3px]">Quick-Pick Pad</h3>
+                        <span class="text-[8px] font-black text-emerald-500 uppercase tracking-widest animate-pulse">Live Grid</span>
+                    </div>
+                    <div class="relative">
+                        <input type="text" x-model="quickSearch" placeholder="Search Pad..." 
+                           class="w-full bg-slate-50 border-none px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider focus:ring-1 focus:ring-brand-primary/20 transition-all placeholder:text-slate-300">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    @foreach($topProducts as $p)
+                        <div x-show="'{{ strtolower($p->product_name) }}'.includes(quickSearch.toLowerCase()) || '{{ $p->product_code }}'.toLowerCase().includes(quickSearch.toLowerCase())"
+                             class="group relative flex flex-col items-center p-3 border border-slate-100 rounded-xl hover:border-brand-primary/30 hover:bg-slate-50 transition-all cursor-pointer">
+                            <!-- Live Count Badge -->
+                            <div x-show="getItemCount('{{ $p->product_name }}') > 0" 
+                                 x-text="getItemCount('{{ $p->product_name }}')"
+                                 class="absolute -top-1.5 -right-1.5 bg-brand-primary text-slate-900 text-[9px] font-black w-5 h-5 flex items-center justify-center rounded-full shadow-lg z-10 animate-in zoom-in">
+                            </div>
+
+                            <!-- Reduce Button -->
+                            <button x-show="getItemCount('{{ $p->product_name }}') > 0" 
+                                    @click.stop="reduceProduct('{{ $p->product_name }}')"
+                                    class="absolute -top-1.5 -left-1.5 bg-slate-800 text-white w-5 h-5 flex items-center justify-center rounded-full shadow-lg z-10 hover:bg-rose-600 transition-colors">
+                                <svg class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4" /></svg>
+                            </button>
+                            
+                            <button @click="quickAdd({ 
+                                    product_name: '{{ $p->product_name }}', 
+                                    price: {{ $p->price }}, 
+                                    telugu_name: '{{ $p->telugu_name }}' 
+                                })" class="flex flex-col items-center w-full">
+                                <div class="h-10 w-10 bg-slate-50 rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-slate-100 group-hover:scale-110 transition-transform">
+                                    <img src="{{ $p->display_image }}" 
+                                         onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($p->product_name) }}&background=ff9933&color=fff&bold=true&font-size=0.5'"
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <span class="text-[9px] font-bold text-slate-900 text-center line-clamp-1 truncate w-full">{{ $p->product_name }}</span>
+                                <span class="text-[8px] font-black text-brand-primary mt-1">₹{{ number_format($p->price, 0) }}</span>
+                            </button>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
             <div class="sticky top-24 space-y-8">
                 
                 <div class="bg-white border border-gray-200 rounded-3xl shadow-xl p-8 overflow-hidden relative group">

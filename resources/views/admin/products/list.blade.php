@@ -11,17 +11,17 @@
 
     <div class="card-premium overflow-hidden">
         <div class="p-8 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="text-xs font-black text-gray-400 uppercase tracking-[6px] leading-none">Global Catalog Presence</h3>
-            <span class="text-[9px] font-black uppercase text-gray-300">Total: {{ $products->total() }} Entities</span>
+            <h3 class="text-xs font-black text-gray-400 uppercase tracking-[6px] leading-none">Product Items</h3>
+            <span class="text-[9px] font-black uppercase text-gray-300">Total: {{ $products->total() }} Products</span>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left">
                 <thead class="bg-gray-50/50">
                     <tr>
-                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Product Details</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Stock Level</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Price (MRP)</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Product</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">In Stock</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Price</th>
                         <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px]">Status</th>
                         <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[3px] text-right">Actions</th>
                     </tr>

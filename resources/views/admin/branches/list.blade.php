@@ -2,7 +2,7 @@
 
 @section('header_extra')
     <div class="flex items-center space-x-4">
-        <h2 class="text-xl lg:text-3xl font-black text-gray-900 uppercase tracking-tighter">Branch Registry</h2>
+        <h2 class="text-xl lg:text-3xl font-black text-gray-900 uppercase tracking-tighter">Store Branches</h2>
         <a href="{{ route('admin.branches.create') }}" class="btn-luxury-saffron px-6 py-2 text-[10px] shadow-xl">+ New Branch</a>
     </div>
 @endsection
@@ -17,7 +17,7 @@
 
     <div class="card-premium overflow-hidden">
         <div class="p-8 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="text-xs font-black text-gray-400 uppercase tracking-[6px] leading-none">Physical Locations</h3>
+            <h3 class="text-xs font-black text-gray-400 uppercase tracking-[6px] leading-none">Our Locations</h3>
             <span class="text-[9px] font-black uppercase text-gray-300">Total: {{ count($branches) }} Branches</span>
         </div>
 
@@ -68,7 +68,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="py-12 text-center text-gray-300 italic">No branches registered.</td>
+                                <td colspan="6" class="py-12 text-center text-gray-300 italic">No branches found.</td>
                             </tr>
                         @endforelse
                     </tbody>

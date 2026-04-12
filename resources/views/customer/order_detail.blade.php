@@ -16,7 +16,7 @@
                     <p class="text-white/50 text-xs font-medium">
                         Placed on {{ $order->ordered_date ? $order->ordered_date->format('d M Y, h:i A') : ($order->created_at?->format('d M Y, h:i A') ?? 'N/A') }}
                     </p>
-                    <a href="{{ route('orders.invoice', $order->encryptedId()) }}" class="flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/10 text-[9px] font-black uppercase tracking-widest text-brand-400">
+                    <a href="{{ route('orders.invoice', $order->encryptedId()) }}" data-turbo="false" class="flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/10 text-[9px] font-black uppercase tracking-widest text-brand-400">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                         <span>Official Invoice</span>
                     </a>
@@ -133,6 +133,40 @@
         <!-- Animated Background Decor -->
         <div class="absolute -right-20 -bottom-20 h-64 w-64 bg-brand-500/10 rounded-full blur-[80px] group-hover:bg-brand-500/20 transition-all duration-700"></div>
     </div>
+    @endif
+
+    <!-- TRACKING & CONFIRMATION HUB (For Post Office / Outside Partners) -->
+    @if($order->shipping_partner && in_array($order->status, ['Shipped', 'In Transit', 'Out for Delivery']))
+    <div class="p-10 bg-white rounded-[2.5rem] shadow-xl border border-gray-100 relative overflow-hidden">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div class="space-y-2">
+                <span class="text-[10px] font-black uppercase tracking-[4px] text-brand-500">Shipping Update</span>
+                <h3 class="text-xl font-black text-onyx-900">Your order is with <span class="text-brand-500">{{ $order->shipping_partner }}</span></h3>
+                <div class="flex items-center space-x-4 mt-4">
+                    <div class="px-4 py-2 bg-gray-50 rounded-xl border border-gray-100">
+                        <span class="text-[9px] font-black uppercase text-gray-400 block">AWB / Tracking ID</span>
+                        <span class="text-xs font-black text-onyx-900">{{ $order->tracking_number ?? 'Awaiting ID' }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-4">
+                @if($order->shipping_partner == 'India Post' && $order->tracking_number)
+                <a href="https://www.indiapost.gov.in/_layouts/15/dop.portal.tracking/trackconsignment.aspx?txtConsignmentNo={{ $order->tracking_number }}" target="_blank" 
+                   class="px-8 py-4 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-600/20">
+                    Track via India Post
+                </a>
+                @endif
+                
+                <form action="{{ route('customer.orders.confirm', $order->encryptedId()) }}" method="POST" onsubmit="return confirm('Please confirm only if you have physically received the package.')">
+                    @csrf
+                    <button type="submit" class="px-8 py-4 bg-brand-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-600 transition-all shadow-lg shadow-brand-500/20">
+                        Confirm Delivery Receipt
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- NEW: DELIVERY AGENT IDENTITY & SAFETY PROTOCOL -->
     @if($order->assignedLogistics)

@@ -20,27 +20,41 @@ class AdminController extends Controller
     {
         // Intelligent Caching Layer: 5 minute TTL for heavy metrics
         $stats = Cache::remember('admin_dashboard_stats', 300, function () {
+            $revenue = 0;
+            if (auth()->user()->hasRole('super_admin')) {
+                $revenue = Order::where('payment_status', 'Paid')->sum('total_amount');
+            }
+
             return [
                 'total_users' => User::count(),
                 'pending_franchises' => User::where('user_type', 'business')->where('is_approved', 0)->count(),
                 'total_products' => Product::count(),
                 'total_orders' => Order::count(),
-                'revenue_total' => Order::where('payment_status', 'Paid')->sum('total_amount'),
+                'revenue_total' => $revenue, // Restricted to Super Admin
                 'successful_deliveries' => Order::where('delivery_status', 'Delivered')->count(),
                 'pending_returns' => Order::where('status', 'Return Requested')->count(),
                 'low_stock_alerts' => Product::whereRaw('stock <= stock_threshold')->count(),
             ];
         });
 
-        // Data Visualization Synthesis: Last 7 Days Revenue Trend
+        // Data Visualization Synthesis: Last 7 Days Revenue Trend (Single Query Optimization)
         $revenueTrend = Cache::remember('admin_revenue_trend', 3600, function () {
+            if (!auth()->user()->hasRole('super_admin')) {
+                return []; 
+            }
+
+            $results = Order::where('payment_status', 'Paid')
+                        ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
+                        ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
+                        ->groupBy('date')
+                        ->pluck('total', 'date')
+                        ->toArray();
+
             $trend = [];
             for ($i = 6; $i >= 0; $i--) {
-                $date = Carbon::now()->subDays($i)->format('M d');
-                $sum = Order::where('payment_status', 'Paid')
-                            ->whereDate('created_at', Carbon::now()->subDays($i))
-                            ->sum('total_amount');
-                $trend[$date] = $sum;
+                $dateKey = Carbon::now()->subDays($i)->format('Y-m-d');
+                $displayDate = Carbon::now()->subDays($i)->format('M d');
+                $trend[$displayDate] = $results[$dateKey] ?? 0;
             }
             return $trend;
         });
@@ -52,7 +66,6 @@ class AdminController extends Controller
                                 ->get();
         });
 
-        // 🟢 System Telemetry: Real-time pulse of the sanctuary infrastructure
         $telemetry = [
             'php_version' => PHP_VERSION,
             'laravel_version' => app()->version(),

@@ -211,6 +211,28 @@ class CustomerController extends Controller
         return back()->with('success', 'Thank you for your feedback! Your rating is saved.');
     }
 
+    public function confirmDelivery(string $token)
+    {
+        $id = \App\Models\Order::decryptOrderId($token);
+        if (!$id) abort(404);
+        $order = Order::findOrFail($id);
+        
+        if ($order->user_id !== Auth::id()) abort(403);
+
+        if ($order->status === 'Delivered') {
+            return back()->with('error', 'Order is already marked as delivered.');
+        }
+
+        $order->update([
+            'status' => 'Delivered',
+            'delivery_status' => 'Delivered',
+            'delivered_at' => now(),
+            'customer_confirmed_at' => now(),
+        ]);
+
+        return back()->with('success', 'Thank you! You have confirmed the delivery of your order.');
+    }
+
     /**
      * Initiate a Return Management System (RMS) request.
      */

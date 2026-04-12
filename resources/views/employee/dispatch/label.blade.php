@@ -69,8 +69,16 @@
                          alt="QR Code" class="h-24 w-24">
                 </div>
                 <p class="text-[7px] font-bold text-gray-400 uppercase tracking-widest max-w-[150px]">Scan for Logistics Routing & Registry Identification</p>
+                @if($order->shipping_partner)
+                    <div class="mt-2 text-[8px] font-black text-brand-500 uppercase tracking-widest bg-brand-50 px-2 py-1 rounded border border-brand-100 italic">
+                        VIA {{ $order->shipping_partner }}
+                    </div>
+                @endif
             </div>
             <div class="text-right flex flex-col items-end space-y-2">
+                @if($order->tracking_number)
+                    <p class="text-[10px] font-black uppercase text-gray-900 leading-none">TRACK: {{ $order->tracking_number }}</p>
+                @endif
                 <div class="px-3 py-1 bg-black text-white text-[9px] font-black uppercase tracking-[3px] rounded-md">PREPAID</div>
                 <p class="text-[7px] font-bold text-gray-300 uppercase tracking-tighter">Verified Audit: {{ $order->label_printed_at ? $order->label_printed_at->format('d/m/Y H:i') : now()->format('d/m/Y H:i') }}</p>
             </div>

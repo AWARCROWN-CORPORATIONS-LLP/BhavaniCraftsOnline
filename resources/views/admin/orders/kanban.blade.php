@@ -2,9 +2,9 @@
 
 @section('header_extra')
     <div class="flex items-center space-x-4">
-        <h2 class="text-xl lg:text-3xl font-black text-gray-900 uppercase tracking-tighter">Sacred Fulfillment</h2>
+        <h2 class="text-xl lg:text-3xl font-black text-gray-900 uppercase tracking-tighter">Orders</h2>
         <span class="text-gray-300">/</span>
-        <p class="text-[10px] items-center font-black text-[#ff9933] uppercase tracking-[4px]">Kanban Module</p>
+        <p class="text-[10px] items-center font-black text-[#ff9933] uppercase tracking-[4px]">Board View</p>
     </div>
     
     <a href="{{ route('admin.orders.index') }}" class="btn-luxury-saffron px-6 py-2.5 text-[10px] bg-white text-gray-400 border border-gray-100 hover:bg-gray-50 shadow-none">
@@ -21,7 +21,7 @@
             <div class="mb-4 flex items-center justify-between px-2">
                 <div class="flex items-center space-x-3">
                     <div class="h-3 w-3 rounded-full bg-gray-300"></div>
-                    <h3 class="text-[11px] font-black uppercase text-gray-500 tracking-[3px]">Incoming (Pending)</h3>
+                    <h3 class="text-[11px] font-black uppercase text-gray-500 tracking-[3px]">Pending</h3>
                 </div>
                 <span class="bg-white text-gray-400 text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm border border-gray-100">{{ $pendingOrders->count() }}</span>
             </div>
@@ -37,7 +37,7 @@
             <div class="mb-4 flex items-center justify-between px-2">
                 <div class="flex items-center space-x-3">
                     <div class="h-3 w-3 rounded-full bg-blue-400 animate-pulse"></div>
-                    <h3 class="text-[11px] font-black uppercase text-blue-600 tracking-[3px]">Polishing (Processing)</h3>
+                    <h3 class="text-[11px] font-black uppercase text-blue-600 tracking-[3px]">Processing</h3>
                 </div>
                 <span class="bg-white text-blue-400 bg-blue-50 border-blue-100 text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm border">{{ $processingOrders->count() }}</span>
             </div>
@@ -53,7 +53,7 @@
             <div class="mb-4 flex items-center justify-between px-2">
                 <div class="flex items-center space-x-3">
                     <div class="h-3 w-3 rounded-full bg-purple-400"></div>
-                    <h3 class="text-[11px] font-black uppercase text-purple-600 tracking-[3px]">In Transit (Shipped)</h3>
+                    <h3 class="text-[11px] font-black uppercase text-purple-600 tracking-[3px]">Shipped</h3>
                 </div>
                 <span class="bg-white text-purple-400 bg-purple-50 border-purple-100 text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm border">{{ $shippedOrders->count() }}</span>
             </div>
@@ -69,7 +69,7 @@
             <div class="mb-4 flex items-center justify-between px-2">
                 <div class="flex items-center space-x-3">
                     <div class="h-3 w-3 rounded-full bg-green-500"></div>
-                    <h3 class="text-[11px] font-black uppercase text-green-600 tracking-[3px]">Completed (Delivered)</h3>
+                    <h3 class="text-[11px] font-black uppercase text-green-600 tracking-[3px]">Delivered</h3>
                 </div>
                 <span class="bg-white text-green-500 bg-green-50 border-green-100 text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm border">{{ $deliveredOrders->count() }}</span>
             </div>

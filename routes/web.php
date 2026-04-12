@@ -87,6 +87,7 @@ Route::prefix('{locale}')->group(function () {
             Route::get('/orders/{token}', [App\Http\Controllers\CustomerController::class, 'showOrder'])->name('orders.show');
             Route::post('/orders/{token}/generate-pin', [App\Http\Controllers\CustomerController::class, 'generateDeliveryPin'])->name('orders.generate_pin');
             Route::post('/orders/{token}/rate', [App\Http\Controllers\CustomerController::class, 'rateOrder'])->name('orders.rate');
+            Route::post('/orders/{token}/confirm', [App\Http\Controllers\CustomerController::class, 'confirmDelivery'])->name('orders.confirm');
             Route::post('/orders/{token}/return', [App\Http\Controllers\CustomerController::class, 'requestReturn'])->name('orders.return');
             Route::post('/orders/{token}/safety-complaint', [App\Http\Controllers\CustomerController::class, 'storeSafetyComplaint'])->name('orders.safety_complaint');
             Route::patch('/orders/{token}/cancel', [App\Http\Controllers\CustomerController::class, 'cancelOrder'])->name('orders.cancel');
@@ -132,22 +133,9 @@ Route::prefix('{locale}')->group(function () {
         Route::post('/chat/ask', [App\Http\Controllers\Api\ChatController::class, 'ask'])->name('api.chat.ask');
     });
 
-    // Poojari (Ritual Specialists) Ecosystem
-    Route::prefix('poojari')->name('poojari.')->group(function () {
-        Route::get('/', [App\Http\Controllers\PublicPoojariController::class, 'index'])->name('index');
-        Route::get('/{slug}', [App\Http\Controllers\PublicPoojariController::class, 'show'])->name('show');
-        Route::post('/book', [App\Http\Controllers\PublicPoojariController::class, 'book'])->name('book')->middleware('auth');
-    });
-
-    // Poojari Dedicated Dashboard
-    Route::middleware(['auth', 'role:poojari'])->prefix('poojari-portal')->name('poojari.')->group(function () {
-        Route::get('/dashboard', [App\Http\Controllers\Poojari\PoojariDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/profile/edit', [App\Http\Controllers\Poojari\PoojariDashboardController::class, 'editProfile'])->name('profile.edit');
-        Route::post('/profile/update', [App\Http\Controllers\Poojari\PoojariDashboardController::class, 'updateProfile'])->name('profile.update');
-    });
 
     // Elite Admin Portal (Protected Routes - Only for Admin Tiers)
-    Route::prefix('admin')->name('admin.')->middleware('role:super_admin,admin,employee')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('role:super_admin,associate_admin,employee')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Admin\AdminController::class, 'dashboard'])->name('dashboard');
         
         // System Telemetry & Auditing
@@ -223,9 +211,12 @@ Route::prefix('{locale}')->group(function () {
 
         // Billing Dashboard & Point of Sale (PoS)
         Route::get('/billing', [App\Http\Controllers\Admin\QuickBillingController::class, 'index'])->name('billing.index');
+        Route::get('/billing/search-customers', [App\Http\Controllers\Admin\QuickBillingController::class, 'searchCustomers'])->name('billing.search-customers');
+        Route::get('/billing/search-products', [App\Http\Controllers\Admin\QuickBillingController::class, 'searchProducts'])->name('billing.search-products');
         Route::post('/billing/store', [App\Http\Controllers\Admin\QuickBillingController::class, 'store'])->name('billing.store');
         Route::get('/billing/verify/{bill_id}', [App\Http\Controllers\Admin\QuickBillingController::class, 'verifyPayment'])->name('billing.verify');
         Route::get('/billing/print/{id}', [App\Http\Controllers\Admin\QuickBillingController::class, 'print'])->name('billing.print');
+        Route::delete('/billing/{id}', [App\Http\Controllers\Admin\QuickBillingController::class, 'destroy'])->name('billing.destroy');
     });
 
 
@@ -239,6 +230,7 @@ Route::prefix('{locale}')->group(function () {
         Route::get('/employees/create', [\App\Http\Controllers\Admin\AdminEmployeeController::class, 'create'])->name('employees.create');
         Route::post('/employees', [\App\Http\Controllers\Admin\AdminEmployeeController::class, 'store'])->name('employees.store');
         Route::patch('/employees/{employee}/toggle-block', [\App\Http\Controllers\Admin\AdminEmployeeController::class, 'toggleBlock'])->name('employees.toggle_block');
+        Route::delete('/employees/{employee}', [\App\Http\Controllers\Admin\AdminEmployeeController::class, 'destroy'])->name('employees.destroy');
     });
 
     // Logistics Operations Portal (For the actual logistics personnel in the field)
@@ -255,7 +247,7 @@ Route::prefix('{locale}')->group(function () {
     });
 
     // Shared Portal (For Admins & Employees)
-    Route::prefix('shared')->name('shared.')->middleware('role:super_admin,admin,employee')->group(function () {
+    Route::prefix('shared')->name('shared.')->middleware('role:super_admin,associate_admin,employee')->group(function () {
         Route::get('/logistics/personnel', [\App\Http\Controllers\Shared\LogisticsPersonnelController::class, 'index'])->name('logistics.personnel.index');
         Route::get('/logistics/personnel/create', [\App\Http\Controllers\Shared\LogisticsPersonnelController::class, 'create'])->name('logistics.personnel.create');
         Route::post('/logistics/personnel', [\App\Http\Controllers\Shared\LogisticsPersonnelController::class, 'store'])->name('logistics.personnel.store');
@@ -263,7 +255,7 @@ Route::prefix('{locale}')->group(function () {
     });
 
     // Employee Portal (Empowered Management Tier)
-    Route::prefix('employee')->name('employee.')->middleware('role:admin,employee')->group(function () {
+    Route::prefix('employee')->name('employee.')->middleware('role:super_admin,associate_admin,employee')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Employee\EmployeeDashboardController::class, 'dashboard'])->name('dashboard');
         
         // Payment Verification Hub (Elevated Priority)

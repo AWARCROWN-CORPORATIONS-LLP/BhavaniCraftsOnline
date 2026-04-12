@@ -4,7 +4,7 @@
     <div class="flex items-center space-x-4">
         <h2 class="text-xl lg:text-3xl font-black text-gray-900 uppercase tracking-tighter">New Category</h2>
         <span class="text-gray-300">/</span>
-        <p class="text-[10px] font-black text-[#ff9933] uppercase tracking-[4px]">Create Registry Node</p>
+        <p class="text-[10px] font-black text-[#ff9933] uppercase tracking-[4px]">Add Category</p>
     </div>
 @endsection
 
@@ -27,7 +27,7 @@
             <!-- Category Name & Hierarchy -->
             <div class="space-y-6">
                 <div class="flex items-center space-x-4">
-                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-[6px] leading-none">Node Identity</h3>
+                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-[6px] leading-none">Category Details</h3>
                     <div class="flex-grow h-px bg-gray-100"></div>
                 </div>
 
@@ -41,7 +41,7 @@
                     <div>
                         <label class="text-[10px] font-black text-gray-600 tracking-[3px] uppercase mb-3 block leading-none">Parent Category</label>
                         <select name="parent_id" class="w-full bg-gray-50 border-none px-6 py-4 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#ff9933]/30">
-                            <option value="">— Root / Top-level —</option>
+                            <option value="">— Main Category —</option>
                             @foreach($parentCategories as $parent)
                                 <option value="{{ $parent->id }}" {{ old('parent_id') == $parent->id ? 'selected' : '' }}>{{ $parent->name }}</option>
                             @endforeach
@@ -74,8 +74,8 @@
                                 <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                             </div>
                             <div class="text-center">
-                                <p class="text-sm font-bold text-gray-600">Drop image here or click to upload</p>
-                                <p class="text-xs text-gray-400 mt-1">PNG, JPG, GIF, WebP — Max 2MB</p>
+                                <p class="text-sm font-bold text-gray-600">Upload image here</p>
+                                <p class="text-xs text-gray-400 mt-1">Allowed: PNG, JPG, GIF, WebP (Max 2MB)</p>
                             </div>
                         </div>
 

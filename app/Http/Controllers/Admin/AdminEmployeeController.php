@@ -16,9 +16,9 @@ class AdminEmployeeController extends Controller
      */
     public function index($locale)
     {
-        // Get users with role 'employee'
+        // Get users with roles 'employee' or 'associate_admin'
         $employees = User::whereHas('roles', function($q) {
-            $q->where('name', 'employee');
+            $q->whereIn('name', ['employee', 'associate_admin']);
         })->orderBy('created_at', 'desc')->paginate(15);
         
         return view('admin.employees.list', compact('employees'));
@@ -42,13 +42,13 @@ class AdminEmployeeController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'required|string|max:20',
             'password' => 'required|string|min:8',
+            'role' => 'required|in:employee,associate_admin',
         ]);
 
-        $employeeRole = Role::where('name', 'employee')->first();
+        $targetRole = Role::where('name', $request->role)->first();
 
-        if (!$employeeRole) {
-            // Self-heal: Create role if missing (common in some environments)
-            $employeeRole = Role::create(['name' => 'employee']);
+        if (!$targetRole) {
+            $targetRole = Role::create(['name' => $request->role]);
         }
 
         $employee = User::create([
@@ -62,7 +62,7 @@ class AdminEmployeeController extends Controller
             'policy' => '1',
         ]);
 
-        $employee->roles()->attach($employeeRole->id);
+        $employee->roles()->attach($targetRole->id);
 
         return redirect()->route('superadmin.employees.index')->with('success', 'Employee credentials generated and access granted.');
     }
@@ -72,8 +72,9 @@ class AdminEmployeeController extends Controller
      */
     public function toggleBlock($locale, User $employee)
     {
-        // Prevent blocking super admins or admins through this route just in case
+        // 🛡️ Safety Registry: Prevent blocking super admins or admins through this route
         if ($employee->hasRole('super_admin') || $employee->hasRole('admin')) {
+            if (request()->ajax()) return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
             return back()->withErrors(['message' => 'Unauthorized action.']);
         }
         
@@ -81,6 +82,36 @@ class AdminEmployeeController extends Controller
         $employee->save();
 
         $status = $employee->is_blocked ? 'revoked' : 'restored';
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true, 
+                'message' => "Employee access has been {$status}.",
+                'is_blocked' => (bool)$employee->is_blocked
+            ]);
+        }
+
         return redirect()->back()->with('success', "Employee access has been {$status}.");
+    }
+
+    /**
+     * Delete the employee from the registry permanently.
+     */
+    public function destroy($locale, User $employee)
+    {
+        // 🛡️ Safety Registry: Prevent deletion of Superadmins or Core Admins
+        if ($employee->hasRole('super_admin') || $employee->hasRole('admin')) {
+            if (request()->ajax()) return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
+            return back()->withErrors(['message' => 'Unauthorized action: Core accounts cannot be deleted.']);
+        }
+
+        $employee->roles()->detach();
+        $employee->delete();
+
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Employee record purged from registry.']);
+        }
+
+        return redirect()->route('superadmin.employees.index')->with('success', 'Employee record purged from registry.');
     }
 }

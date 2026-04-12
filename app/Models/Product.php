@@ -49,6 +49,21 @@ class Product extends Model
         return $this->hasMany(ProductReview::class)->latest();
     }
 
+    /**
+     * Get the first image as the display image.
+     */
+    public function getDisplayImageAttribute(): ?string
+    {
+        $image = $this->images()->where('is_main', true)->first() ?? $this->images()->first();
+        if (!$image) return null;
+        
+        $url = $image->image_url;
+        if (str_starts_with($url, 'http')) {
+            return $url;
+        }
+        return \Illuminate\Support\Facades\Storage::url($url);
+    }
+
     public function encryptedId()
     {
         return base64_encode(\Illuminate\Support\Facades\Crypt::encryptString($this->id));

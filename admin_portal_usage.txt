@@ -1,88 +1,76 @@
 ====================================================
 BHAVANI CRAFTS - ADMIN PORTAL USAGE & OPERATIONS GUIDE
 ====================================================
-Version: 1.0 (March 2026)
-Architecture: Multi-Tiered Enterprise Control Panel
+Version: 1.1 (April 2026)
+Architecture: Admin Dashboard Control Panel
 
-This document serves as the official master manual for operating the Admin Portal of Bhavani Crafts Online. The portal has been custom-built to offer absolute, centralized control over the B2C (Retail) and B2B (Wholesale Franchise) ecosystems.
-
-
-===========================
-1. TIERED ACCESS PROTOCOLS
-===========================
-The system operates on an automated role-based access control (RBAC) hierarchy.
-
-[Tier 1] SUPER ADMIN (Owner): Has supreme control. Has exclusive access to the 'Employee Registry' to hire or terminate staff access.
-[Tier 2] ADMIN: Can manage products, orders, franchises, and broadcasts, but cannot manage employees. 
-[Tier 3] EMPLOYEE: Identical operational access to Admin, restricted from sensitive system configurations or peer management.
-
+This document is the manual for the Admin Portal of Bhavani Crafts Online. Use this to manage customers, orders, staff, and products.
 
 ===========================
-2. THE COMMAND DASHBOARD
+1. USER ACCESS LEVELS
 ===========================
-Upon logging in as an admin or employee, you land on the Dashboard.
-- Active Broadcast Ticker: If there is an ongoing emergency network broadcast, it will pulsate at the very top of the screen.
-- Real-Time Analytics: Four premium data cards dynamically track your Total Seekers (Users), Pending Franchise Approvals, Master Catalog Size, and Total Revenue Registry.
-- Quick Jump Hub: Instantly jump into 'Franchise Approvals', 'Category Setup', or 'Product Management'.
+The system has three types of users:
 
-
-===========================
-3. EMPLOYEE ACCESS REGISTRY (Super Admin Only)
-===========================
-Navigation path: Sidebar -> Employee Access -> Staff Registry
-Use this module to securely onboard new staff.
-- Add New Employee: You provide their Name, Email, Phone, and assign a temporary Password.
-- Revocation/Block: If an employee leaves the company, hit the "Block Access" button. This immediately freezes their dashboard without destroying their historical data logs. You can unblock them anytime.
-
+[Tier 1] SUPER ADMIN (Owner): Full control over everything, including adding or removing staff.
+[Tier 2] ADMIN: Can manage products, orders, partners, and announcements but cannot manage staff.
+[Tier 3] EMPLOYEE: Same as Admin, but cannot change system settings or manage other staff.
 
 ===========================
-4. GLOBAL BROADCAST SYSTEM
+2. STORE SUMMARY (DASHBOARD)
 ===========================
-Navigation path: Sidebar -> Employee Access -> Global Broadcast
-This is your mass-communication emergency radio tower.
-- Function: Creates a prominent, unignorable alert banner on user dashboards.
-- Audiences: 
-   1. 'Staff Only' (Employees only see it).
-   2. 'Franchises' (Only Business partners see it on their Hub).
-   3. 'Global' (Pushed to absolutely everyone).
-- Threat Levels: Set urgency to Information (Blue), Warning (Yellow), or Critical Alert (Pulsing Red).
-- Kill Switch: Hit the 'Transmitting' button to instantly pull a broadcast offline without needing to constantly delete and recreate them.
-
+When you log in, you see the Store Summary page.
+- Announcement Ticker: Any active alerts or news will show at the top of the screen.
+- Real-Time Stats: Four cards show Total Customers, New Business Requests, Total Items in store, and Total Sales amount.
+- Quick Actions: Shortcuts to manage partners, categories, or products.
 
 ===========================
-5. FRANCHISE MASTERY (B2B Approval)
+3. STAFF ACCESS (Super Admin Only)
 ===========================
-Navigation path: Sidebar -> Master Actions Hub -> Franchise Mastery
-When a new store wants to sell your artifacts, they register as a 'Business'. 
-They cannot access the system or wholesale pricing until you approve them.
-- Action: Review their submitted Company Name, Tax ID/GST, and intended physical location. Click "Approve Partnership" to unlock their Wholesale Dashboard and generate their B2B Catalog.
-
-
-===========================
-6. PRODUCTS MASTERY & MASTER CATALOG
-===========================
-Navigation path: Sidebar -> Catalog Silk -> Products Mastery
-This is the core inventory engine. 
-- Retail vs Wholesale Pricing: Every product takes a standard price (for public customers) and a Wholesale Price (for approved Franchises).
-- Stock Engine: Enter precise stock. If a customer or franchise buys it, this central number drops automatically.
-- Multi-Tier Variants: When adding Options (like "Size: Large" or "Material: Brass"), you can now add specific Option Descriptions for deeper detail.
-- Manual Discounts: You can apply a specific manual discount percentage to any artifact.
-
+Navigation: Sidebar -> Staff Access -> Staff Members
+Use this to add or manage your team.
+- Add New Staff: Enter their Name, Email, Phone, and set a Password.
+- Block Access: If someone leaves, click "Block". This stops them from logging in but keeps their history. You can unblock them later.
 
 ===========================
-7. SACRED FULFILLMENT (Kanban & List views)
+4. ANNOUNCEMENTS
 ===========================
-Navigation path: Sidebar -> Catalog Silk -> Kanban Fulfillment // Order Registry
-This module controls exactly how physical artifacts get to buyers.
-- List View (Order Registry): Detailed, tabular breakdown of every order, their line items, the customer's contact info, and total financial value. 
-- Kanban Board: The operational powerhouse. Four vertical colored lanes (Pending -> Processing -> Shipped -> Delivered). 
-- To use Kanban: Literally click, drag, and drop a customer's order card from one column to another. The database instantaneously updates the status silently in the background. No save buttons required.
+Navigation: Sidebar -> Store Management -> Announcements
+Use this to send messages to your users or staff.
+- Function: Shows a banner at the top of their screen.
+- Audience: You can send to 'Staff Only', 'Partners Only', or 'Everyone'.
+- Urgency: Set to Information (Blue), Warning (Yellow), or Critical (Red).
+- Switch Off: Use the toggle to hide an announcement without deleting it.
 
+===========================
+5. PARTNERS (Branch Registry)
+===========================
+Navigation: Sidebar -> Store Management -> Partners
+When a local shop wants to work with us, they sign up as a 'Business'.
+- Action: Check their details (Company Name, GST, Location). Click "Approve" to let them see wholesale prices and start ordering.
 
 ===========================
-8. SECTORS PENDING DEVELOPMENT
+6. PRODUCTS & ITEMS
 ===========================
-- Headquarters Auto-Restock Approval: Franchises can request bulk restocks via their portal. The HQ approval board is the next scheduled feature to be built into this Admin screen.
-- Advanced Accounting / Invoicing module.
+Navigation: Sidebar -> Store Items -> Products
+This is where you manage what you sell.
+- Pricing: Set the regular price and the Wholesale price for partners.
+- Stock: Enter how many items you have. The number drops automatically when someone buys.
+- 3D Models: You can upload .GLB and .USDZ files to show products in 3D/AR on the website.
+- AI Writer: Use the "AI Writer" button to automatically generate product descriptions.
+
+===========================
+7. ORDERS (Status Board & List)
+===========================
+Navigation: Sidebar -> Store Management -> Orders
+Manage how orders are shipped and delivered.
+- List View: A table showing all orders, customer names, and total amounts.
+- Status Board (Kanban): A drag-and-drop board with four columns (Pending -> Processing -> Shipped -> Delivered).
+- Using the Board: Click and drag an order card to the next column as you process it. The status updates automatically.
+
+===========================
+8. UPCOMING FEATURES
+===========================
+- Auto-Restock: Letting partners ask for more stock automatically.
+- Better Accounting: More detailed financial reports and automated invoices.
 
 -- End of Document --

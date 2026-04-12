@@ -1,265 +1,213 @@
 @extends('layouts.admin')
 
 @section('header_extra')
-    <h2 class="text-xl lg:text-2xl font-black text-gray-900 uppercase tracking-tight">Dashboard Overview</h2>
+    <h2 class="text-xl lg:text-2xl font-black text-gray-900 uppercase tracking-tight">Store Summary</h2>
 @endsection
 
 @section('content')
 
-    <!-- STATS GRID -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <!-- STATS GRID: PRECISION METRICS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         
-        <!-- Total Users Card -->
-        <div class="card-premium p-8 relative overflow-hidden flex flex-col justify-between h-[220px]">
-            <div class="z-10">
-                <p class="text-[9px] font-black text-[#ff9933] uppercase tracking-[4px] mb-2 leading-none">Total Users</p>
-                <h3 class="text-4xl lg:text-5xl font-black text-gray-900 leading-none tracking-tighter">{{ $stats['total_users'] }}</h3>
-            </div>
-            <div class="z-10 flex items-center justify-between">
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">Registered Members</p>
-                <div class="h-10 w-10 bg-[#ff9933]/10 text-[#ff9933] flex items-center justify-center rounded-xl shadow-lg">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354l.586.586H19v10.354L12.586 16H4V4.94L11.414 4H12zM12 11h.01" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11a1 1 0 100-2 1 1 0 000 2z" /></svg>
-                </div>
-            </div>
-            <div class="absolute -right-10 -bottom-10 h-40 w-40 bg-[#ff9933]/5 rounded-full blur-3xl"></div>
-        </div>
-
-        <!-- Pending Franchises Card -->
-        <div class="card-premium p-8 relative overflow-hidden flex flex-col justify-between h-[220px] bg-gradient-to-br from-white to-gray-50">
-            <div class="z-10">
-                <p class="text-[9px] font-black text-[#ff9933] uppercase tracking-[4px] mb-2 leading-none">Pending Approvals</p>
-                <h3 class="text-4xl lg:text-5xl font-black text-gray-900 leading-none tracking-tighter">{{ $stats['pending_franchises'] }}</h3>
-            </div>
-            <div class="z-10 flex items-center justify-between">
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">Pending Businesses</p>
-                <div class="h-10 w-10 bg-[#ff9933] text-white flex items-center justify-center rounded-xl shadow-lg animate-pulse">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                </div>
-            </div>
-            <div class="absolute inset-0 border-[10px] border-[#ff9933]/5 rounded-[30px] -m-2 opacity-50"></div>
-        </div>
-
-        <!-- Total Products Card -->
-        <div class="card-premium p-8 relative overflow-hidden flex flex-col justify-between h-[220px]">
-            <div class="z-10">
-                <p class="text-[9px] font-black text-[#ff9933] uppercase tracking-[4px] mb-2 leading-none">Catalog Size</p>
-                <h3 class="text-4xl lg:text-5xl font-black text-gray-900 leading-none tracking-tighter">{{ $stats['total_products'] }}</h3>
-            </div>
-            <div class="z-10 flex items-center justify-between">
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">Total Products</p>
-                <div class="h-10 w-10 bg-[#ff9933]/10 text-[#ff9933] flex items-center justify-center rounded-xl shadow-lg">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-                </div>
-            </div>
-            <div class="absolute -left-10 -bottom-10 h-40 w-40 bg-gray-100/50 rounded-full blur-3xl"></div>
-        </div>
-
-        <!-- Revenue Registry Card -->
-        <div class="card-premium p-8 relative overflow-hidden flex flex-col justify-between h-[220px]">
-            <div class="z-10">
-                <p class="text-[9px] font-black text-[#ff9933] uppercase tracking-[4px] mb-2 leading-none">Total Revenue</p>
-                <h3 class="text-4xl lg:text-5xl font-black revenue-badge leading-none tracking-tighter">@format_currency_abbr($stats['revenue_total'])</h3>
-            </div>
-            <div class="z-10 flex items-center justify-between">
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">Total Profit Volume</p>
-                <div class="h-10 w-10 bg-[#ff9933]/10 text-[#ff9933] flex items-center justify-center rounded-xl shadow-lg">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                </div>
-            </div>
-            <div class="absolute -right-20 -top-20 h-64 w-64 bg-[#ff9933]/5 rounded-full blur-3xl"></div>
-        </div>
-
-        <!-- Successful Deliveries Card -->
-        <div class="card-premium p-8 relative overflow-hidden flex flex-col justify-between h-[220px] bg-gradient-to-br from-emerald-500 to-emerald-700">
-            <div class="z-10">
-                <p class="text-[9px] font-black text-emerald-100 uppercase tracking-[4px] mb-2 leading-none">Successful Deliveries</p>
-                <h3 class="text-4xl lg:text-5xl font-black text-white leading-none tracking-tighter">{{ $stats['successful_deliveries'] }}</h3>
-            </div>
-            <div class="z-10 flex items-center justify-between">
-                <p class="text-[10px] text-emerald-100 font-bold uppercase tracking-widest leading-none">Authentication Vault</p>
-                <div class="h-10 w-10 bg-white/20 text-white flex items-center justify-center rounded-xl shadow-lg border border-white/30 backdrop-blur-sm">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                </div>
-            </div>
-            <div class="absolute inset-0 border-[10px] border-white/5 rounded-[30px] -m-2"></div>
-        </div>
-
-        <!-- Pending Returns Card -->
-        <div class="card-premium p-8 relative overflow-hidden flex flex-col justify-between h-[220px] bg-gradient-to-br from-amber-500 to-amber-700">
-            <div class="z-10">
-                <p class="text-[9px] font-black text-amber-100 uppercase tracking-[4px] mb-2 leading-none">Pending Extractions</p>
-                <h3 class="text-4xl lg:text-5xl font-black text-white leading-none tracking-tighter">{{ $stats['pending_returns'] }}</h3>
-            </div>
-            <div class="z-10 flex items-center justify-between">
-                <p class="text-[10px] text-amber-100 font-bold uppercase tracking-widest leading-none">RMS Returns Registry</p>
-                <div class="h-10 w-10 bg-white/20 text-white flex items-center justify-center rounded-xl shadow-lg border border-white/30 backdrop-blur-sm">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" /></svg>
-                </div>
-            </div>
-            <div class="absolute inset-0 border-[10px] border-white/5 rounded-[30px] -m-2"></div>
-        </div>
-    </div>
-
-    <!-- COMMAND CENTER & ACCOUNTING EXPORTS -->
-    <div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Revenue Trajectory Chart -->
-        <div class="lg:col-span-2 card-premium p-8 relative overflow-hidden">
-            <h3 class="text-xl font-black text-gray-900 uppercase tracking-widest mb-6">Revenue Trajectory (7 Days)</h3>
-            <div id="revenueChart" class="w-full h-[300px]"></div>
-        </div>
-
-        <!-- Compliance & Export Modules -->
-        <div class="card-premium p-8 relative overflow-hidden flex flex-col justify-between">
+        <!-- Metric Card: Total Users -->
+        <div class="card-premium p-6 flex flex-col justify-between h-[160px]">
             <div>
-                <h3 class="text-xl font-black text-gray-900 uppercase tracking-widest mb-2">Accounting Compliance</h3>
-                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-6 leading-relaxed">
-                    Generate encrypted CSV payloads of financial transactions and inventory states for regulatory compliance.
-                </p>
-                
-                <div class="space-y-4">
-                    <a href="{{ route('admin.export.orders') }}" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-[#ff9933]/10 border border-gray-100 hover:border-[#ff9933] rounded-2xl transition-all group">
-                        <div class="flex items-center space-x-4">
-                            <div class="h-10 w-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-gray-400 group-hover:text-[#ff9933] transition-colors">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-bold text-gray-900">Financial Ledger</h4>
-                                <span class="text-[10px] text-gray-500 uppercase tracking-widest">Orders & Revenue</span>
-                            </div>
-                        </div>
-                        <svg class="h-5 w-5 text-gray-300 group-hover:text-[#ff9933]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                    </a>
-
-                    <a href="{{ route('admin.export.products') }}" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-[#ff9933]/10 border border-gray-100 hover:border-[#ff9933] rounded-2xl transition-all group">
-                        <div class="flex items-center space-x-4">
-                            <div class="h-10 w-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-gray-400 group-hover:text-[#ff9933] transition-colors">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-bold text-gray-900">Inventory State</h4>
-                                <span class="text-[10px] text-gray-500 uppercase tracking-widest">Stock & Thresholds</span>
-                            </div>
-                        </div>
-                        <svg class="h-5 w-5 text-gray-300 group-hover:text-[#ff9933]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                    </a>
+                <p class="label-muted mb-1 text-slate-500">Growth Registry</p>
+                <div class="flex items-end justify-between">
+                    <h3 class="heading-silk text-3xl">{{ number_format($stats['total_users']) }}</h3>
+                    <span class="text-[9px] font-black text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 uppercase tracking-tighter">Verified</span>
                 </div>
+            </div>
+            <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                <p class="text-[10px] text-muted font-semibold uppercase tracking-widest">Total Customers</p>
+                <svg class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            </div>
+        </div>
+
+        <!-- Metric Card: Pending Franchises -->
+        <div class="card-premium p-6 flex flex-col justify-between h-[160px]">
+            <div>
+                <p class="label-muted mb-1 text-slate-500">Application Queue</p>
+                <div class="flex items-end justify-between">
+                    <h3 class="heading-silk text-3xl">{{ $stats['pending_franchises'] }}</h3>
+                    @if($stats['pending_franchises'] > 0)
+                        <span class="text-[9px] font-black text-amber-500 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 uppercase tracking-tighter animate-pulse">Action Required</span>
+                    @endif
+                </div>
+            </div>
+            <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                <p class="text-[10px] text-muted font-semibold uppercase tracking-widest">Partner Requests</p>
+                <svg class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354l.586.586H19v10.354L12.586 16H4V4.94L11.414 4H12zM12 11h.01" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11a1 1 0 100-2 1 1 0 000 2z" /></svg>
+            </div>
+        </div>
+
+        @if(auth()->user()->hasRole('super_admin'))
+        <!-- Metric Card: Revenue -->
+        <div class="card-premium p-6 flex flex-col justify-between h-[160px] border-l-4 border-l-brand-primary">
+            <div>
+                <p class="label-muted mb-1 text-slate-500">Financial Terminal</p>
+                <div class="flex items-end justify-between">
+                    <h3 class="heading-silk text-2xl">@format_currency_abbr($stats['revenue_total'])</h3>
+                    <span class="text-[9px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 uppercase tracking-tighter">Gross</span>
+                </div>
+            </div>
+            <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                <p class="text-[10px] text-muted font-semibold uppercase tracking-widest">Total Sales</p>
+                <svg class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+        </div>
+        @endif
+
+        <!-- Metric Card: Returns -->
+        <div class="card-premium p-6 flex flex-col justify-between h-[160px]">
+            <div>
+                <p class="label-muted mb-1 text-slate-500">Inventory Risks</p>
+                <div class="flex items-end justify-between">
+                    <h3 class="heading-silk text-3xl">{{ $stats['pending_returns'] }}</h3>
+                    <span class="text-[9px] font-black text-rose-500 bg-rose-50 px-2 py-0.5 rounded border border-rose-100 uppercase tracking-tighter">Return Dept</span>
+                </div>
+            </div>
+            <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                <p class="text-[10px] text-muted font-semibold uppercase tracking-widest">Pending Returns</p>
+                <svg class="h-4 w-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4 2 4-2 4 2z" /></svg>
             </div>
         </div>
     </div>
 
-    <!-- SYSTEM TELEMETRY & ACTIVE BROADCASTS -->
-    <div class="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <!-- SYSTEM TELEMETRY CORE -->
-        <div class="lg:col-span-8 card-premium p-10 relative overflow-hidden flex flex-col justify-between">
-            <div class="relative z-10 flex items-center justify-between mb-10">
-                <div>
-                   <h3 class="text-xl font-black text-gray-900 uppercase tracking-widest leading-none mb-4">Infrastructure Pulse</h3>
-                   <span class="text-[9px] font-black uppercase text-[#ff9933] border border-[#ff9933] px-3 py-1 rounded-full tracking-[2px]">System Telemetry Registry</span>
-                </div>
-                <div class="h-12 w-12 bg-gray-50 text-gray-400 flex items-center justify-center rounded-2xl shadow-inner group hover:text-[#1e40af] transition-all">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <!-- ANALYTICS & REVENUE HUB -->
+    <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        @if(auth()->user()->hasRole('super_admin'))
+        <div class="lg:col-span-2 card-premium p-6">
+            <h3 class="heading-silk text-sm mb-6">Revenue Trajectory</h3>
+            <div id="revenueChart" class="w-full h-[320px]"></div>
+        </div>
+        @endif
+
+        <!-- DATA EXPORTS -->
+        <div class="card-premium p-6 flex flex-col">
+            <h3 class="heading-silk text-sm mb-2">Export Data</h3>
+            <p class="text-[11px] text-muted mb-6 leading-relaxed">Download CSV archives for offline accounting and reporting.</p>
+            
+            <div class="space-y-3">
+                @if(auth()->user()->hasRole('super_admin'))
+                <a href="{{ route('admin.export.orders') }}" data-turbo="false" class="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-white border hover:border-brand-primary rounded-lg transition-all group">
+                    <div class="flex items-center space-x-3">
+                        <svg class="h-4 w-4 text-slate-400 group-hover:text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        <span class="text-xs font-bold text-slate-700">Financial Registry</span>
+                    </div>
+                    <svg class="h-3 w-3 text-slate-300 group-hover:text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                </a>
+                @endif
+
+                <a href="{{ route('admin.export.products') }}" data-turbo="false" class="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-white border hover:border-brand-primary rounded-lg transition-all group">
+                    <div class="flex items-center space-x-3">
+                        <svg class="h-4 w-4 text-slate-400 group-hover:text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                        <span class="text-xs font-bold text-slate-700">Inventory Logs</span>
+                    </div>
+                    <svg class="h-3 w-3 text-slate-300 group-hover:text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- INFRASTRUCTURE & BROADCASTS -->
+    <div class="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- SYSTEM TELEMETRY -->
+        <div class="lg:col-span-8 card-premium p-0 flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-border-subtle bg-slate-50 flex items-center justify-between">
+                <h3 class="heading-silk text-[11px] uppercase tracking-widest text-slate-400">Infrastructure Health</h3>
+                <div class="flex items-center space-x-2">
+                    <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-[10px] font-bold text-emerald-600 uppercase">Operational</span>
                 </div>
             </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 relative z-10">
-                <div class="space-y-1">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Kernel / PHP</p>
-                    <p class="text-[12px] font-black text-gray-900">{{ $telemetry['php_version'] }} ({{ $telemetry['server_os'] }})</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Framework</p>
-                    <p class="text-[12px] font-black text-gray-900">Laravel v{{ $telemetry['laravel_version'] }}</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Memory Pulse</p>
-                    <p class="text-[12px] font-black text-gray-900">{{ $telemetry['memory_usage'] }} / {{ $telemetry['memory_limit'] }}</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Global Access</p>
-                    <p class="text-[12px] font-black text-gray-900">{{ $telemetry['environment'] }} • {{ $telemetry['timezone'] }}</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Security Integrity</p>
-                    <p class="text-[12px] font-black text-gray-900">{{ $telemetry['debug_mode'] }}</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Primary Registry</p>
-                    <p class="text-[12px] font-black text-gray-900 uppercase">{{ $telemetry['database'] }} Engine</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[3px]">Infrastructure Status</p>
-                    <div class="flex items-center space-x-2">
-                         <div class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></div>
-                         <p class="text-[12px] font-black text-emerald-600 uppercase">Sanctuary Operational</p>
+            <div class="p-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="space-y-1">
+                        <p class="label-muted text-[10px]">Environment</p>
+                        <p class="font-bold text-slate-900">{{ $telemetry['php_version'] }} / PHP</p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="label-muted text-[10px]">Core Runtime</p>
+                        <p class="font-bold text-slate-900">Laravel v{{ $telemetry['laravel_version'] }}</p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="label-muted text-[10px]">Memory Pulse</p>
+                        <p class="font-bold text-slate-900">{{ $telemetry['memory_usage'] }}</p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="label-muted text-[10px]">Security Engine</p>
+                        <p class="font-bold {{ $telemetry['debug_mode'] == 'Disabled' ? 'text-emerald-500' : 'text-rose-500' }}">{{ $telemetry['debug_mode'] }}</p>
                     </div>
                 </div>
             </div>
-            
-            <div class="absolute -right-20 -bottom-20 h-64 w-64 bg-gray-50 rounded-full blur-3xl opacity-50"></div>
         </div>
 
         <!-- BROADCAST SHORTS -->
-        <div class="lg:col-span-4 card-premium p-10 relative overflow-hidden flex flex-col justify-between bg-[#111111]">
-            <h3 class="text-lg font-black text-white uppercase tracking-widest leading-none mb-8 z-10">Active Broadcasts</h3>
-            
-            <div class="space-y-6 z-10 overflow-y-auto max-h-[300px] no-scrollbar">
+        <div class="lg:col-span-4 card-premium p-0 flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-border-subtle bg-brand-dark flex items-center justify-between">
+                <h3 class="heading-silk text-[11px] uppercase tracking-widest text-white/50">Admin Logs</h3>
+                <svg class="h-4 w-4 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+            </div>
+            <div class="p-6 space-y-4">
                 @forelse($activeBroadcasts as $broadcast)
-                    <div class="border-l-2 pl-4 py-1 
-                        {{ $broadcast->urgency == 'critical' ? 'border-red-500' : ($broadcast->urgency == 'warning' ? 'border-amber-500' : 'border-[#ff9933]') }}">
-                        <h4 class="text-[10px] font-black uppercase tracking-widest text-[#ff9933]">{{ $broadcast->title }}</h4>
-                        <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1 truncate">{{ $broadcast->message }}</p>
-                        <time class="text-[7px] font-black text-gray-600 uppercase tracking-widest mt-2 block">{{ $broadcast->created_at->diffForHumans() }}</time>
+                    <div class="group">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[9px] font-black uppercase tracking-widest text-brand-primary">{{ $broadcast->title }}</span>
+                            <span class="text-[8px] font-bold text-slate-400">{{ $broadcast->created_at->diffForHumans() }}</span>
+                        </div>
+                        <p class="text-[10px] text-slate-600 font-medium group-hover:text-slate-900 transition-colors">{{ $broadcast->message }}</p>
                     </div>
                 @empty
-                    <div class="py-12 text-center">
-                         <p class="text-[10px] text-gray-700 font-black uppercase tracking-[4px]">No Active Broadcasts</p>
-                    </div>
+                    <p class="text-[10px] text-slate-400 italic text-center py-4 uppercase tracking-widest">No active logs</p>
                 @endforelse
             </div>
-            
-            <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-80 pointer-events-none"></div>
         </div>
     </div>
 
 
-    <!-- QUICK ACTIONS -->
-    <div class="mt-16">
-        <div class="flex items-center space-x-6 mb-8">
-            <h2 class="text-2xl font-black text-gray-900 uppercase">Quick Actions</h2>
-            <div class="flex-grow h-[1px] bg-gray-100"></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <a href="{{ route('admin.franchises') }}" class="card-premium p-10 flex flex-col items-center text-center group hover:bg-[#ff9933] transition-colors duration-500">
-                <div class="h-20 w-20 bg-[#ff9933]/10 text-[#ff9933] rounded-3xl flex items-center justify-center mb-6 group-hover:bg-white group-hover:scale-110 transition-all">
-                    <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+    <!-- ACTION HUB -->
+    <div class="mt-12">
+        <h3 class="heading-silk text-sm mb-6">Action Hub</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <a href="{{ route('admin.franchises') }}" class="card-premium p-5 flex items-center space-x-4 hover:bg-slate-50 transition-colors">
+                <div class="h-10 w-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                 </div>
-                <h4 class="text-[12px] font-black uppercase tracking-[4px] text-gray-900 group-hover:text-white mb-2">Franchise Management</h4>
-                <p class="text-[10px] text-gray-400 group-hover:text-white/70 font-bold uppercase tracking-wider">Review & Approve Business Requests</p>
+                <div>
+                     <p class="text-xs font-bold text-slate-900">Partner Manager</p>
+                     <p class="text-[9px] text-muted uppercase font-bold tracking-widest">Franchises</p>
+                </div>
             </a>
 
-            <a href="{{ route('admin.categories.index') }}" class="card-premium p-10 flex flex-col items-center text-center group hover:bg-[#ff9933] transition-colors duration-500">
-                <div class="h-20 w-20 bg-[#ff9933]/10 text-[#ff9933] rounded-3xl flex items-center justify-center mb-6 group-hover:bg-white group-hover:scale-110 transition-all">
-                    <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m12 4a2 2 0 100-4m0 4a2 2 0 110-4m-6 0a2 2 0 100 4m0-4a2 2 0 110 4m-6 0v-2m8 4v-2a2 2 0 110 4m-6 0v2m8 4v-2" /></svg>
+            <a href="{{ route('admin.categories.index') }}" class="card-premium p-5 flex items-center space-x-4 hover:bg-slate-50 transition-colors">
+                <div class="h-10 w-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m12 4a2 2 0 100-4m0 4a2 2 0 110-4m-6 0a2 2 0 100 4m0-4a2 2 0 110 4m-6 0v-2m8 4v-2a2 2 0 110 4m-6 0v2m8 4v-2" /></svg>
                 </div>
-                <h4 class="text-[12px] font-black uppercase tracking-[4px] text-gray-900 group-hover:text-white mb-2 leading-none">Categories</h4>
-                <p class="text-[10px] text-gray-400 group-hover:text-white/70 font-bold uppercase tracking-wider">Manage Product Categories</p>
+                <div>
+                     <p class="text-xs font-bold text-slate-900">Category Engine</p>
+                     <p class="text-[9px] text-muted uppercase font-bold tracking-widest">Inventory</p>
+                </div>
             </a>
 
-            <a href="{{ route('admin.products.index') }}" class="card-premium p-10 flex flex-col items-center text-center group hover:bg-[#ff9933] transition-colors duration-500">
-                <div class="h-20 w-20 bg-[#ff9933]/10 text-[#ff9933] rounded-3xl flex items-center justify-center mb-6 group-hover:bg-white group-hover:scale-110 transition-all">
-                    <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+            <a href="{{ route('admin.products.index') }}" class="card-premium p-5 flex items-center space-x-4 hover:bg-slate-50 transition-colors">
+                <div class="h-10 w-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                 </div>
-                <h4 class="text-[12px] font-black uppercase tracking-[4px] text-gray-900 group-hover:text-white mb-2 leading-none">Products</h4>
-                <p class="text-[10px] text-gray-400 group-hover:text-white/70 font-bold uppercase tracking-wider">Manage Product Catalog</p>
+                <div>
+                     <p class="text-xs font-bold text-slate-900">Resource Master</p>
+                     <p class="text-[9px] text-muted uppercase font-bold tracking-widest">Products</p>
+                </div>
             </a>
 
-            <a href="{{ route('admin.page-content.index') }}" class="card-premium p-10 flex flex-col items-center text-center group hover:bg-[#ff9933] transition-colors duration-500">
-                <div class="h-20 w-20 bg-[#ff9933]/10 text-[#ff9933] rounded-3xl flex items-center justify-center mb-6 group-hover:bg-white group-hover:scale-110 transition-all">
-                    <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
+            <a href="{{ route('admin.page-content.index') }}" class="card-premium p-5 flex items-center space-x-4 hover:bg-slate-50 transition-colors">
+                <div class="h-10 w-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
                 </div>
-                <h4 class="text-[12px] font-black uppercase tracking-[4px] text-gray-900 group-hover:text-white mb-2 leading-none">Page Content</h4>
-                <p class="text-[10px] text-gray-400 group-hover:text-white/70 font-bold uppercase tracking-wider">Manage Dynamic Sections</p>
+                <div>
+                     <p class="text-xs font-bold text-slate-900">Content Designer</p>
+                     <p class="text-[9px] text-muted uppercase font-bold tracking-widest">Frontend</p>
+                </div>
             </a>
         </div>
     </div>
@@ -267,45 +215,54 @@
     <!-- ApexCharts Setup -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const chartData = @json($revenueTrend);
-            
-            const options = {
-                chart: {
-                    type: 'area',
-                    height: 300,
-                    toolbar: { show: false },
-                    fontFamily: 'inherit'
-                },
-                series: [{
-                    name: 'Revenue',
-                    data: Object.values(chartData)
-                }],
-                xaxis: {
-                    categories: Object.keys(chartData),
-                    labels: { style: { colors: '#9ca3af', fontSize: '10px', fontWeight: 700 } },
-                    axisBorder: { show: false },
-                    axisTicks: { show: false }
-                },
-                yaxis: {
-                    labels: { 
-                        formatter: (val) => { return '₹ ' + val.toLocaleString('en-IN') },
-                        style: { colors: '#9ca3af', fontSize: '10px', fontWeight: 700 } 
-                    }
-                },
-                colors: ['#ff9933'],
-                fill: {
-                    type: 'gradient',
-                    gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.0, stops: [0, 90, 100] }
-                },
-                dataLabels: { enabled: false },
-                stroke: { curve: 'smooth', width: 3 },
-                grid: { borderColor: '#f3f4f6', strokeDashArray: 4, yaxis: { lines: { show: true } } },
-                tooltip: { theme: 'light', y: { formatter: function (val) { return '₹ ' + val.toLocaleString('en-IN') } } }
+        (function() {
+            const initChart = () => {
+                const chartEl = document.querySelector("#revenueChart");
+                if (!chartEl) return;
+
+                const chartData = @json($revenueTrend);
+                const options = {
+                    chart: {
+                        type: 'area',
+                        height: 320,
+                        toolbar: { show: false },
+                        fontFamily: 'inherit',
+                        animations: { enabled: true, easing: 'easeinout', speed: 800 }
+                    },
+                    series: [{
+                        name: 'Revenue',
+                        data: Object.values(chartData)
+                    }],
+                    xaxis: {
+                        categories: Object.keys(chartData),
+                        labels: { style: { colors: '#64748b', fontSize: '10px', fontWeight: 600 } },
+                        axisBorder: { show: false },
+                        axisTicks: { show: false }
+                    },
+                    yaxis: {
+                        labels: { 
+                            formatter: (val) => { return '₹' + val.toLocaleString('en-IN') },
+                            style: { colors: '#64748b', fontSize: '10px', fontWeight: 600 } 
+                        }
+                    },
+                    colors: ['#ff9933'],
+                    fill: {
+                        type: 'gradient',
+                        gradient: { shadeIntensity: 1, opacityFrom: 0.2, opacityTo: 0.05, stops: [0, 90, 100] }
+                    },
+                    dataLabels: { enabled: false },
+                    stroke: { curve: 'smooth', width: 2, colors: ['#ff9933'] },
+                    grid: { borderColor: '#f1f5f9', strokeDashArray: 4, yaxis: { lines: { show: true } } },
+                    tooltip: { theme: 'light', y: { formatter: function (val) { return '₹' + val.toLocaleString('en-IN') } } }
+                };
+
+                const chart = new ApexCharts(chartEl, options);
+                chart.render();
             };
 
-            const chart = new ApexCharts(document.querySelector("#revenueChart"), options);
-            chart.render();
-        });
+            // Support both standard load and Turbo navigation
+            document.addEventListener('DOMContentLoaded', initChart);
+            document.addEventListener('turbo:load', initChart);
+        })();
     </script>
 @endsection

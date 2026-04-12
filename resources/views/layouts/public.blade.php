@@ -21,6 +21,14 @@
 
     <title>@yield('meta_title', config('app.name', 'Bhavani Crafts | Premium Products'))</title>
     
+    <!-- PWA & Mobile Optimization -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ff9933">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bhavani Crafts">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
+    
     <!-- High-Fidelity Professional Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -491,8 +499,9 @@
                 <div class="w-px h-6 bg-gray-200 mx-2 hidden lg:block"></div>
 
                 <!-- Auth Buttons -->
+                <!-- Auth Buttons -->
                 <div class="hidden lg:flex items-center space-x-6">
-                    <a href="{{ route('poojari.index') }}" class="text-[11px] font-black uppercase tracking-[2px] text-onyx-900 border-b-2 {{ Request::is('*/poojari*') ? 'border-brand-500' : 'border-transparent' }} hover:text-brand-500 transition-all">Ritual Services</a>
+                    <a href="{{ route('pages.sacred-kit') }}" class="text-[11px] font-black uppercase tracking-[2px] text-onyx-900 border-b-2 {{ Request::is('*/sacred-kit*') ? 'border-brand-500' : 'border-transparent' }} hover:text-brand-500 transition-all">Ritual Services</a>
                     @auth
                         <a href="{{ route('customer.dashboard') }}" class="text-xs font-bold text-gray-700 hover:text-brand-500 uppercase tracking-wider transition-colors">My Profile</a>
                     @else
@@ -531,7 +540,7 @@
             
             <nav class="flex flex-col items-center space-y-6 text-center w-full px-8 flex-1 mt-10">
                 <a href="{{ route('home') }}" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Home</a>
-                <a href="{{ route('poojari.index') }}" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Ritual Services</a>
+                <a href="{{ route('pages.sacred-kit') }}" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Ritual Services</a>
                 <a href="#" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Categories</a>
                 <a href="{{ route('franchise.register') }}" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Apply Franchise</a>
                 <a href="#" class="text-white text-2xl font-serif hover:text-brand-400 transition-colors">Our Heritage</a>
@@ -650,6 +659,17 @@
 
     {{-- Page-specific scripts pushed from child views --}}
     @stack('scripts')
+
+    {{-- PWA Service Worker Activation --}}
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Bhavani PWA Service Worker Registered', reg))
+                    .catch(err => console.log('Bhavani PWA Service Worker Failed', err));
+            });
+        }
+    </script>
 
     {{-- Global helper functions used by product_card partial --}}
     <script type="text/javascript">

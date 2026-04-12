@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserLoginNotification;
+use App\Mail\UserRegisteredNotification;
 
 class AuthApiController extends Controller
 {
@@ -89,6 +92,13 @@ class AuthApiController extends Controller
                 // Secure session token update
                 $user->session_token = hash('sha256', Str::random(60));
                 $user->save();
+
+                // Dispatch Login Notification
+                try {
+                    Mail::to($user->email)->queue(new UserLoginNotification($user, now()->toDateTimeString(), $request->ip()));
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Login Notification Failed: ' . $e->getMessage());
+                }
 
                 $request->session()->regenerate();
 
@@ -174,9 +184,7 @@ class AuthApiController extends Controller
                     ['id' => $user->id, 'hash' => sha1($user->getEmailForVerification())]
                 );
 
-                \Illuminate\Support\Facades\Mail::raw("Welcome to Bhavani Crafts! Please click the following link to verify your email and activate your account: " . $verificationUrl, function($message) use ($user) {
-                    $message->to($user->email)->subject('Verify Your Account - Bhavani Crafts');
-                });
+                \Illuminate\Support\Facades\Mail::to($user->email)->queue(new UserRegisteredNotification($user, $verificationUrl));
             } catch (\Throwable $t) {
                 \Illuminate\Support\Facades\Log::error('Email Dispatch Failure: ' . $t->getMessage());
             }

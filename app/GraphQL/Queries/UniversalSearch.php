@@ -26,7 +26,7 @@ class UniversalSearch
                 'title' => $product->product_name,
                 'subtitle' => $product->product_code,
                 'type' => 'Product',
-                'url' => route('public.products.show', $product->slug),
+                'url' => route('artifact.show', ['locale' => app()->getLocale(), 'slug' => $product->slug]),
                 'image' => $product->display_image,
             ];
         }
@@ -42,43 +42,63 @@ class UniversalSearch
                 'title' => $category->name,
                 'subtitle' => 'Category',
                 'type' => 'Category',
-                'url' => route('public.categories.show', $category->slug),
+                'url' => route('collection.show', ['locale' => app()->getLocale(), 'token' => $category->slug]),
                 'image' => $category->display_image,
             ];
         }
 
-        // 3. Search Orders (Staff only)
-        if (Auth::check() && in_array(Auth::user()->user_type, ['superadmin', 'admin', 'employee', 'franchise'])) {
-            $orders = Order::where('order_id_string', 'LIKE', "%{$q}%")
-                ->orWhere('razorpay_order_id', 'LIKE', "%{$q}%")
-                ->orWhereHas('user', function($u) use ($q) {
-                    $u->where('email', 'LIKE', "%{$q}%")->orWhere('phone', 'LIKE', "%{$q}%");
-                })
-                ->with('user')
-                ->take(5)
-                ->get();
+        // 3. Search Orders (Administrative access only)
+        if (Auth::check()) {
+            $user = Auth::user();
+            $isAdmin = $user->hasRole('super_admin') || $user->hasRole('admin');
+            $isPersonnel = $user->hasRole('employee') || $user->hasRole('franchise') || $user->hasRole('logistics');
 
-            foreach ($orders as $order) {
-                // Determine redirect route based on user role
-                $routeNamespace = 'employee';
-                if (Auth::user()->user_type === 'superadmin' || Auth::user()->user_type === 'admin') {
-                    $routeNamespace = 'admin';
-                } elseif (Auth::user()->user_type === 'franchise') {
-                    $routeNamespace = 'franchise';
+            if ($isAdmin || $isPersonnel) {
+                // Search Online Orders
+                $orders = Order::where('order_id_string', 'LIKE', "%{$q}%")
+                    ->orWhere('razorpay_order_id', 'LIKE', "%{$q}%")
+                    ->orWhere('razorpay_payment_id', 'LIKE', "%{$q}%")
+                    ->orWhereHas('user', function($u) use ($q) {
+                        $u->where('name', 'LIKE', "%{$q}%")
+                          ->orWhere('email', 'LIKE', "%{$q}%")
+                          ->orWhere('phone', 'LIKE', "%{$q}%");
+                    })
+                    ->with('user')
+                    ->take(5)
+                    ->get();
+    
+                foreach ($orders as $order) {
+                    $routeNamespace = $isAdmin ? 'admin' : 'employee';
+                    $matchedInfo = $order->user->name ?? 'Guest Member';
+                    if ($order->razorpay_payment_id && str_contains(strtolower($order->razorpay_payment_id), strtolower($q))) {
+                        $matchedInfo = 'TXN: ' . $order->razorpay_payment_id;
+                    }
+
+                    $results[] = [
+                        'title' => 'Order #' . ($order->order_id_string ?? $order->id),
+                        'subtitle' => $matchedInfo . ' (' . $order->status . ')',
+                        'type' => 'Online Order',
+                        'url' => route($routeNamespace . '.orders.show', ['locale' => app()->getLocale(), 'order' => $order->encryptedId()]),
+                        'image' => null,
+                    ];
                 }
+
+                // Search Quick Bills (Store Sales)
+                $quickBills = \App\Models\QuickBill::where('bill_number', 'LIKE', "%{$q}%")
+                    ->orWhere('customer_name', 'LIKE', "%{$q}%")
+                    ->orWhere('customer_phone', 'LIKE', "%{$q}%")
+                    ->take(3)
+                    ->get();
                 
-                // Note: Check if the route exists for the namespace. 
-                // Currently: admin.orders.show, employee.orders.show exist.
-                // Franchise does not have a dedicated orders.show yet, but could be added.
-                $routeName = $routeNamespace . '.orders.show';
-                
-                $results[] = [
-                    'title' => 'Order #' . ($order->order_id_string ?? $order->id),
-                    'subtitle' => $order->user->email ?? 'Guest Order',
-                    'type' => 'Order',
-                    'url' => route($routeName, $order->encryptedId()),
-                    'image' => null,
-                ];
+                foreach ($quickBills as $bill) {
+                    $results[] = [
+                        'title' => 'Bill #' . $bill->bill_number,
+                        'subtitle' => ($bill->customer_name ?? 'Walk-in') . ' (₹' . number_format($bill->total_amount, 2) . ')',
+                        'type' => 'Retail Bill',
+                        'url' => route('admin.billing.dashboard', ['locale' => app()->getLocale()]), // Redirect to dashboard, could be deep link to scroll to row
+                        'image' => null,
+                    ];
+                }
             }
         }
 

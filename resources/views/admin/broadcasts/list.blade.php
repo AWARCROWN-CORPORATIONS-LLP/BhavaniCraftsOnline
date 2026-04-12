@@ -2,13 +2,13 @@
 
 @section('header_extra')
     <div class="flex items-center space-x-4">
-        <h2 class="text-xl lg:text-3xl font-black text-gray-900 uppercase tracking-tighter">Global Broadcast</h2>
+        <h2 class="text-xl lg:text-3xl font-black text-gray-900 uppercase tracking-tighter">Announcements</h2>
         <span class="text-gray-300">/</span>
-        <p class="text-[10px] items-center font-black text-[#ff9933] uppercase tracking-[4px]">Transmission Registry</p>
+        <p class="text-[10px] items-center font-black text-[#ff9933] uppercase tracking-[4px]">Manage Alerts</p>
     </div>
     
     <a href="{{ route('admin.broadcasts.create') }}" class="btn-luxury-saffron px-6 py-2.5 text-[10px]">
-        Initiate New Broadcast
+        New Announcement
     </a>
 @endsection
 
@@ -16,19 +16,19 @@
 
     <div class="card-premium overflow-hidden">
         <div class="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-            <h3 class="text-xs font-black text-gray-400 uppercase tracking-[6px] leading-none">Active Transmissions</h3>
-            <span class="px-4 py-1.5 bg-[#ff9933]/10 text-[#ff9933] rounded-full text-[9px] font-black uppercase tracking-widest">{{ $broadcasts->total() }} Logged</span>
+            <h3 class="text-xs font-black text-gray-400 uppercase tracking-[6px] leading-none">Live Announcements</h3>
+            <span class="px-4 py-1.5 bg-[#ff9933]/10 text-[#ff9933] rounded-full text-[9px] font-black uppercase tracking-widest">{{ $broadcasts->total() }} Announcements</span>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-white border-b border-gray-100">
-                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[4px]">Broadcast Identity</th>
-                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[4px]">Target Audience</th>
-                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[4px]">Urgency Level</th>
+                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[4px]">Title</th>
+                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[4px]">Audience</th>
+                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[4px]">Urgency</th>
                         <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[4px]">Status</th>
-                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[4px] text-right">Operations</th>
+                        <th class="p-8 text-[10px] font-black text-gray-400 uppercase tracking-[4px] text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50/50">
@@ -40,11 +40,11 @@
                             </td>
                             <td class="p-8">
                                 @if($broadcast->target_audience == 'all')
-                                    <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-md text-[9px] font-black uppercase tracking-widest">Global Network</span>
+                                    <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-md text-[9px] font-black uppercase tracking-widest">Everyone</span>
                                 @elseif($broadcast->target_audience == 'exact:employee')
-                                    <span class="px-3 py-1 bg-purple-50 text-purple-600 rounded-md text-[9px] font-black uppercase tracking-widest">Internal Employees</span>
+                                    <span class="px-3 py-1 bg-purple-50 text-purple-600 rounded-md text-[9px] font-black uppercase tracking-widest">Staff Only</span>
                                 @else
-                                    <span class="px-3 py-1 bg-amber-50 text-amber-600 rounded-md text-[9px] font-black uppercase tracking-widest">Franchise Partners</span>
+                                    <span class="px-3 py-1 bg-amber-50 text-amber-600 rounded-md text-[9px] font-black uppercase tracking-widest">Partners Only</span>
                                 @endif
                             </td>
                             <td class="p-8">
@@ -71,7 +71,7 @@
                                     @method('PATCH')
                                     <button type="submit" class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[2px] transition-all 
                                         {{ $broadcast->is_active ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-100 text-gray-400' }}">
-                                        {{ $broadcast->is_active ? 'Transmitting' : 'Offline' }}
+                                        {{ $broadcast->is_active ? 'Live' : 'Hidden' }}
                                     </button>
                                 </form>
                             </td>
@@ -80,7 +80,7 @@
                                     <a href="{{ route('admin.broadcasts.edit', $broadcast->id) }}" class="text-[#ff9933] hover:text-[#fb8c00] transition-colors p-2">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                     </a>
-                                    <form action="{{ route('admin.broadcasts.destroy', $broadcast->id) }}" method="POST" class="inline" onsubmit="return confirm('Eradicate this transmission permanently?');">
+                                     <form action="{{ route('admin.broadcasts.destroy', $broadcast->id) }}" method="POST" class="inline" onsubmit="return confirm('Delete this announcement?');">
                                         @csrf
                                         @method('DELETE')
                                         <button class="text-red-400 hover:text-red-600 transition-colors p-2">
@@ -93,7 +93,7 @@
                     @empty
                         <tr>
                             <td colspan="5" class="p-16 text-center text-gray-400">
-                                <p class="text-xs uppercase tracking-[4px] font-black">No Active Transmissions</p>
+                                 <p class="text-xs uppercase tracking-[4px] font-black">No Announcements Found</p>
                             </td>
                         </tr>
                     @endforelse

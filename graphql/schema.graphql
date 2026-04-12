@@ -1,12 +1,12 @@
 type Query {
     "Search for products with a query string"
-    searchProducts(q: String, category: ID, first: Int = 12, page: Int): ProductPaginator @paginate(resolver: "App\\GraphQL\\Queries\\SearchProducts")
+    searchProducts(q: String, category: ID, first: Int = 12, page: Int): ProductPaginator @paginate(resolver: "App\\GraphQL\\Queries\\SearchProducts") @cache(maxAge: 300)
 
     "Get a single product by slug"
-    product(slug: String @eq): Product @find
+    product(slug: String @eq): Product @find @cache(maxAge: 600)
     
     "Get all categories"
-    categories: [Category!]! @all
+    categories: [Category!]! @all @cache(maxAge: 3600)
 
     "Universal search across products, categories, and orders"
     universalSearch(q: String!): [SearchResult!]! @field(resolver: "App\\GraphQL\\Queries\\UniversalSearch")

@@ -105,6 +105,7 @@
                     </form>
                     @endif
                     <a href="{{ route('checkout.receipt', $order->encryptedId()) }}" 
+                       data-turbo="false"
                        class="p-2.5 bg-gray-50 text-gray-400 hover:text-brand-500 hover:bg-brand-50 rounded-xl transition-all"
                        title="Download Receipt">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

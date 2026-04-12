@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -9,18 +10,22 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderConfirmed extends Mailable implements ShouldQueue
+class UserLoginNotification extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public $order;
+    public $user;
+    public $loginTime;
+    public $ipAddress;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($order)
+    public function __construct(User $user, $loginTime, $ipAddress)
     {
-        $this->order = $order;
+        $this->user = $user;
+        $this->loginTime = $loginTime;
+        $this->ipAddress = $ipAddress;
     }
 
     /**
@@ -29,7 +34,7 @@ class OrderConfirmed extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Confirmed - ' . $this->order->order_id_string . ' | Bhavani Crafts',
+            subject: 'Security Alert: New Login at Bhavani Crafts',
         );
     }
 
@@ -39,7 +44,7 @@ class OrderConfirmed extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.orders.confirmed',
+            markdown: 'emails.user.login_notification',
         );
     }
 

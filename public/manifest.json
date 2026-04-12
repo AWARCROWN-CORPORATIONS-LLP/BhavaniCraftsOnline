@@ -1,0 +1,37 @@
+{
+  "name": "Bhavani Crafts Online",
+  "short_name": "Bhavani Crafts",
+  "description": "Exquisite Handicrafts and Sacred Ritual Artifacts",
+  "start_url": "/?pwa=true",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff9933",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "culture"],
+  "shortcuts": [
+    {
+      "name": "My Orders",
+      "url": "/en/my-account/orders",
+      "description": "View your order history"
+    },
+    {
+      "name": "Sacred Kits",
+      "url": "/en/sacred-kit",
+      "description": "Build your ritual kit"
+    }
+  ]
+}

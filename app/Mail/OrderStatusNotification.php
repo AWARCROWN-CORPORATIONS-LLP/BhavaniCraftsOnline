@@ -2,25 +2,27 @@
 
 namespace App\Mail;
 
+use App\Models\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderConfirmed extends Mailable implements ShouldQueue
+class OrderStatusNotification extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $order;
+    public $status;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($order)
+    public function __construct(Order $order, $status)
     {
         $this->order = $order;
+        $this->status = $status;
     }
 
     /**
@@ -29,7 +31,7 @@ class OrderConfirmed extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Confirmed - ' . $this->order->order_id_string . ' | Bhavani Crafts',
+            subject: 'Divine Update: Order #' . $this->order->order_id_string . ' is now ' . $this->status,
         );
     }
 
@@ -39,7 +41,7 @@ class OrderConfirmed extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.orders.confirmed',
+            view: 'emails.orders.status_updated',
         );
     }
 

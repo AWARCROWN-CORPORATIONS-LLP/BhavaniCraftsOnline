@@ -188,7 +188,7 @@ class CheckoutController extends Controller
 
                 // Send Confirmation Email
                 try {
-                    Mail::to(Auth::user()->email)->send(new OrderConfirmed($order));
+                    Mail::to(Auth::user()->email)->queue(new OrderConfirmed($order));
                 } catch (\Exception $e) {
                     \Log::error('Order Confirmation Email failed for order ' . $order->order_id_string . ': ' . $e->getMessage());
                 }
@@ -319,7 +319,7 @@ class CheckoutController extends Controller
 
             // Send Confirmation Email
             try {
-                Mail::to(Auth::user()->email)->send(new OrderConfirmed($order));
+                Mail::to(Auth::user()->email)->queue(new OrderConfirmed($order));
             } catch (\Exception $e) {
                 \Log::error('Order Confirmation Email failed for order ' . $order->order_id_string . ': ' . $e->getMessage());
             }

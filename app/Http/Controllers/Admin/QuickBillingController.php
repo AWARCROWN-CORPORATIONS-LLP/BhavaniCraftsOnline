@@ -111,6 +111,39 @@ class QuickBillingController extends Controller
     }
 
     /**
+     * Search Customers by phone, email or name
+     */
+    public function searchCustomers(Request $request)
+    {
+        $q = $request->query('q');
+        if (!$q || strlen($q) < 3) return response()->json([]);
+
+        $users = \App\Models\User::where('phone', 'LIKE', "%{$q}%")
+            ->orWhere('email', 'LIKE', "%{$q}%")
+            ->orWhere('name', 'LIKE', "%{$q}%")
+            ->take(5)
+            ->get(['name', 'phone', 'email']);
+
+        return response()->json($users);
+    }
+
+    /**
+     * Search Products by name or code
+     */
+    public function searchProducts(Request $request)
+    {
+        $q = $request->query('q');
+        if (!$q || strlen($q) < 2) return response()->json([]);
+
+        $products = \App\Models\Product::where('product_name', 'LIKE', "%{$q}%")
+            ->orWhere('product_code', 'LIKE', "%{$q}%")
+            ->take(8)
+            ->get(['product_name', 'telugu_name', 'price', 'product_code']);
+
+        return response()->json($products);
+    }
+
+    /**
      * View/Print the Generated Bill
      */
     public function print($locale, $id)
@@ -118,5 +151,19 @@ class QuickBillingController extends Controller
         $bill = QuickBill::findOrFail($id);
         return view('admin.billing.print', compact('bill'));
     }
-}
 
+    /**
+     * Delete a Bill Record
+     */
+    public function destroy($locale, $id)
+    {
+        $bill = QuickBill::findOrFail($id);
+        $bill->delete();
+
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Record successfully archived.']);
+        }
+
+        return redirect()->back()->with('success', 'Bill record purged from registry.');
+    }
+}
