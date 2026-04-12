@@ -44,7 +44,12 @@ class AdminEmployeeController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        $employeeRole = Role::where('name', 'employee')->firstOrFail();
+        $employeeRole = Role::where('name', 'employee')->first();
+
+        if (!$employeeRole) {
+            // Self-heal: Create role if missing (common in some environments)
+            $employeeRole = Role::create(['name' => 'employee']);
+        }
 
         $employee = User::create([
             'username' => Str::slug($request->name) . rand(100, 999), // unique username
