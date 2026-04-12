@@ -122,6 +122,10 @@
                         fadeInUp: {
                             '0%': { opacity: '0', transform: 'translateY(20px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        kenBurns: {
+                            '0%': { transform: 'scale(1)' },
+                            '100%': { transform: 'scale(1.15) rotate(0.02deg)' },
                         }
                     },
                     animation: {
@@ -129,6 +133,7 @@
                         'fadeIn': 'fadeIn 1s ease-out forwards',
                         'fadeInDown': 'fadeInDown 1s ease-out forwards',
                         'fadeInUp': 'fadeInUp 1s ease-out forwards',
+                        'ken-burns': 'kenBurns 20s ease-out infinite alternate',
                     }
                 }
             }
@@ -503,7 +508,15 @@
                 <div class="hidden lg:flex items-center space-x-6">
                     <a href="{{ route('pages.sacred-kit') }}" class="text-[11px] font-black uppercase tracking-[2px] text-onyx-900 border-b-2 {{ Request::is('*/sacred-kit*') ? 'border-brand-500' : 'border-transparent' }} hover:text-brand-500 transition-all">Ritual Services</a>
                     @auth
-                        <a href="{{ route('customer.dashboard') }}" class="text-xs font-bold text-gray-700 hover:text-brand-500 uppercase tracking-wider transition-colors">My Profile</a>
+                        @php
+                            $targetDashboard = route('customer.dashboard');
+                            if(auth()->user()->hasRole('super_admin')) {
+                                $targetDashboard = route('superadmin.dashboard');
+                            } elseif(auth()->user()->hasRole('associate_admin') || auth()->user()->hasRole('employee')) {
+                                $targetDashboard = route('admin.dashboard');
+                            }
+                        @endphp
+                        <a href="{{ $targetDashboard }}" class="text-xs font-bold text-gray-700 hover:text-brand-500 uppercase tracking-wider transition-colors">My Profile</a>
                     @else
                         <a href="{{ route('login') }}" class="text-[11px] font-bold text-gray-700 hover:text-brand-500 uppercase tracking-widest transition-colors">Sign In</a>
                         <a href="{{ route('register') }}" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all duration-300 shadow-md shadow-brand-900/10 hover:shadow-brand-500/30">
@@ -549,7 +562,15 @@
 
             <div class="mt-auto w-full px-8 space-y-4">
                 @auth
-                    <a href="{{ url('/dashboard') }}" class="block w-full py-4 bg-brand-500 hover:bg-brand-600 text-white text-center font-bold uppercase tracking-widest text-sm rounded-xl transition-colors shadow-lg shadow-brand-500/30">Go to Dashboard</a>
+                    @php
+                        $targetDashboard = route('customer.dashboard');
+                        if(auth()->user()->hasRole('super_admin')) {
+                            $targetDashboard = route('superadmin.dashboard');
+                        } elseif(auth()->user()->hasRole('associate_admin') || auth()->user()->hasRole('employee')) {
+                            $targetDashboard = route('admin.dashboard');
+                        }
+                    @endphp
+                    <a href="{{ $targetDashboard }}" class="block w-full py-4 bg-brand-500 hover:bg-brand-600 text-white text-center font-bold uppercase tracking-widest text-sm rounded-xl transition-colors shadow-lg shadow-brand-500/30">Go to Dashboard</a>
                 @else
                     <a href="{{ route('login') }}" class="block w-full py-4 bg-white/10 hover:bg-white/20 text-white text-center font-bold uppercase tracking-widest text-sm rounded-xl transition-colors border border-white/10 hover:border-white/30">Sign In</a>
                     <a href="{{ route('register') }}" class="block w-full py-4 bg-brand-500 hover:bg-brand-600 text-white text-center font-bold uppercase tracking-widest text-sm rounded-xl transition-colors shadow-lg shadow-brand-500/30">Create Account</a>

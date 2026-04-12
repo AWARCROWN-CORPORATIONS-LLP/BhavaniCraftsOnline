@@ -325,6 +325,18 @@
                 <span x-show='sidebarOpen' class='text-[11px] uppercase tracking-wider'>Announcements</span>
             </a>
 
+            <a href='{{ route('admin.newsletters') }}' class="nav-item flex items-center space-x-3 px-4 py-3 rounded-md transition-all {{ request()->routeIs('admin.newsletters') ? 'nav-item-active' : '' }}">
+                <svg class='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' /></svg>
+                <span x-show='sidebarOpen' class='text-[11px] uppercase tracking-wider'>Newsletter Hub</span>
+            </a>
+
+            @if(Auth::user()->hasRole('super_admin') || Auth::user()->hasRole('associate_admin'))
+                <a href='{{ route('admin.bulk-email.index') }}' class="nav-item flex items-center space-x-3 px-4 py-3 rounded-md transition-all {{ request()->routeIs('admin.bulk-email.*') ? 'nav-item-active' : '' }}">
+                    <svg class='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 19l9 2-9-18-9 18 9-2zm0 0v-8' /></svg>
+                    <span x-show='sidebarOpen' class='text-[11px] uppercase tracking-wider'>Mass Email</span>
+                </a>
+            @endif
+
             <a href='{{ route('admin.page-content.index') }}' class="nav-item flex items-center space-x-3 px-4 py-3 rounded-md transition-all {{ request()->routeIs('admin.page-content.index') ? 'nav-item-active' : '' }}">
                 <svg class='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' /></svg>
                 <span x-show='sidebarOpen' class='text-[11px] uppercase tracking-wider'>Design Pages</span>

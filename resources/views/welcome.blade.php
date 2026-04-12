@@ -3,13 +3,14 @@
 @section('content')
 
     <!-- DYNAMIC SACRED HERO SECTION -->
-    <section class="relative h-[600px] md:h-[750px] w-full flex items-center justify-center overflow-hidden bg-onyx-950">
-        <!-- Background Img with Parallax-ready feel -->
+    <section class="relative h-[600px] md:h-[780px] w-full flex items-center justify-center overflow-hidden bg-onyx-950">
+        <!-- Background Img: High Performance / Parallax Blend -->
         <div class="absolute inset-0 z-0">
-            <img src="{{ $pageContent['hero_bg_image'] ?? 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop' }}" 
-                 class="w-full h-full object-cover opacity-50 scale-105" 
-                 alt="Bhavani Crafts Ritual Heritage">
-           <!-- <div class="absolute inset-0 bg-gradient-to-b from-onyx-950/80 via-onyx-950/40 to-white"></div> -->
+            <img src="{{ $pageContent['hero_bg_image'] ?? asset('storage/custom/hero_bg.png') }}" 
+                 class="w-full h-full object-cover opacity-60 scale-100 animate-ken-burns" 
+                 alt="Bhavani Crafts Ritual Heritage"
+                 fetchpriority="high">
+            <div class="absolute inset-0 bg-gradient-to-b from-onyx-950/40 via-transparent to-onyx-950/90"></div>
         </div>
 
         <div class="container mx-auto px-4 lg:px-8 relative z-10 text-center flex flex-col items-center">
@@ -29,7 +30,7 @@
             </h1>
 
             <p class="max-w-2xl text-lg md:text-2xl text-gray-200/90 font-medium leading-relaxed mb-12 animate-fadeInUp delay-200">
-                {{ $pageContent['hero_subtitle'] ?? 'Your global hub for authentic Brass Idols, Pasupu-Kunkuma, and Marriage Ceremony Essentials. Wholesale quality, Retail devotion.' }}
+                {{ $pageContent['hero_subtitle'] ?? 'Find the best Brass items, Pooja sets, and everything you need for Marriages. High quality and low prices.' }}
             </p>
 
             <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-8 animate-fadeInUp delay-300">
@@ -169,8 +170,8 @@
         <div class="container mx-auto px-4 lg:px-8">
             <div class="mb-16 border-l-4 border-brand-500 pl-8">
                 <span class="text-[10px] font-black uppercase tracking-[5px] text-brand-500 block mb-2">Ready to use</span>
-                <h2 class="font-serif text-4xl md:text-5xl font-bold text-onyx-900 leading-tight italic">Complete Pooja Kits</h2>
-                <p class="text-gray-500 max-w-xl mt-4 leading-relaxed font-medium">Carefully packed bundles for specific pujas. Everything you need, hand-selected to ensure your ceremonies go smoothly.</p>
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-onyx-900 leading-tight italic">Full Pooja Kits</h2>
+                <p class="text-gray-500 max-w-xl mt-4 leading-relaxed font-medium">Get everything you need for your pooja in one simple set. We have high-quality items picked for your special day.</p>
             </div>
 
             <div class="flex pb-12 overflow-x-auto gap-8 no-scrollbar snap-x snap-mandatory scroll-smooth">
@@ -178,7 +179,7 @@
                 <div class="flex-none w-[320px] md:w-[450px] snap-start">
                     <div class="bg-white rounded-[40px] shadow-2xl overflow-hidden group border border-brand-100 hover:border-brand-500 transition-all duration-500">
                         <div class="relative h-[250px] md:h-[300px]">
-                            <img src="{{ $kit->display_image ? Storage::url($kit->display_image) : 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop' }}" 
+                            <img src="{{ $kit->display_image ? Storage::url($kit->display_image) : asset('storage/custom/hero_bg.png') }}" 
                                  loading="lazy"
                                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2000ms]">
                             <div class="absolute inset-0 bg-gradient-to-t from-onyx-950 via-onyx-950/20 to-transparent"></div>
@@ -339,9 +340,9 @@
                      <div class="absolute inset-0 bg-brand-900/10"></div>
                 </div>
                 <div class="lg:w-1/2 p-12 lg:p-20">
-                     <span class="text-[10px] font-black uppercase tracking-[6px] text-brand-500 block mb-6">Expert Guidance</span>
-                     <h2 class="text-4xl lg:text-5xl font-serif font-bold text-onyx-900 mb-8 italic leading-tight">Wedding & Big Event Guidance</h2>
-                     <p class="text-lg text-gray-500 mb-10 leading-relaxed">Planning a big puja or marriage? We provide personalized advice, brass item selection, and complete logistics support to make your day perfect and tension-free.</p>
+                     <span class="text-[10px] font-black uppercase tracking-[6px] text-brand-500 block mb-6">Expert Help</span>
+                     <h2 class="text-4xl lg:text-5xl font-serif font-bold text-onyx-900 mb-8 italic leading-tight">Help for Weddings & Big Events</h2>
+                     <p class="text-lg text-gray-500 mb-10 leading-relaxed">Planning a big pooja or marriage? We help you choose the best brass items and help with everything to make your day perfect and stress-free.</p>
                      
                      <div class="space-y-6">
                          <div class="flex items-start space-x-4">
@@ -350,11 +351,46 @@
                          </div>
                          <div class="flex items-start space-x-4">
                              <div class="h-6 w-6 text-brand-500 mt-1"><svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" /></svg></div>
-                             <p class="text-sm font-bold text-onyx-900 uppercase tracking-widest leading-none pt-1">Setup & Delivery Assistance</p>
+                             <p class="text-sm font-bold text-onyx-900 uppercase tracking-widest leading-none pt-1">Setup & Delivery Help</p>
                          </div>
                      </div>
                      
                      <button class="mt-12 px-10 py-5 bg-onyx-900 text-white text-[11px] font-black uppercase tracking-[4px] rounded-2xl hover:bg-brand-600 transition-all shadow-xl shadow-onyx-900/20">Talk to our Experts</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section x-data="{ visible: false }" x-intersect.once="visible = true"
+             :class="visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
+             class="py-24 bg-white transition-all duration-1000 ease-out relative overflow-hidden">
+        <div class="container mx-auto px-4 lg:px-8">
+            <div class="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+                <div class="w-full lg:w-1/2">
+                    <span class="text-[10px] font-black uppercase tracking-[6px] text-brand-500 block mb-6">Traditional Items for You</span>
+                    <h2 class="text-5xl md:text-6xl font-serif font-bold text-onyx-900 mb-8 italic leading-tight">Handmade Items Since 2017.</h2>
+                    <p class="text-lg text-gray-500 mb-10 leading-relaxed font-serif italic">"Bhavani Crafts helps you bring tradition to your home. From brass lamps to everything you need for marriages, we make every item with care and purity."</p>
+                    
+                    <div class="grid grid-cols-2 gap-8 mb-12">
+                        <div class="border-l-2 border-brand-100 pl-4">
+                            <span class="text-2xl font-black text-onyx-950 block mb-2">1,000+</span>
+                            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Items to Choose From</span>
+                        </div>
+                        <div class="border-l-2 border-brand-100 pl-4">
+                            <span class="text-2xl font-black text-onyx-950 block mb-2">100%</span>
+                            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Pure Brass Guarantee</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-1/2 relative group">
+                    <div class="aspect-[4/5] rounded-[40px] overflow-hidden shadow-3xl bg-onyx-50 relative z-10">
+                        <img src="{{ asset('storage/custom/pooja_collection.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3000ms]">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    </div>
+                    <!-- Decorative Golden Accents -->
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-brand-500/10 blur-[60px] rounded-full"></div>
+                    <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-brand-500/10 blur-[60px] rounded-full"></div>
                 </div>
             </div>
         </div>
@@ -371,12 +407,12 @@
         
         <div class="container mx-auto px-4 lg:px-8 relative z-10">
             <div class="max-w-3xl">
-                <span class="text-[10px] font-black uppercase tracking-[6px] text-amber-400 block mb-6">B2B Mastery</span>
-                <h2 class="text-5xl md:text-7xl font-serif font-bold italic mb-8 drop-shadow-lg leading-tight">Corporate Gifting &<br>Institutional Supply.</h2>
-                <p class="text-xl text-gray-400 mb-12 leading-relaxed">Impress your clients and stakeholders with the elegance of pure brass. Custom branding, premium velvet packaging, and global multi-unit shipping available.</p>
+                <span class="text-[10px] font-black uppercase tracking-[6px] text-amber-400 block mb-6">Business Gifts</span>
+                <h2 class="text-5xl md:text-7xl font-serif font-bold italic mb-8 drop-shadow-lg leading-tight">Gifts for Businesses &<br>Bulk Orders.</h2>
+                <p class="text-xl text-gray-400 mb-12 leading-relaxed">Impress your clients and team with the beauty of pure brass. We can add your logo, use premium packaging, and ship to your office or home.</p>
                 
                 <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-8">
-                                           <button @click="corporateModalOpen = true" class="px-12 py-5 bg-white text-onyx-950 text-[11px] font-black uppercase tracking-[4px] rounded-2xl hover:bg-amber-500 transition-all">Request Corporate Catalog</button>
+                                           <button @click="corporateModalOpen = true" class="px-12 py-5 bg-white text-onyx-950 text-[11px] font-black uppercase tracking-[4px] rounded-2xl hover:bg-amber-500 transition-all">Get Our Gift Catalog</button>
                      <div class="flex items-center space-x-4">
                          <div class="h-10 w-10 border border-white/20 rounded-full flex items-center justify-center">
                              <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7zm10 5a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"/></svg>
@@ -398,25 +434,26 @@
                     <div class="h-16 w-16 mx-auto bg-brand-50 rounded-2xl flex items-center justify-center mb-6 text-brand-500 group-hover:bg-brand-500 group-hover:text-white transition-all transform group-hover:-translate-y-2 duration-300 shadow-sm">
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                     </div>
-                    <h3 class="font-serif font-bold text-xl text-onyx-900 mb-3">{{ $pageContent['feature_1_title'] ?? 'Authentic Craftsmanship' }}</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed px-4">{{ $pageContent['feature_1_description'] ?? 'Every item is completely hand-forged by generational artisans using traditional techniques.' }}</p>
+                    <h3 class="font-serif font-bold text-xl text-onyx-900 mb-3">{{ $pageContent['feature_1_title'] ?? 'Truly Handmade' }}</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed px-4">{{ $pageContent['feature_1_description'] ?? 'Every item is made by hand using traditional ways.' }}</p>
                 </div>
                 
                 <div class="text-center group">
                     <div class="h-16 w-16 mx-auto bg-brand-50 rounded-2xl flex items-center justify-center mb-6 text-brand-500 group-hover:bg-brand-500 group-hover:text-white transition-all transform group-hover:-translate-y-2 duration-300 shadow-sm">
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
-                    <h3 class="font-serif font-bold text-xl text-onyx-900 mb-3">{{ $pageContent['feature_2_title'] ?? 'Global Shipping' }}</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed px-4">{{ $pageContent['feature_2_description'] ?? 'Securely packaged and exported worldwide. We ensure products reach your door safely.' }}</p>
+                    <h3 class="font-serif font-bold text-xl text-onyx-900 mb-3">{{ $pageContent['feature_2_title'] ?? 'Shipping Everywhere' }}</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed px-4">{{ $pageContent['feature_2_description'] ?? 'We pack your items safely and ship them to your door, anywhere in the world.' }}</p>
                 </div>
-
+ 
                 <div class="text-center group">
                     <div class="h-16 w-16 mx-auto bg-brand-50 rounded-2xl flex items-center justify-center mb-6 text-brand-500 group-hover:bg-brand-500 group-hover:text-white transition-all transform group-hover:-translate-y-2 duration-300 shadow-sm">
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
-                    <h3 class="font-serif font-bold text-xl text-onyx-900 mb-3">{{ $pageContent['feature_3_title'] ?? 'B2B & Wholesale Dropshipping' }}</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed px-4">{{ $pageContent['feature_3_description'] ?? 'Exclusive partner portals featuring automated restocks and zero-inventory fulfillment systems.' }}</p>
+                    <h3 class="font-serif font-bold text-xl text-onyx-900 mb-3">{{ $pageContent['feature_3_title'] ?? 'Business Partners & Bulk Orders' }}</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed px-4">{{ $pageContent['feature_3_description'] ?? 'We help businesses with large orders and easy shipping to your clients.' }}</p>
                 </div>
+ </div>
             </div>
         </div>
     </section>
@@ -464,12 +501,12 @@
                     @php 
                         $imgKey = 'gallery_image_' . $i; 
                         $fallbacks = [
-                            1 => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=2670&auto=format&fit=crop',
-                            2 => 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop',
-                            3 => 'https://images.unsplash.com/photo-1603412470732-bc66033866b1?q=80&w=2670&auto=format&fit=crop',
-                            4 => 'https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?q=80&w=2670&auto=format&fit=crop',
-                            5 => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=2670&auto=format&fit=crop',
-                            6 => 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop',
+                            1 => asset('storage/custom/hero_bg.png'),
+                            2 => asset('storage/custom/artisan_heritage.png'),
+                            3 => asset('storage/custom/hero_bg.png'),
+                            4 => asset('storage/custom/artisan_heritage.png'),
+                            5 => asset('storage/custom/hero_bg.png'),
+                            6 => asset('storage/custom/artisan_heritage.png'),
                         ];
                     @endphp
                     <div class="mx-4 w-[300px] md:w-[450px] h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 hover:scale-105 border border-gray-100">
@@ -483,12 +520,12 @@
                     @php 
                         $imgKey = 'gallery_image_' . $i; 
                         $fallbacks = [
-                            1 => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=2670&auto=format&fit=crop',
-                            2 => 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop',
-                            3 => 'https://images.unsplash.com/photo-1603412470732-bc66033866b1?q=80&w=2670&auto=format&fit=crop',
-                            4 => 'https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?q=80&w=2670&auto=format&fit=crop',
-                            5 => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=2670&auto=format&fit=crop',
-                            6 => 'https://images.unsplash.com/photo-1590739225287-bd20498ded45?q=80&w=2670&auto=format&fit=crop',
+                            1 => asset('storage/custom/hero_bg.png'),
+                            2 => asset('storage/custom/artisan_heritage.png'),
+                            3 => asset('storage/custom/hero_bg.png'),
+                            4 => asset('storage/custom/artisan_heritage.png'),
+                            5 => asset('storage/custom/hero_bg.png'),
+                            6 => asset('storage/custom/artisan_heritage.png'),
                         ];
                     @endphp
                     <div class="mx-4 w-[300px] md:w-[450px] h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 hover:scale-105 border border-gray-100">
@@ -499,6 +536,80 @@
         </div>
     </section>
     @endif
+
+    <!-- THE SACRED DIGEST: EXCLUSIVE ACCESS -->
+    <section class="py-24 bg-brand-50/50 border-y border-brand-100">
+        <div class="container mx-auto px-4 lg:px-8">
+            <div class="max-w-4xl mx-auto bg-white rounded-[40px] shadow-3xl overflow-hidden shadow-brand-500/5 flex flex-col md:flex-row items-stretch border border-brand-100">
+                <div class="w-full md:w-2/5 relative min-h-[300px]">
+                    <img src="{{ asset('storage/custom/hero_bg.png') }}" class="absolute inset-0 w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-[2px]"></div>
+                    <div class="absolute inset-x-8 bottom-10">
+                        <span class="text-[10px] font-black uppercase tracking-[4px] text-amber-400 block mb-2 text-center">Join The Inner Circle</span>
+                        <h3 class="text-3xl text-white font-serif font-bold text-center leading-tight">Sacred Wisdom &<br>Exclusive Access.</h3>
+                    </div>
+                </div>
+                <div class="w-full md:w-3/5 p-12 lg:p-16 flex flex-col justify-center" 
+                     x-data="{ 
+                        email: '', 
+                        loading: false, 
+                        message: '', 
+                        success: false,
+                        submitForm() {
+                            if(!this.email) return;
+                            this.loading = true;
+                            this.message = '';
+                            
+                            fetch('{{ route('newsletter.subscribe') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({ email: this.email })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                this.loading = false;
+                                this.message = data.message;
+                                this.success = data.success;
+                                if(data.success) this.email = '';
+                            })
+                            .catch(err => {
+                                this.loading = false;
+                                this.message = 'Error. Try again.';
+                                this.success = false;
+                            });
+                        }
+                     }">
+                    <p class="text-gray-500 mb-10 leading-relaxed font-serif italic text-lg text-center md:text-left">Subscribe to get news about new items and simple pooja tips.</p>
+                    
+                    <form @submit.prevent="submitForm()" class="flex flex-col sm:flex-row gap-4">
+                        <input x-model="email" type="email" required placeholder="your@email.com" class="flex-grow px-6 py-5 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-medium">
+                        <button type="submit" 
+                                :disabled="loading"
+                                class="px-8 py-5 bg-brand-600 text-white text-[11px] font-black uppercase tracking-[3px] rounded-2xl hover:bg-brand-500 transition-all shadow-xl shadow-brand-900/20 flex items-center justify-center min-w-[140px]">
+                            <span x-show="!loading">Subscribe</span>
+                            <span x-show="loading" class="flex items-center">
+                                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
+                        </button>
+                    </form>
+                    
+                    <div x-show="message" 
+                         x-transition
+                         class="mt-4 text-[11px] font-bold uppercase tracking-widest text-center md:text-left"
+                         :class="success ? 'text-green-600' : 'text-red-600'"
+                         x-text="message"></div>
+                    
+                    <p class="mt-6 text-[9px] text-gray-400 font-bold uppercase tracking-widest text-center md:text-left">We keep your email safe.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
 @endsection
 

@@ -33,6 +33,7 @@ Route::prefix('{locale}')->group(function () {
     })->name('franchise.register');
     Route::post('/franchise-registration', [App\Http\Controllers\FranchiseApplicationController::class, 'store'])->name('franchise.store');
     Route::post('/corporate-catalog-request', [App\Http\Controllers\CorporateRequestController::class, 'store'])->name('corporate.catalog');
+    Route::post('/newsletter/subscribe', [App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 
     Route::get('/cart/data', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
@@ -159,6 +160,7 @@ Route::prefix('{locale}')->group(function () {
         Route::get('/users', [App\Http\Controllers\Admin\AdminController::class, 'userManagement'])->name('users');
         Route::post('/franchises/{user}/approve', [App\Http\Controllers\Admin\AdminController::class, 'approveFranchise'])->name('approve_franchise');
         Route::patch('/users/{user}/toggle-block', [App\Http\Controllers\Admin\AdminController::class, 'toggleBlock'])->name('toggle_block');
+        Route::get('/newsletters', [App\Http\Controllers\Admin\AdminController::class, 'newsletterManagement'])->name('newsletters');
         
         // Master Catalog Management
         Route::resource('categories', App\Http\Controllers\Admin\AdminCategoryController::class);
@@ -177,6 +179,10 @@ Route::prefix('{locale}')->group(function () {
         // Global Broadcast Network
         Route::resource('broadcasts', App\Http\Controllers\Admin\GlobalBroadcastController::class)->except(['show']);
         Route::patch('/broadcasts/{broadcast}/toggle', [App\Http\Controllers\Admin\GlobalBroadcastController::class, 'toggle'])->name('broadcasts.toggle');
+        
+        // Mass Email Outreah
+        Route::get('/bulk-email', [App\Http\Controllers\Admin\BulkEmailController::class, 'index'])->name('bulk-email.index');
+        Route::post('/bulk-email/send', [App\Http\Controllers\Admin\BulkEmailController::class, 'send'])->name('bulk-email.send');
         
         // Page Content Management
         Route::get('/page-content', [App\Http\Controllers\Admin\AdminPageContentController::class, 'index'])->name('page-content.index');

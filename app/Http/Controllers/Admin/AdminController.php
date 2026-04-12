@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Newsletter;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Cache;
@@ -146,5 +147,14 @@ class AdminController extends Controller
 
         $status = $user->is_blocked ? 'suspended' : 'restored';
         return back()->with('success', "Seeker identity {$user->name} has been {$status} in the registry.");
+    }
+
+    /**
+     * Newsletter / Subscriber Management
+     */
+    public function newsletterManagement($locale)
+    {
+        $subscribers = Newsletter::orderBy('created_at', 'desc')->paginate(50);
+        return view('admin.newsletters.index', compact('subscribers'));
     }
 }
