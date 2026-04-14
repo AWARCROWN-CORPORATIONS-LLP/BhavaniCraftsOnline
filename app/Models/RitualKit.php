@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class RitualKit extends Model
 {
+    use \App\Traits\InvalidatesHomeCache;
     protected $fillable = ['name', 'slug', 'description', 'price', 'display_image', 'is_active'];
 
     public function products()

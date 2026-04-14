@@ -8,7 +8,7 @@ use App\Traits\Auditable;
 
 class Product extends Model
 {
-    use Auditable;
+    use Auditable, \App\Traits\InvalidatesHomeCache;
     public $timestamps = false;
 
     protected $fillable = [

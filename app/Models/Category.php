@@ -8,7 +8,7 @@ use App\Traits\Auditable;
 
 class Category extends Model
 {
-    use Auditable;
+    use Auditable, \App\Traits\InvalidatesHomeCache;
     public $timestamps = false;
 
     protected $fillable = ['name', 'slug', 'parent_id', 'icon_url', 'image_path'];

@@ -240,10 +240,10 @@
                 <div class='h-10 w-auto'>
                     <img src='{{ $siteLogo }}' alt='Bhavani Crafts' class='h-full w-auto object-contain'>
                 </div>
-                <div x-show='sidebarOpen' class='ml-3'>
+                <!--<div x-show='sidebarOpen' class='ml-3'>
                     <span class='text-[10px] font-black uppercase tracking-[2px] text-brand-dark block'>Bhavani</span>
                     <span class='text-[8px] font-bold uppercase tracking-[3px] text-muted block -mt-1'>Admin OS</span>
-                </div>
+                </div>-->
             </a>
         </div>
 
@@ -262,6 +262,16 @@
             <a href='{{ route('admin.billing.index') }}' class="nav-item flex items-center space-x-3 px-4 py-3 rounded-md transition-all {{ request()->routeIs('admin.billing.*') ? 'nav-item-active' : '' }}">
                 <svg class='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z' /></svg>
                 <span x-show='sidebarOpen' class='text-[11px] uppercase tracking-wider'>Billing</span>
+            </a>
+
+            <a href='{{ route('admin.products.index') }}' class="nav-item flex items-center space-x-3 px-4 py-3 rounded-md transition-all {{ request()->routeIs('admin.products.*') ? 'nav-item-active' : '' }}">
+                <svg class='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' /></svg>
+                <span x-show='sidebarOpen' class='text-[11px] uppercase tracking-wider'>Products</span>
+            </a>
+
+            <a href='{{ route('admin.categories.index') }}' class="nav-item flex items-center space-x-3 px-4 py-3 rounded-md transition-all {{ request()->routeIs('admin.categories.*') ? 'nav-item-active' : '' }}">
+                <svg class='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m12 4a2 2 0 100-4m0 4a2 2 0 110-4m-6 0a2 2 0 100 4m0-4a2 2 0 110 4m-6 0v-2m8 4v-2a2 2 0 110 4m-6 0v2m8 4v-2' /></svg>
+                <span x-show='sidebarOpen' class='text-[11px] uppercase tracking-wider'>Categories</span>
             </a>
 
             <a href='{{ route('admin.orders.index') }}' class="nav-item flex items-center space-x-3 px-4 py-3 rounded-md transition-all {{ request()->routeIs('admin.orders.*') && !request()->routeIs('admin.orders.kanban') ? 'nav-item-active' : '' }}">
@@ -349,16 +359,6 @@
 
             <p x-show='sidebarOpen' class='label-muted px-4 mb-2 mt-8'>Inventory Engine</p>
 
-            <a href='{{ route('admin.categories.index') }}' class="nav-item flex items-center space-x-3 px-4 py-3 rounded-md transition-all {{ request()->routeIs('admin.categories.*') ? 'nav-item-active' : '' }}">
-                <svg class='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m12 4a2 2 0 100-4m0 4a2 2 0 110-4m-6 0a2 2 0 100 4m0-4a2 2 0 110 4m-6 0v-2m8 4v-2a2 2 0 110 4m-6 0v2m8 4v-2' /></svg>
-                <span x-show='sidebarOpen' class='text-[11px] uppercase tracking-wider'>Categories</span>
-            </a>
-
-            <a href='{{ route('admin.products.index') }}' class="nav-item flex items-center space-x-3 px-4 py-3 rounded-md transition-all {{ request()->routeIs('admin.products.*') ? 'nav-item-active' : '' }}">
-                <svg class='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' /></svg>
-                <span x-show='sidebarOpen' class='text-[11px] uppercase tracking-wider'>Products</span>
-            </a>
-            
             <a href='{{ route('admin.ritual-kits.index') }}' class="nav-item flex items-center space-x-3 px-4 py-3 rounded-md transition-all {{ request()->routeIs('admin.ritual-kits.*') ? 'nav-item-active' : '' }}">
                 <svg class='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 011-1h1a2 2 0 100-4H7a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 001-1V4z' /></svg>
                 <span x-show='sidebarOpen' class='text-[11px] uppercase tracking-wider'>Ritual Kits</span>
