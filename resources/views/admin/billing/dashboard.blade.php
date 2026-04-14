@@ -154,6 +154,8 @@
                     return;
                 }
                 this.initiateRazorpay(result);
+            } else if (result.error) {
+                alert(result.error);
             }
         } catch (e) { console.error(e); }
         finally { this.processing = false; }
@@ -176,8 +178,7 @@
             'theme': { 'color': '#1e40af' }
         };
         
-        // Only attach order_id if it's a real Razorpay Order ID (not simulated)
-        if (data.razorpay_order_id && !data.razorpay_order_id.startsWith('SIMULATED-')) {
+        if (data.razorpay_order_id) {
             options.order_id = data.razorpay_order_id;
         }
         let rzp = new Razorpay(options);

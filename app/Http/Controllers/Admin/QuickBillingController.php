@@ -83,9 +83,10 @@ class QuickBillingController extends Controller
                 ]);
                 $razorpayOrderId = $razorpayOrder->id;
             } catch (\Exception $e) {
-                \Log::warning('Razorpay Order creation failed for QuickBill: ' . $e->getMessage());
-                // Fallback to dummy ID if API fails, but we'll handle this in frontend to avoid SDK crash
-                $razorpayOrderId = 'SIMULATED-' . Str::random(14);
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Razorpay Gateway Unreachable: ' . $e->getMessage()
+                ], 502);
             }
         }
 
