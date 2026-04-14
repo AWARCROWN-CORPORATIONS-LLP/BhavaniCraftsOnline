@@ -10,7 +10,7 @@ class InvoiceController extends Controller
     /**
      * Generate and download the official trade registry invoice for an order.
      */
-    public function download(string $token)
+    public function download(string $locale, string $token)
     {
         $id = Order::decryptOrderId($token);
         if (!$id) abort(404);

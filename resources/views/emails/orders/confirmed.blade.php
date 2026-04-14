@@ -23,9 +23,9 @@ Thank you for choosing **Bhavani Crafts**. We have successfully received your or
 @endcomponent
 
 ### Delivery Information
-**Recipient:** {{ $order->address->first_name }} {{ $order->address->last_name }}  
-**Address:** {{ $order->address->address_line_1 }}, {{ $order->address->address_line_2 ?? '' }}  
-{{ $order->address->city }}, {{ $order->address->state }} - {{ $order->address->pincode }}
+**Recipient:** {{ $order->address->full_name }}  
+**Address:** {{ $order->address->address_line1 }}, {{ $order->address->address_line2 ?? '' }}  
+{{ $order->address->city }}, {{ $order->address->state }} - {{ $order->address->postal_code }}
 
 @component('mail::button', ['url' => route('checkout.success', ['token' => $order->order_id_string, 'locale' => 'en-in'])])
 Track your Order

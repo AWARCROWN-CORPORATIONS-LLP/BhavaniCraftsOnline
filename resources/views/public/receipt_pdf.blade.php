@@ -48,10 +48,10 @@
                         <div style="font-size: 12px;">{{ $order->created_at->format('M d, Y | h:i A') }}</div>
                         <div class="section-title" style="margin-top: 15px;">Sanctified Address</div>
                         <div style="font-size: 11px; line-height: 1.4;">
-                            {{ $order->address->first_name }} {{ $order->address->last_name }}<br>
+                            {{ $order->address->full_name }}<br>
                             {{ $order->address->address_line1 }}<br>
                             @if($order->address->address_line2) {{ $order->address->address_line2 }}<br> @endif
-                            {{ $order->address->city }}, {{ $order->address->state }} - {{ $order->address->pincode }}<br>
+                            {{ $order->address->city }}, {{ $order->address->state }} - {{ $order->address->postal_code }}<br>
                         </div>
                     </td>
                 </tr>

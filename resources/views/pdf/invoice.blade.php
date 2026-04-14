@@ -37,7 +37,7 @@
                 <div class="label">Destination Point</div>
                 <div class="value">
                     @if($order->address)
-                        {{ $order->address->street_address }},<br>
+                        {{ $order->address->address_line1 }}<br>
                         {{ $order->address->city }}, {{ $order->address->state }} {{ $order->address->postal_code }}
                     @else
                         Extraction point not recorded.
@@ -69,7 +69,7 @@
         <tbody>
             @foreach($order->items as $item)
             <tr>
-                <td style="border-bottom: 1px solid #f1f5f9;">{{ $item->product->name ?? 'Unknown Artifact' }}</td>
+                <td style="border-bottom: 1px solid #f1f5f9;">{{ $item->product_name ?? 'Unknown Artifact' }}</td>
                 <td style="border-bottom: 1px solid #f1f5f9;">{{ $item->quantity }}</td>
                 <td style="border-bottom: 1px solid #f1f5f9;">₹{{ number_format($item->price, 2) }}</td>
                 <td style="border-bottom: 1px solid #f1f5f9; text-align: right;">₹{{ number_format($item->price * $item->quantity, 2) }}</td>
