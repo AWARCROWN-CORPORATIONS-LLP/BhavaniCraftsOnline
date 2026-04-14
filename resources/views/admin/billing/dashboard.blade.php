@@ -166,7 +166,6 @@
             'currency': 'INR',
             'name': 'Bhavani Crafts',
             'description': 'Payment for Bill #' + data.bill_id,
-            'order_id': data.razorpay_order_id, 
             'handler': async (response) => {
                 window.location.href = `{{ url('/') }}/{{ app()->getLocale() }}/admin/billing/verify/${data.bill_id}?payment_id=` + response.razorpay_payment_id;
             },
@@ -176,6 +175,11 @@
             },
             'theme': { 'color': '#1e40af' }
         };
+        
+        // Only attach order_id if it's a real Razorpay Order ID (not simulated)
+        if (data.razorpay_order_id && !data.razorpay_order_id.startsWith('SIMULATED-')) {
+            options.order_id = data.razorpay_order_id;
+        }
         let rzp = new Razorpay(options);
         rzp.open();
     },

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\QuickBill;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Razorpay\Api\Api;
 
 class QuickBillingController extends Controller
 {
@@ -70,6 +71,24 @@ class QuickBillingController extends Controller
         $paymentMethod = $request->payment_method ?? 'online';
         $paymentStatus = ($paymentMethod === 'cash') ? 'paid' : 'pending';
 
+        $razorpayOrderId = null;
+        if ($paymentMethod === 'online' && !$request->is_quotation) {
+            try {
+                $api = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+                $razorpayOrder = $api->order->create([
+                    'receipt'         => 'BILL-' . strtoupper(Str::random(8)),
+                    'amount'          => (int) round($total * 100),
+                    'currency'        => 'INR',
+                    'payment_capture' => 1,
+                ]);
+                $razorpayOrderId = $razorpayOrder->id;
+            } catch (\Exception $e) {
+                \Log::warning('Razorpay Order creation failed for QuickBill: ' . $e->getMessage());
+                // Fallback to dummy ID if API fails, but we'll handle this in frontend to avoid SDK crash
+                $razorpayOrderId = 'SIMULATED-' . Str::random(14);
+            }
+        }
+
         $bill = QuickBill::create([
             'bill_number' => ($request->is_quotation ? 'QUOT-' : 'BC-') . strtoupper(Str::random(8)),
             'is_quotation' => $request->is_quotation ?? false,
@@ -83,7 +102,7 @@ class QuickBillingController extends Controller
             'payment_method' => $paymentMethod,
             'customer_name' => $request->customer_name,
             'customer_phone' => $request->customer_phone,
-            'razorpay_order_id' => 'order_' . Str::random(14), // Dummy ID for simulation
+            'razorpay_order_id' => $razorpayOrderId,
         ]);
 
         return response()->json([
